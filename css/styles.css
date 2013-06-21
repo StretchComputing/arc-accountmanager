@@ -1,0 +1,143 @@
+.flash {
+  text-align: center;
+  font-weight: bold;
+  padding: .5em;
+  margin: 0 0 15px 0;
+  position: fixed;
+  width: 100%;
+  z-index: 9002;
+}
+
+.success {
+  color: #48830C;
+  background: #D8F2AF;
+  border: #48830C 2px solid;
+}
+
+.info {
+  color: #064492;
+  background: #AFDEF8;
+  border: #064492 2px solid;
+}
+
+.warning {
+  color: #AA741C;
+  background: #FEEEA0;
+  border: #AA741C 2px solid;
+}
+
+.error {
+  color: #6E2123;
+  background: #FFA9AB;
+  border: #6E2123 2px solid;
+}
+
+.applicationName {
+  color: white;
+  background-color: #4882B5;
+  text-align: center;
+  padding: .5em;
+}
+
+.long-lines {
+  white-space: pre-line;
+  overflow: auto;
+}
+
+.count-bubble {
+  font-size: 100% !important;
+}
+
+#pending li{
+  background-color: #fff ;
+  padding: 5px ;
+  border: 1px solid #d6d9de ;
+  box-shadow: 1px 1px 10px 1px #888888;
+  margin-bottom: 20px ;
+  min-width: 260px ;
+}
+
+#pending li a{
+  text-decoration: none; 
+  color: #000 ;
+}
+
+li.detailbtns{
+  background-color: #fff ;
+  padding: 5px ;
+  border: 1px solid #d6d9de ;
+  box-shadow: 0px 0px 1px 0px #888888;
+  margin-bottom: 15px ;
+  min-width: 250px ;
+}
+
+li.invDetailli{
+  background-color: #fff ;
+  padding: 5px ;
+  border: 1px solid #d6d9de ;
+  box-shadow: 0px 0px 1px 0px #888888;
+  margin-bottom: 15px ;
+  min-width: 250px ;
+}
+
+li.invAccountingli{
+  overflow: auto ;
+  border: 0px solid #fff ;
+}
+
+#invAccounting {
+  min-width: 265px ;
+  margin-left: 0px ;
+  overflow: auto ;
+  padding: 0 ;
+  border: 1px solid #d6d9de ;
+  background-color: #fff ;
+  padding-bottom: 10px ;
+  box-shadow: 0px 0px 1px 0px #888888;
+}
+
+#invAccounting li{
+  border: 0px solid #f3f7fc ;
+  box-shadow: 0px 0px 0px 0px #f3f7fc;
+  overflow: auto;
+  padding: 0px ;
+}
+
+li.reqDetailli{
+  background-color: #fff ;
+  padding: 5px ;
+  border: 1px solid #d6d9de ;
+  box-shadow: 0px 0px 1px 0px #888888;
+  margin-bottom: 15px ;
+  min-width: 250px ;
+}
+
+li.reqAccountingli{
+  overflow: auto ;
+  border: 0px solid #fff ;
+}
+
+#reqAccounting {
+  min-width: 265px ;
+  margin-left: 0px ;
+  overflow: auto ;
+  padding: 0 ;
+  border: 1px solid #d6d9de ;
+  background-color: #fff ;
+  padding-bottom: 10px ;
+  box-shadow: 0px 0px 1px 0px #888888;
+}
+
+#reqAccounting li{
+  border: 0px solid #f3f7fc ;
+  box-shadow: 0px 0px 0px 0px #f3f7fc;
+  overflow: auto;
+  padding: 0px ;
+}
+
+.titlebar{
+  padding: 2px ;
+  border-bottom: 1px solid #d6d9de ;
+  box-shadow: 0px 0px 1px 0px #888888;
+  background-color: #faf4dc ;
+}
