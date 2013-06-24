@@ -21,6 +21,14 @@ var EXELON = (function (r, $) {
     submit: function (evt) {
       try {
         var valid;
+      
+        var stubbedOff = true;
+        if(stubbedOff) {
+          RSKYBOX.log.info('THE LOGIN PROCESS IS CURRENTLY STUBBED OFF!!!', 'Login.submit');
+          $.mobile.changePage( "#home", { transition: "slideup", changeHash: false });
+          evt.preventDefault();
+          return false;
+        }
 
         valid = this.model.set({
           aduser: this.$("input[name='login']").val(),
@@ -40,9 +48,7 @@ var EXELON = (function (r, $) {
             success: this.success,
             statusCode: r.statusCodeHandlers(this.apiError)
           });
-
-        }
-        evt.preventDefault();
+} evt.preventDefault();
         return false;
       } catch (e) {
         RSKYBOX.log.error(e, 'LoginView.submit');

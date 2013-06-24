@@ -74,8 +74,7 @@
       </div>
 
       <div data-role="content">
-        <ul id="pending" data-role="listview" data-inset="true" data-filter="false">
-        </ul>
+        <h1>This is the home page -- empty so far ...</h1>
       </div>
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
         <div data-role="header" data-theme="a" class="ui-corner-top">
@@ -89,5 +88,73 @@
     </div><!-- /page -->
     <script type="text/template" id="xyzTemplate">
     </script>
+
+    <div data-role="page" id="configure">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Account Manager</h1>
+        <a href="#configure_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+      </div>
+
+      <div data-role="content">
+        <div>This is the Configure page</div>
+      </div>
+    </div><!-- /page -->
+
+    <div data-role="page" id="configureTest">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Account Manager</h1>
+        <a href="#configureTest_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+      </div>
+
+      <div data-role="content">
+        <div>This is the Configure Test page</div>
+      </div>
+    </div><!-- /page -->
+
+    <div data-role="page" id="reports">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Account Manager</h1>
+        <a href="#reports_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+      </div>
+
+      <div data-role="content">
+        <div>This is the Reports page</div>
+      </div>
+    </div><!-- /page -->
+
+    <script type="text/template" id="leftPanelTemplate">
+      <div data-role="panel" id="page_leftPanel" data-theme="c" data-position-fixed="true">
+         <ul data-role="listview" data-theme="b" data-divider-theme="b" style="margin-top:-16px;" class="nav-search">
+            <li data-icon="delete" style="background-color:#111;">
+              <a href="#" data-rel="close" class="userName">[USER NAME]</a>
+            </li>
+          </ul>
+          <ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:15px;">
+            <li data-icon="home">
+              <a class="home">Home</a>
+            </li>
+            <li>
+              <a class="configure">Configure</a>
+            </li>
+            <li>
+              <a class="configureTest">Configure Test</a>
+            </li>
+          </ul>
+          <ul data-role="listview" data-theme="b" data-divider-theme="b" style="margin-top:15px;">
+            <div data-role="collapsible" data-theme="b" data-content-theme="b" data-collapsed-icon="gear" data-expanded-icon="gear" data-iconpos="right" data-inset="true" style="margin-bottom:0px;">
+              <h2>Reports</h2>
+              <ul data-role="listview">
+                <li><a href="#">Cohort Report</a></li>
+                <li><a href="#">Sales Report</a></li>
+              </ul>
+            </div><!-- /collapsible -->
+            <li data-icon="alert">
+              <a href="#" class="logOut">Log Out</a>
+            </li>
+          </ul>
+      </div><!-- /panel -->
+    </script>
+
+
 </body>
 </html>

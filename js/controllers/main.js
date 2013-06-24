@@ -57,7 +57,6 @@ var EXELON = (function (r, $) {
     // Home Screen
     homeBeforeCreate: function () {
       try {
-        // TODO -- is the event handler called multiple times for each JQM page -- best guess, no, it's not
         RSKYBOX.log.info('entering', 'main.js.homeBeforeCreate');
         r.attachPanel("home");
       } catch (e) {
@@ -68,202 +67,42 @@ var EXELON = (function (r, $) {
     homeInit: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeInit');
-
-        if (r.requisitionsView) {
-          r.requisitionsView.undelegateEvents();
-          delete r.requisitionsView;
-        }
-        if (r.invoicesView) {
-          r.invoicesView.undelegateEvents();
-          delete r.invoicesView;
-        }
-
-        r.requisitionsView = new r.RequisitionsView({
-          el: $('#pending'),
-          collection: new r.Requisitions()
-        });
-        r.invoicesView = new r.InvoicesView({
-          el: $('#pending'),
-          collection: new r.Invoices()
-        });
-
-        r.refreshHome();
-        r.homeInitComplete = true;
-
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeInit');
       }
     },
 
-    requisitionBeforeCreate: function () {
+    homeShow: function () {
       try {
-        RSKYBOX.log.info('entering', 'main.js.requisitionBeforeCreate');
-        r.attachPanel("requisition");
+        RSKYBOX.log.info('entering', 'main.js.homeShow');
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.requisitionBeforeCreate');
+        RSKYBOX.log.error(e, 'main.js.homeShow');
       }
     },
 
-    requisitionInit: function () {
+    // Configure Screen
+    configureBeforeCreate: function () {
       try {
-        RSKYBOX.log.info('entering', 'main.js.requisitionInit');
-
-        if (r.requisitionView) {
-          r.requisitionView.undelegateEvents();
-          delete r.requisitionView;
-        }
-
-        r.requisitionView = new r.RequisitionView({
-          el: $('#requisitionDetails'),
-          model: new r.Requisition()
-        });
-
+        RSKYBOX.log.info('entering', 'main.js.configureBeforeCreate');
+        r.attachPanel("configure");
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.requisitionInit');
+        RSKYBOX.log.error(e, 'main.js.configureBeforeCreate');
       }
     },
 
-    requisitionShow: function () {
+    configureInit: function () {
       try {
-        RSKYBOX.log.info('entering', 'main.js.requisitionShow');
-        var contrrequisition = r.session.params.id;
-
-        // start by clearing any previous requisition that may already be displayed
-        //$('#requisitionDetails').html("");
-        var model = r.requisitionsView.collection.findWhere({"contrrequisition" : contrrequisition});
-        r.requisitionView.setModel(model);
-        r.requisitionView.render();
-
-        if (r.reqAccountingsView) {
-          r.reqAccountingsView.undelegateEvents();
-          delete r.reqAccountingsView;
-        }
-
-        r.reqAccountingsView = new r.ReqAccountingsView({
-          el: $('#reqAccounting'),
-          collection: new r.ReqAccountings()
-        });
-
-        r.reqAccountingsView.collection.setUrl(model.get('axrefcode'));
-        r.reqAccountingsView.collection.fetch({  headers: {'Authorization' : r.getAuthorizationHeader()},
-                                                      statusCode: r.statusCodeHandlers(),
-                                                      reset: true });
+        RSKYBOX.log.info('entering', 'main.js.configureInit');
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.requisitionShow');
+        RSKYBOX.log.error(e, 'main.js.configureInit');
       }
     },
 
-    invoiceBeforeCreate: function () {
+    configureShow: function () {
       try {
-        RSKYBOX.log.info('entering', 'main.js.invoiceBeforeCreate');
-        r.attachPanel("invoice");
+        RSKYBOX.log.info('entering', 'main.js.configureShow');
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.invoiceBeforeCreate');
-      }
-    },
-
-    invoiceInit: function () {
-      try {
-        RSKYBOX.log.info('entering', 'main.js.invoiceInit');
-
-        if (r.invoiceView) {
-          r.invoiceView.undelegateEvents();
-          delete r.invoiceView;
-        }
-
-        r.invoiceView = new r.InvoiceView({
-          el: $('#invoiceDetails'),
-          model: new r.Invoice()
-        });
-      } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.invoiceInit');
-      }
-    },
-
-    invoiceShow: function () {
-      try {
-        RSKYBOX.log.info('entering', 'main.js.invoiceShow');
-        var paymtrefno = r.session.params.id;
-
-        // start by clearing any previous invoice that may already be displayed
-        //$('#invoiceDetails').html("");
-        var model = r.invoicesView.collection.findWhere({"paymtrefno" : paymtrefno});
-        r.invoiceView.setModel(model);
-        r.invoiceView.render();
-
-        if (r.invAccountingsView) {
-          r.invAccountingsView.undelegateEvents();
-          delete r.invAccountingsView;
-        }
-
-        r.invAccountingsView = new r.InvAccountingsView({
-          el: $('#invAccounting'),
-          collection: new r.InvAccountings()
-        });
-
-        r.invAccountingsView.collection.setUrl(paymtrefno);
-        r.invAccountingsView.collection.fetch({  headers: {'Authorization' : r.getAuthorizationHeader()},
-                                                      statusCode: r.statusCodeHandlers(),
-                                                      reset: true });
-
-      } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.invoiceShow');
-      }
-    },
-
-    scopeBeforeCreate: function () {
-      try {
-        RSKYBOX.log.info('entering', 'main.js.scopeBeforeCreate');
-        r.attachPanel("scope");
-      } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.scopeBeforeCreate');
-      }
-    },
-
-    scopeInit: function () {
-      try {
-        RSKYBOX.log.info('entering', 'main.js.scopeInit');
-
-        if (r.scopeView) {
-          r.scopeView.undelegateEvents();
-          delete r.scopeView;
-        }
-
-        r.scopeView = new r.ScopeView({
-          el: $('#scopeDetails'),
-          model: new r.Scope()
-        });
-
-      } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.scopeInit');
-      }
-    },
-
-    scopeShow: function () {
-      try {
-        RSKYBOX.log.info('entering', 'main.js.scopeShow');
-        var oleidscope = r.session.params.id;
-
-        // start by clearing any previous scope that may already be displayed
-        //$('#scopeDetails').html("");
-
-        r.scopeView.model.setUrl(oleidscope);
-        r.scopeView.model.fetch({  headers: {'Authorization' : r.getAuthorizationHeader()},
-                                   statusCode: r.statusCodeHandlers() });
-
-      } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.scopeShow');
-      }
-    },
-
-    // Session Setup
-    setupSession: function (eventType, matchObj, ui, page, evt) {
-      try {
-        RSKYBOX.log.info('entering', 'main.js.setupSession');
-        r.session = r.session || {};
-        r.session.params = r.router.getParams(location.hash);
-      } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.setupSession');
+        RSKYBOX.log.error(e, 'main.js.configureShow');
       }
     },
 
@@ -283,17 +122,6 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.refreshHome');
 
         $.mobile.showPageLoadingMsg();
-
-        // first, clear the list that holds both the requisitions and invoices
-        $('#pending').html("");
-
-        // fetch requisitions and invoices
-        r.requisitionsView.collection.fetch({  headers: {'Authorization' : r.getAuthorizationHeader()},
-                                                    statusCode: r.statusCodeHandlers(),
-                                                    reset: true });
-        r.invoicesView.collection.fetch({      headers: {'Authorization' : r.getAuthorizationHeader()},
-                                                    statusCode: r.statusCodeHandlers(),
-                                                    reset: true });
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.refreshHome');
       }
@@ -350,6 +178,15 @@ var EXELON = (function (r, $) {
     return false;
   });
 
+  $(document).on('click', '.configure', function(e){
+    if($.mobile.activePage.is('#configure')) {
+      $('#configure_leftPanel').panel("close");
+    } else {
+      $.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
+    }
+    return false;
+  });
+
 
   try {
     r.router = new $.mobile.Router([
@@ -360,15 +197,10 @@ var EXELON = (function (r, $) {
       { '#login':                { handler: 'loginShow',         events: 's'   } },
       { '#home':                 { handler: 'homeBeforeCreate',  events: 'bc'  } },
       { '#home':                 { handler: 'homeInit',    events: 'i'  } },
-      { '#requisition[?]id=.*':  { handler: 'requisitionBeforeCreate',  events: 'bc'  } },
-      { '#requisition[?]id=.*':  { handler: 'requisitionInit',  events: 'i'  } },
-      { '#requisition[?]id=.*':  { handler: 'requisitionShow',  events: 's'  } },
-      { '#invoice[?]id=.*':      { handler: 'invoiceBeforeCreate',  events: 'bc'  } },
-      { '#invoice[?]id=.*':      { handler: 'invoiceInit',  events: 'i'  } },
-      { '#invoice[?]id=.*':      { handler: 'invoiceShow',  events: 's'  } },
-      { '#scope[?]id=.*':        { handler: 'scopeBeforeCreate',  events: 'bc'  } },
-      { '#scope[?]id=.*':        { handler: 'scopeInit',  events: 'i'  } },
-      { '#scope[?]id=.*':        { handler: 'scopeShow',  events: 's'  } }
+      { '#home':                 { handler: 'homeShow',    events: 's'   } },
+      { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
+      { '#configure':            { handler: 'configureInit',    events: 'i'  } },
+      { '#configure':            { handler: 'configureShow',    events: 's'   } }
     ], r.controller);
   } catch (e) {
     RSKYBOX.log.error(e, 'EXELON.main.router');
