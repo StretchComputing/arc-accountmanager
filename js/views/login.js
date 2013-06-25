@@ -25,7 +25,16 @@ var EXELON = (function (r, $) {
         var stubbedOff = true;
         if(stubbedOff) {
           RSKYBOX.log.info('THE LOGIN PROCESS IS CURRENTLY STUBBED OFF!!!', 'Login.submit');
-          $.mobile.changePage( "#home", { transition: "slideup", changeHash: false });
+          
+          if(!r.currentCustomer) /*Make page transition to customer select page*/
+      		{
+      			$.mobile.changePage( "#customerSelect", { transition: "slideup", changeHash: true });
+      		}
+          
+          else {
+        	  $.mobile.changePage( "#home", { transition: "slideup", changeHash: false });
+          }
+          
           evt.preventDefault();
           return false;
         }

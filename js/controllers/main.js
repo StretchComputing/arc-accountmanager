@@ -8,7 +8,7 @@ var EXELON = (function (r, $) {
       try {
         RSKYBOX.log.info('entering', 'main.js.isLoggedIn');
 
-        // Theoretically, don't need to preven default just to reroute a request, but could not get
+        // Theoretically, don't need to prevent default just to reroute a request, but could not get
         // this method to work without it.  Without it, it would just endlessly display loading indicator.
         evt.preventDefault();
 
@@ -53,12 +53,108 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.error(e, 'main.js.loginShow');
       }
     },
-
+    
+    // Customer Select Screen
+    customerSelectBeforeCreate: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.customerSelectBeforeCreate')
+    		
+    		var recentCustomers = [];
+    		/*TODO:Read in data from local storage*/
+    		recentCustomers.push({name: "addNew", displayName : "Add New", onClick: function(e){
+    			$.mobile.changePage( "#newCustomer", { transition: "slideup", changeHash: true });	
+    		}});
+    		/*Add names to list*/
+    		var customerList = $('#recentCustomerList')
+    		for(var i = 0; i < recentCustomers.length; i++){
+    			var cust = recentCustomers[i];
+    			customerList.append('<li><a class="' + cust.name + 'Cust">' + cust.displayName + '</a></li>');
+    			$(document).on('click', '.'+cust.name+'Cust', cust.onClick);  //Register event handler
+    		}
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.custmoerSelectBeforeCreate')
+    	}
+    },
+    
+    customerSelectInit: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.customerSelectInit')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.custmoerSelectInit')
+    	}
+    },
+    
+    customerSelectShow: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.customerSelectShow')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.custmoerSelectShow')
+    	}
+    },
+    
+    newCustomerBeforeCreate: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.newCustomerBeforeCreate')
+    		var form = $('#newCustForm');
+    		form.append('<button class="newCustSubmit">Submit</button>');
+    		$(document).on('click', '.newCustSubmit', function(e){
+    			
+    			/*Build Customer Object Here*/
+    			var newCustomer = {}
+    			var elm;
+    			alert(form.elements);
+    			for(var i = 0; i < form.length; i++){
+    				elm = form[i];
+    				if(elm.required && elm.value === ""){
+    					return;
+    				}
+    				newCustomer[elm.name] = elm.value;
+    			}
+    			/*TODO:submit data to api*/
+    			
+    			r.currentCustomer = newCustomer;
+    			alert(r.currentCustomer.restaurantName);
+    			
+    		});
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.newCustomerBeforeCreate')
+    	}
+    },
+    
+    newCustomerInit: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.newCustomerInit')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.newCustomerInit')
+    	}
+    },
+    
+    newCustomerShow: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.newCustomerShow')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.newCustomerShow')
+    	}
+    },
+    
     // Home Screen
     homeBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeBeforeCreate');
         r.attachPanel("home");
+
+        
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeBeforeCreate');
       }
@@ -75,6 +171,7 @@ var EXELON = (function (r, $) {
     homeShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeShow');
+        
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeShow');
       }
@@ -198,6 +295,12 @@ var EXELON = (function (r, $) {
       { '#home':                 { handler: 'homeBeforeCreate',  events: 'bc'  } },
       { '#home':                 { handler: 'homeInit',    events: 'i'  } },
       { '#home':                 { handler: 'homeShow',    events: 's'   } },
+      { '#customerSelect':       { handler: 'customerSelectBeforeCreate', events: 'bc'} },
+      { '#customerSelect':       { handler: 'customerSelectInit', events: 'i'} },
+      { '#customerSelect':       { handler: 'customerSelectShow', events: 's'} },
+      { '#newCustomer':          { handler: 'newCustomerBeforeCreate', events: 'bc'} },
+      { '#newCustomer':          { handler: 'newCustomerInit', events: 'i'} },
+      { '#newCustomer':          { handler: 'newCustomerShow', events: 's'} },
       { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
       { '#configure':            { handler: 'configureInit',    events: 'i'  } },
       { '#configure':            { handler: 'configureShow',    events: 's'   } }

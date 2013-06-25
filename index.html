@@ -67,6 +67,42 @@
       </ul>
     </script>
 
+	<div data-role="page" id="customerSelect">
+		<div data-role="header" data-position="fixed" data-tap-toggle="false">
+			<h1>Please select a customer</h1>
+			<a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+		</div>
+		
+		<div data-role="content">
+			<ul data-role="listview" id="recentCustomerList">
+				
+			</ul>
+		</div>
+	</div>
+	
+	<div data-role="page" id="newCustomer">
+		<div data-role="header" data-position="fixed" data-tap-toggle="false">
+			<h1>Create new customer</h1>
+		</div>
+		
+		<div data-role="content">
+			<form id="newCustForm">
+				Restaurant Name:*<br>
+				<input type="text" name="restaurantName" id="newCustRestaurantName" required> <br>
+				Owner/Manager name <br>
+				<input type="text" name="ownerName" id="newCustOwnerName"> <br>
+				Point of Sale Device:*<br>
+				<select id="newCustPosSelect">
+					<option value="Micros">Micros</option>
+					<option value="otherOne">Other</option>
+				</select>
+				Number of tables:<br>
+				<input type="number" name="numTables" id="newCustNumTables"> <br>
+				Etc <br>
+			</form>
+		</div>
+	</div>
+
     <div data-role="page" id="home">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
         <h1>Account Manager</h1>
