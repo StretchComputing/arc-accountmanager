@@ -103,24 +103,31 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.newCustomerBeforeCreate')
     		var form = $('#newCustForm');
     		form.append('<button class="newCustSubmit">Submit</button>');
+    		form.append('<button class="newCustCancel">Cancel</button>');
     		$(document).on('click', '.newCustSubmit', function(e){
-    			
-    			/*Build Customer Object Here*/
-    			var newCustomer = {}
-    			var elm;
-    			alert(form.elements);
-    			for(var i = 0; i < form.length; i++){
-    				elm = form[i];
-    				if(elm.required && elm.value === ""){
-    					return;
-    				}
-    				newCustomer[elm.name] = elm.value;
+    			var newCustomer ={};
+    			var inputs = $('#newCustForm :input');
+    			newCustomer.display = new Array();
+    			for(var i = 0; i < inputs.length; i++){
+    				var input = inputs[i];
+    				if(input.name == "")
+    					continue;
+    				var display = {};
+    				display.name = input.name;
+    				display.value = input.value;
+    				newCustomer.display[i] = display;
+    				newCustomer[input.name] = input.value;
     			}
-    			/*TODO:submit data to api*/
+    			/*Submit to server*/
     			
     			r.currentCustomer = newCustomer;
-    			alert(r.currentCustomer.restaurantName);
+    			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
     			
+    			return;
+    		});
+    		$(document).on('click', '.newCustCancel', function(e){
+    			$.mobile.changePage( "#customerSelect", { transition: "slideup", changeHash: true });
+    			return;
     		});
     	}
     	catch(e){
@@ -153,7 +160,14 @@ var EXELON = (function (r, $) {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeBeforeCreate');
         r.attachPanel("home");
-
+        /*put in the elements from the 'current customer' object*/
+        var home = $('#homeStart');
+        for(var i = 0; i <r.currentCustomer.display.length; i++){
+        	var name = r.currentCustomer.display[i].name;
+        	var value = r.currentCustomer.display[i].value;
+        	if(name != "")
+        		home.append('<h1>'+name + ": " + value + '</h1>');
+        }
         
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeBeforeCreate');

@@ -86,20 +86,19 @@
 		</div>
 		
 		<div data-role="content">
-			<form id="newCustForm">
-				Restaurant Name:*<br>
-				<input type="text" name="restaurantName" id="newCustRestaurantName" required> <br>
-				Owner/Manager name <br>
-				<input type="text" name="ownerName" id="newCustOwnerName"> <br>
-				Point of Sale Device:*<br>
-				<select id="newCustPosSelect">
+			<div id="newCustForm">
+				<lable for="newCustRestaurantName">Restaurant Name</lable> 
+				<input type="text" name="restaurantName" id="newCustRestaurantName" required>
+				<lable for="newCustOwnerName">Owner/Manager Name</lable>
+				<input type="text" name="ownerName" id="newCustOwnerName">
+				<lable for="newCustPosSelect">Point of Sale Device</lable>
+				<select name="pointOfSaleDevice" id="newCustPosSelect">
 					<option value="Micros">Micros</option>
 					<option value="otherOne">Other</option>
 				</select>
-				Number of tables:<br>
-				<input type="number" name="numTables" id="newCustNumTables"> <br>
-				Etc <br>
-			</form>
+				<lable for="newCustNumTables">Number of Tables</lable>
+				<input type="number" name="numTables" id="newCustNumTables">
+			</div>
 		</div>
 	</div>
 
@@ -110,7 +109,7 @@
       </div>
 
       <div data-role="content">
-        <h1>This is the home page -- empty so far ...</h1>
+        <div id="homeStart"></div>
       </div>
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
         <div data-role="header" data-theme="a" class="ui-corner-top">
