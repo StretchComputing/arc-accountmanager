@@ -102,21 +102,16 @@ var EXELON = (function (r, $) {
     	try{
     		RSKYBOX.log.info('entering', 'main.js.newCustomerBeforeCreate')
     		var form = $('#newCustForm');
-    		form.append('<button class="newCustSubmit">Submit</button>');
-    		form.append('<button class="newCustCancel">Cancel</button>');
+    		buildNewCustomerForm(form);
     		$(document).on('click', '.newCustSubmit', function(e){
     			var newCustomer ={};
     			var inputs = $('#newCustForm :input');
-    			newCustomer.display = new Array();
     			for(var i = 0; i < inputs.length; i++){
     				var input = inputs[i];
-    				if(input.name == "")
-    					continue;
-    				var display = {};
-    				display.name = input.name;
-    				display.value = input.value;
-    				newCustomer.display[i] = display;
-    				newCustomer[input.name] = input.value;
+    				if(input.type != "checkbox")
+    					newCustomer[input.name] = input.value; /*So that the properties of the customer object can be referenced by name*/
+    				else
+    					newCustomer[input.name] = input.checked;
     			}
     			/*Submit to server*/
     			
@@ -161,14 +156,8 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.homeBeforeCreate');
         r.attachPanel("home");
         /*put in the elements from the 'current customer' object*/
-        var home = $('#homeStart');
-        for(var i = 0; i <r.currentCustomer.display.length; i++){
-        	var name = r.currentCustomer.display[i].name;
-        	var value = r.currentCustomer.display[i].value;
-        	if(name != "")
-        		home.append('<h1>'+name + ": " + value + '</h1>');
-        }
-        
+        var home = $('#homePropList');
+        buildHomeScreeen(r.currentCustomer, home);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeBeforeCreate');
       }
@@ -298,6 +287,84 @@ var EXELON = (function (r, $) {
     return false;
   });
 
+  /*An associative array which matches property names to property display text
+   * Should probably go in a separate file...*/
+  var customerDisplay = [
+		  { propName: "AcceptTerms",           displayText: "Accepted the terms and conditions?", inputType: "checkbox"},
+		  { propName: "EIN",                   displayText: "Company Employer ID Number",         inputType: "text"},
+		  { propName: "Street",                displayText: "Street Address",                     inputType: "text"},
+		  { propName: "City",                  displayText: "City",                               inputType: "text"},
+		  { propName: "State",                 displayText: "State",                              inputType: "text"},
+		  { propName: "ZipCode",               displayText: "Zip Code",                           inputType: "text"},
+		  { propName: "Name",                  displayText: "Company Name",                       inputType: "text"},
+		  { propName: "Password",              displayText: "Password",                           inputType: "text"},
+		  { propName: "PaymentAccepted",       displayText: "Credit Card Payments Accepted?",     inputType: "checkbox"},
+		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text"},
+		  { propName:"InvoiceExpiration",      displayText: "Invoice Experation Time",            inputType: "text"},
+		  { propName: "InvoiceExpirationUnit", displayText: "Invoice Experation Unit",            inputType: "text"},
+		  { propName: "StartWorkHour",         displayText: "Restaurant Work Start",              inputType: "text"},
+		  { propName: "EndWorkHour",           displayText: "Restaurant Work End",                inputType: "text"},
+		  { propName: "POS",                   displayText: "POS Type",                           inputType: "select", options: ["POS_MICROS", "POS_ISIS", "POS_ALOHA"]},
+		  { propName: "eMail",                 displayText: "Email",                              inputType: "text"},
+		  { propName: "TwitterHandler",        displayText: "Twitter Handler",                    inputType: "text"},
+		  { propName: "FacebookHandler",       displayText: "Facebook Handler",                   inputType: "text"},
+		  { propName: "DeviceId",              displayText: "DeviceId",                           inputType: "text"},
+		  { propName: "PushType",              displayText:"Push Type",                           inputType: "text"},
+		  { propName: "MinReviewThreshold",    displayText: "Minimum Review Threashold",          inputType: "text"},
+		  { propName: "MaxReviewThreshold",    displayText: "Maximum Review Threashold",          inputType: "text"},
+		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text"},
+		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text"}
+  ];
+  
+  function buildNewCustomerForm(form){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.newCustomerBeforeCreate.buildNewCustomerForm')
+		  var displayArr = customerDisplay;
+		  for(var i = 0; i < displayArr.length; i++){
+			  var prop = displayArr[i];
+			  var label = '<label for="newCust"' + prop.propName + ">" + prop.displayText + "</label>";
+			  var input = "";
+			  if(prop.inputType === "select"){
+				  input += '<select id=newCust"' + prop.propName + '" name="' + prop.propName + '">';
+				  for(var j = 0; j < prop.options.length; j++){
+					  input += '<option value="'+prop.options[j] + '">' + prop.options[j] + '</option>\n';
+				  }
+				  input += "</select>";
+			  }
+			  else {
+				  input = '<input id="newCust' + prop.propName +'"';
+				  input += 'type="' + prop.inputType + '"';
+				  input += 'name="' + prop.propName + '">\n';
+			  }
+			  form.append(label);
+			  form.append(input);
+		  }
+		  form.append('<button class="newCustSubmit">Submit</button>');
+		  form.append('<button class="newCustCancel">Cancel</button>');
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e, 'main.js.newCustomerBeforeCreate.buildNewCustomerForm');
+	  }
+  }
+  
+  function buildHomeScreeen(customer, div){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.homeBeforeCreate.buildHomeScreen');
+		  div.append('<ul data-role="listview" id="homeCustomerProperties">');
+		  for(var i = 0; i < customerDisplay.length; i++){
+			  var prop = customerDisplay[i];
+			  var val;
+			  if( undefined != (val = customer[prop.propName])){
+				  if(prop.inputType === "checkbox")
+					  val = val ? "Yes" : "No";
+				  div.append('<li>'+prop.displayText + ': ' + val + '</li>');
+			  }
+		  }
+	}
+	catch(e){
+		RSKYBOX.log.error(e, 'main.js.homeBeforeCreate.buildHomeScreen');
+	}
+  }
 
   try {
     r.router = new $.mobile.Router([
