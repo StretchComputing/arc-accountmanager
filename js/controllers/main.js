@@ -108,10 +108,22 @@ var EXELON = (function (r, $) {
     			var inputs = $('#newCustForm :input');
     			for(var i = 0; i < inputs.length; i++){
     				var input = inputs[i];
-    				if(input.type != "checkbox")
-    					newCustomer[input.name] = input.value; /*So that the properties of the customer object can be referenced by name*/
-    				else
+    				
+    				if(input.type != "checkbox"){
+    					if(input.required && input.value == ""){
+    						alert("Please fill out " + input.name);
+    						return;
+    					}
+    					newCustomer[input.name] = input.value;
+    				}
+    					
+    				else{
+    					if(input.required && !input.checked){
+    						alert("You must check " + input.name);
+    						return;
+    					}
     					newCustomer[input.name] = input.checked;
+    				}
     			}
     			/*Submit to server*/
     			
@@ -290,30 +302,30 @@ var EXELON = (function (r, $) {
   /*An associative array which matches property names to property display text
    * Should probably go in a separate file...*/
   var customerDisplay = [
-		  { propName: "AcceptTerms",           displayText: "Accepted the terms and conditions?", inputType: "checkbox"},
-		  { propName: "EIN",                   displayText: "Company Employer ID Number",         inputType: "text"},
-		  { propName: "Street",                displayText: "Street Address",                     inputType: "text"},
-		  { propName: "City",                  displayText: "City",                               inputType: "text"},
-		  { propName: "State",                 displayText: "State",                              inputType: "text"},
-		  { propName: "ZipCode",               displayText: "Zip Code",                           inputType: "text"},
-		  { propName: "Name",                  displayText: "Company Name",                       inputType: "text"},
-		  { propName: "Password",              displayText: "Password",                           inputType: "text"},
-		  { propName: "PaymentAccepted",       displayText: "Credit Card Payments Accepted?",     inputType: "checkbox"},
-		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text"},
-		  { propName:"InvoiceExpiration",      displayText: "Invoice Experation Time",            inputType: "text"},
-		  { propName: "InvoiceExpirationUnit", displayText: "Invoice Experation Unit",            inputType: "text"},
-		  { propName: "StartWorkHour",         displayText: "Restaurant Work Start",              inputType: "text"},
-		  { propName: "EndWorkHour",           displayText: "Restaurant Work End",                inputType: "text"},
-		  { propName: "POS",                   displayText: "POS Type",                           inputType: "select", options: ["POS_MICROS", "POS_ISIS", "POS_ALOHA"]},
-		  { propName: "eMail",                 displayText: "Email",                              inputType: "text"},
-		  { propName: "TwitterHandler",        displayText: "Twitter Handler",                    inputType: "text"},
-		  { propName: "FacebookHandler",       displayText: "Facebook Handler",                   inputType: "text"},
-		  { propName: "DeviceId",              displayText: "DeviceId",                           inputType: "text"},
-		  { propName: "PushType",              displayText:"Push Type",                           inputType: "text"},
-		  { propName: "MinReviewThreshold",    displayText: "Minimum Review Threashold",          inputType: "text"},
-		  { propName: "MaxReviewThreshold",    displayText: "Maximum Review Threashold",          inputType: "text"},
-		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text"},
-		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text"}
+		  { propName: "AcceptTerms",           displayText: "Accepted the terms and conditions?", inputType: "checkbox", required:true},
+		  { propName: "EIN",                   displayText: "Company Employer ID Number",         inputType: "text",     required:true},
+		  { propName: "Street",                displayText: "Street Address",                     inputType: "text",     required:true},
+		  { propName: "City",                  displayText: "City",                               inputType: "text",     required:true},
+		  { propName: "State",                 displayText: "State",                              inputType: "text",     required:true},
+		  { propName: "ZipCode",               displayText: "Zip Code",                           inputType: "text",     required:true},
+		  { propName: "Name",                  displayText: "Company Name",                       inputType: "text",     required:true},
+		  { propName: "Password",              displayText: "Password",                           inputType: "text",     required:true},
+		  { propName: "PaymentAccepted",       displayText: "Credit Card Payments Accepted?",     inputType: "checkbox", required:true},
+		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text",     required:true},
+		  { propName:"InvoiceExpiration",      displayText: "Invoice Experation Time",            inputType: "text",     required:false},
+		  { propName: "InvoiceExpirationUnit", displayText: "Invoice Experation Unit",            inputType: "text",     required:false},
+		  { propName: "StartWorkHour",         displayText: "Restaurant Work Start",              inputType: "text",     required:true},
+		  { propName: "EndWorkHour",           displayText: "Restaurant Work End",                inputType: "text",     required:true},
+		  { propName: "POS",                   displayText: "POS Type",                           inputType: "select",   required:false, options: ["POS_MICROS", "POS_ISIS", "POS_ALOHA"]},
+		  { propName: "eMail",                 displayText: "Email",                              inputType: "text",     required:true},
+		  { propName: "TwitterHandler",        displayText: "Twitter Handler",                    inputType: "text",     required:false},
+		  { propName: "FacebookHandler",       displayText: "Facebook Handler",                   inputType: "text",     required:false},
+		  { propName: "DeviceId",              displayText: "DeviceId",                           inputType: "text",     required:false},
+		  { propName: "PushType",              displayText:"Push Type",                           inputType: "text",     required:false},
+		  { propName: "MinReviewThreshold",    displayText: "Minimum Review Threashold",          inputType: "text",     required:true},
+		  { propName: "MaxReviewThreshold",    displayText: "Maximum Review Threashold",          inputType: "text",     required:true},
+		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text",     required:false},
+		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text",     required:false}
   ];
   
   function buildNewCustomerForm(form){
@@ -334,7 +346,11 @@ var EXELON = (function (r, $) {
 			  else {
 				  input = '<input id="newCust' + prop.propName +'"';
 				  input += 'type="' + prop.inputType + '"';
-				  input += 'name="' + prop.propName + '">\n';
+				  input += 'name="' + prop.propName + '"';
+				  if(prop.required)
+					  input += 'required';
+				  input += '>'
+				
 			  }
 			  form.append(label);
 			  form.append(input);
