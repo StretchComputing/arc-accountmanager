@@ -220,17 +220,8 @@ var EXELON = (function(r, $) {
 
   // returns the complete, partially Base64 encoded authorization header ready to be inserted in the HTTP Authorication header
   r.getAuthorizationHeader = function() {
-    var authHeader = '';
-    var user = r.store.getItem(APPROVER_USER);
-
-    // only build the auth header if the user model in local storage and the token is non-null
-    if(user && user['token']) {
-      // the token held by the user object is the Base64 encoded userid:password -- portion of the HTTP auth header.
-      // TODO -- hard coded to Tom Esposito's token right now since I don't have a passport account
-      //authHeader = 'Basic ' + user['token'];
-      authHeader = 'Basic ' + 'dDplc3BvdHc6NHVvYXYwc3E2NDJ1ODBlaWQ3bTdncG9tcjY='; // Tom's Token
-      //authHeader = 'Basic ' + 'dDpCT1dFQ006OWF2MnA4YThvajJpazNvcTM0dWNja2VoMHM='; // Craig's Token
-    }
+		// hard code token to one for joepwro@gmail.com
+    var authHeader = 'Basic VEU5SFNVNWZWRmxRUlY5RFZWTlVUMDFGVWpwcWIyVndkM0p2UUdkdFlXbHNMbU52YlRwMWRHOHhNak09';
     return authHeader;
   };
 
