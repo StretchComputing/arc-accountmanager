@@ -75,7 +75,7 @@ var EXELON = (function (r, $) {
     homeShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeShow');
-				r.getMerchants();
+		r.getMerchants();
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeShow');
       }
@@ -218,9 +218,9 @@ var EXELON = (function (r, $) {
 				headers: {'Authorization' : r.getAuthorizationHeader()},
         success: function(data, status, jqXHR) {
                     try {
-											// Display returned data on the screen
-											// to create object from JSON, call -- JSON.parse(data)
-											var jtest = 5;
+                    	var homeContent = $('#homeContent');
+                    	r.writeMerchantList(homeContent, data.Results);
+                    	var jtest = 5;
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
                     }
@@ -230,6 +230,31 @@ var EXELON = (function (r, $) {
       RSKYBOX.log.error(e, 'getMerchants');
     }
   };
+  
+  r.writeMerchantList = function(location, list){
+	  var set = '<div data-role="collapsible-set">';
+	  for(var i = 0; i <list.length; i++){
+		  var col = '<div data-role="collapisble">';
+		  col += '<h3>' + list[i].Name + '</h3>';
+		  col += '<p>';
+		  var ul = '<ul data-role="listview">';
+		  for (var j=0; j < MERCHANT.merchantDisplay.length; j++){
+			  var li = '<li>' + MERCHANT.merchantDisplay[j].displayText + ': ';
+			  var val;
+			  if(val = list[i][MERCHANT.merchantDisplay[j].propName])
+				  li += val;
+			  li += '</li>';
+			 ul += li;
+		  }
+		  ul += '</ul>';
+		  col += ul + '</p>';
+		  col += '</div>';
+		  set += col;
+	  }
+	  set += '</div>';
+	  location.append(set);
+	  location.trigger('create');
+  }
 
 
   try {

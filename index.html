@@ -36,6 +36,8 @@
       <script src="js/views/base.js"></script>
       <script src="js/views/login.js"></script>
 
+	  <script src="js/lib/merchantobject.js"></script>
+
       <script>
           $( document ).on( "pageshow", function(){
               $( "p.message" ).hide().delay( 1500 ).show( "fast" );
@@ -73,8 +75,7 @@
         <a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
       </div>
 
-      <div data-role="content">
-        <h1>This is the home page -- empty so far ...</h1>
+      <div data-role="content" id="homeContent">
       </div>
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
         <div data-role="header" data-theme="a" class="ui-corner-top">
