@@ -75,6 +75,7 @@ var EXELON = (function (r, $) {
     homeShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeShow');
+				r.getMerchants();
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeShow');
       }
@@ -209,11 +210,11 @@ var EXELON = (function (r, $) {
 
       $.ajax({
         type: 'search',
-        data: json.stringify(jsonobj),
+        data: JSON.stringify(jsonobj),
         datatype: 'json',
         contenttype: 'application/json',
         url: closeurl,
-        statuscode: r.statuscodehandlers(),
+        statuscode: r.statusCodeHandlers(),
 				headers: {'Authorization' : r.getAuthorizationHeader()},
         success: function(data, status, jqXHR) {
                     try {
@@ -221,12 +222,12 @@ var EXELON = (function (r, $) {
 											// to create object from JSON, call -- JSON.parse(data)
 											var jtest = 5;
                     } catch (e) {
-                      r.log.error(e, 'getMerchants.success');
+                      RSKYBOX.log.error(e, 'getMerchants.success');
                     }
                   }
       });
     } catch (e) {
-      r.log.error(e, 'getMerchants');
+      RSKYBOX.log.error(e, 'getMerchants');
     }
   };
 
