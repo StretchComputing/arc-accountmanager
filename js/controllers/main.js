@@ -9,6 +9,7 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.isLoggedIn');
 
         // Theoretically, don't need to preven default just to reroute a request, but could not get
+        // Theoretically, don't need to prevent default just to reroute a request, but could not get
         // this method to work without it.  Without it, it would just endlessly display loading indicator.
         evt.preventDefault();
 
@@ -53,12 +54,123 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.error(e, 'main.js.loginShow');
       }
     },
-
+    
+    // Customer Select Screen
+    customerSelectBeforeCreate: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.customerSelectBeforeCreate')
+    		
+    		var recentCustomers = [];
+    		/*TODO:Read in data from local storage*/
+    		recentCustomers.push({name: "addNew", displayName : "Add New", onClick: function(e){
+    			$.mobile.changePage( "#newCustomer", { transition: "slideup", changeHash: true });	
+    		}});
+    		/*Add names to list*/
+    		var customerList = $('#recentCustomerList')
+    		for(var i = 0; i < recentCustomers.length; i++){
+    			var cust = recentCustomers[i];
+    			customerList.append('<li><a class="' + cust.name + 'Cust">' + cust.displayName + '</a></li>');
+    			$(document).on('click', '.'+cust.name+'Cust', cust.onClick);  //Register event handler
+    		}
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.custmoerSelectBeforeCreate')
+    	}
+    },
+    
+    customerSelectInit: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.customerSelectInit')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.custmoerSelectInit')
+    	}
+    },
+    
+    customerSelectShow: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.customerSelectShow')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.custmoerSelectShow')
+    	}
+    },
+    
+    newCustomerBeforeCreate: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.newCustomerBeforeCreate')
+    		var form = $('#newCustForm');
+    		buildNewCustomerForm(form);
+    		$(document).on('click', '.newCustSubmit', function(e){
+    			var newCustomer ={};
+    			var inputs = $('#newCustForm :input');
+    			for(var i = 0; i < inputs.length; i++){
+    				var input = inputs[i];
+    				
+    				if(input.type != "checkbox"){
+    					if(input.required && input.value == ""){
+    						alert("Please fill out " + input.name);
+    						return;
+    					}
+    					newCustomer[input.name] = input.value;
+    				}
+    					
+    				else{
+    					if(input.required && !input.checked){
+    						alert("You must check " + input.name);
+    						return;
+    					}
+    					newCustomer[input.name] = input.checked;
+    				}
+    			}
+    			/*Submit to server*/
+    			
+    			r.currentCustomer = newCustomer;
+    			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+    			
+    			return;
+    		});
+    		$(document).on('click', '.newCustCancel', function(e){
+    			$.mobile.changePage( "#customerSelect", { transition: "slideup", changeHash: true });
+    			return;
+    		});
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.newCustomerBeforeCreate')
+    	}
+    },
+    
+    newCustomerInit: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.newCustomerInit')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.newCustomerInit')
+    	}
+    },
+    
+    newCustomerShow: function() {
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.newCustomerShow')
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.newCustomerShow')
+    	}
+    },
+    
     // Home Screen
     homeBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeBeforeCreate');
         r.attachPanel("home");
+        /*put in the elements from the 'current customer' object*/
+        var home = $('#homePropList');
+        buildHomeScreeen(r.currentCustomer, home);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeBeforeCreate');
       }
@@ -267,6 +379,12 @@ var EXELON = (function (r, $) {
       { '#home':                 { handler: 'homeBeforeCreate',  events: 'bc'  } },
       { '#home':                 { handler: 'homeInit',    events: 'i'  } },
       { '#home':                 { handler: 'homeShow',    events: 's'   } },
+      { '#customerSelect':       { handler: 'customerSelectBeforeCreate', events: 'bc'} },
+      { '#customerSelect':       { handler: 'customerSelectInit', events: 'i'} },
+      { '#customerSelect':       { handler: 'customerSelectShow', events: 's'} },
+      { '#newCustomer':          { handler: 'newCustomerBeforeCreate', events: 'bc'} },
+      { '#newCustomer':          { handler: 'newCustomerInit', events: 'i'} },
+      { '#newCustomer':          { handler: 'newCustomerShow', events: 's'} },
       { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
       { '#configure':            { handler: 'configureInit',    events: 'i'  } },
       { '#configure':            { handler: 'configureShow',    events: 's'   } }
