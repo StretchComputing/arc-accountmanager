@@ -75,6 +75,7 @@ var EXELON = (function (r, $) {
     homeShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeShow');
+				r.getMerchants();
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeShow');
       }
@@ -146,6 +147,7 @@ var EXELON = (function (r, $) {
 
   r.attachPanel = function(pageName) {
     try {
+      RSKYBOX.log.info('entering', 'main.js.attachPanel');
       // attach panel -- built via template
       var template = _.template($('#leftPanelTemplate').html());
       var content = template({});
@@ -164,28 +166,70 @@ var EXELON = (function (r, $) {
   
   // Define event handlers for panel. Done here so it only happens one time -- when HTML page is loaded
   $(document).on('click', '.logOut', function(){
-    r.logOut();
-    $.mobile.changePage( "#login", { transition: "slideup", changeHash: true });
-    return false;
+		try {
+			r.logOut();
+			$.mobile.changePage( "#login", { transition: "slideup", changeHash: true });
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.logOut');
+    }
   });
 
   $(document).on('click', '.home', function(e){
-    if($.mobile.activePage.is('#home')) {
-      $('#home_leftPanel').panel("close");
-    } else {
-      $.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+		try {
+			if($.mobile.activePage.is('#home')) {
+				$('#home_leftPanel').panel("close");
+			} else {
+				$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+			}
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.home');
     }
-    return false;
   });
 
   $(document).on('click', '.configure', function(e){
-    if($.mobile.activePage.is('#configure')) {
-      $('#configure_leftPanel').panel("close");
-    } else {
-      $.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
+		try {
+			if($.mobile.activePage.is('#configure')) {
+				$('#configure_leftPanel').panel("close");
+			} else {
+				$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
+			}
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.configure');
     }
-    return false;
   });
+
+  var devUrl = 'http://dev.dagher.mobi/rest/v1/';
+	var prdUrl = 'https://arc.dagher.mobi/rest/v1/';
+  r.getMerchants = function() {
+    try {
+      var closeurl = devUrl + 'merchants/list';
+      var jsonobj = {};
+
+      $.ajax({
+        type: 'search',
+        data: JSON.stringify(jsonobj),
+        datatype: 'json',
+        contenttype: 'application/json',
+        url: closeurl,
+        statuscode: r.statusCodeHandlers(),
+				headers: {'Authorization' : r.getAuthorizationHeader()},
+        success: function(data, status, jqXHR) {
+                    try {
+											// Display returned data on the screen
+											// to create object from JSON, call -- JSON.parse(data)
+											var jtest = 5;
+                    } catch (e) {
+                      RSKYBOX.log.error(e, 'getMerchants.success');
+                    }
+                  }
+      });
+    } catch (e) {
+      RSKYBOX.log.error(e, 'getMerchants');
+    }
+  };
 
 
   try {
