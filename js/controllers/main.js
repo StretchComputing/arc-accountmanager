@@ -8,7 +8,6 @@ var EXELON = (function (r, $) {
       try {
         RSKYBOX.log.info('entering', 'main.js.isLoggedIn');
 
-        // Theoretically, don't need to preven default just to reroute a request, but could not get
         // Theoretically, don't need to prevent default just to reroute a request, but could not get
         // this method to work without it.  Without it, it would just endlessly display loading indicator.
         evt.preventDefault();
@@ -77,10 +76,132 @@ var EXELON = (function (r, $) {
     homeShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeShow');
-		r.getMerchants();
+        if(!r.merchantList)
+        	r.getMerchants();
+        else
+        	r.writeMerchantList($('#homeContent'), r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeShow');
       }
+    },
+    
+    homeHide: function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.homeHide');
+    		$('#homeContent').empty();
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.homeHide');
+    	}
+    },
+    
+    editMerchantShow: function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.editMerchantShow');
+    		var content = $('#editMerchantContent');
+    		var merchant;
+    		
+    		if(!r.merchantToEdit)
+    			r.merchantToEdit = { newMerchant : true};
+    		
+    		merchant = r.merchantToEdit;
+    		
+    		var list = $('<ul />', { 'data-role' : "listview",
+    								 'id' : 'editMerchantForm'});
+    		for(var i = 0; i < MERCHANT.merchantDisplay.length; i++){
+    			var input = MERCHANT.merchantDisplay[i];
+    			var li = $('<li />');
+    			var label = $('<label />', { 'for' : "editMerchant"+input.propName,
+    										 'text' : input.displayText });
+    			
+    			var inputTag;
+    			if(input.inputType === "select"){
+    				inputTag = $('<select />',  { 'id' : "editMerchant" + input.propName });
+    				for(var j = 0; j < input.options.length; j++){
+    					var optOptions = {};
+    					if(input.options[j] === merchant[input.propName]){
+    						optOptions.selected = 'selected';
+    					}
+    					optOptions.text = input.options[j];
+    					inputTag.append($('<option />', optOptions));
+    				}
+    			}
+    			
+    			else{
+    				var inputOpts = {};
+    				inputOpts.name = input.propName;
+    				inputOpts.id = 'editMerchant' + input.propName;
+    				inputOpts.type = input.inputType;
+        			if(input.required)
+        				inputOpts.required = 'required';
+        			if(input.inputType === 'checkbox'){
+        				if(merchant[input.propName])
+        					 inputOpts.checked = 'checked';
+        			}
+        			else{
+        				if(merchant[input.propName]){
+        					inputOpts.value = merchant[input.propName];
+        				}
+        					
+        			}
+        			inputTag = $('<input />', inputOpts);
+    			}
+    			li.append(label);
+    			li.append(inputTag);
+    			list.append(li);
+    		}
+    		var li = $('<li />');
+    		
+    		var submit = $('<button />', {id : 'editMerchantSubmit',
+    									  text : 'Submit'});
+    		submit.bind('click', function(e){
+    			var form = $('#editMerchantForm :input');
+    			var merchant = r.merchantToEdit;
+    			for(var i = 0; i < form.length; i++){
+    				if(form[i].type === 'checkbox'){
+    					merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
+    				}
+    				else{
+    					merchant[form[i].name] = form[i].value;
+    				}
+    			}
+    			if(merchant.newMerchant){
+    				r.merchantList.push(merchant);
+    				delete merchant.newMerchant;
+    			}
+    			//TODO:Send edit to server
+    			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+    		});
+    		li.append(submit);
+    		
+    		var cancel = $('<button />', {id : 'editMerchantCancel',
+    									  text : 'Cancel'});
+    		cancel.bind('click', function(){
+    			$.mobile.changePage("#home", {transition: "slideup", changeHash : true});
+    		});
+    		li.append(cancel);
+    		
+    		list.append(li);
+    		
+    		content.append(list);
+    		
+    		content.trigger('create');
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.editMerchantShow');
+    	}
+    },
+    
+    editMerchantHide: function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.editMerchantHide');
+    		r.merchantToEdit = undefined;
+    		$('#editMerchantContent').empty();
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.editMerchantHide');
+    	}
     },
 
     // Configure Screen
@@ -221,7 +342,8 @@ var EXELON = (function (r, $) {
         success: function(data, status, jqXHR) {
                     try {
                     	var homeContent = $('#homeContent');
-                    	r.writeMerchantList(homeContent, data.Results);
+                    	r.merchantList = data.Results;
+                    	r.writeMerchantList(homeContent, r.merchantList);
                     	var jtest = 5;
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
@@ -234,30 +356,77 @@ var EXELON = (function (r, $) {
   };
   
   r.writeMerchantList = function(location, list){
-	  var set = '<div data-role="collapsible-set">';
-	  for(var i = 0; i <list.length; i++){
-		  var col = '<div data-role="collapisble">';
-		  col += '<h3>' + list[i].Name + '</h3>';
-		  col += '<p>';
-		  var ul = '<ul data-role="listview">';
-		  for (var j=0; j < MERCHANT.merchantDisplay.length; j++){
-			  var li = '<li>' + MERCHANT.merchantDisplay[j].displayText + ': ';
-			  var val;
-			  if(val = list[i][MERCHANT.merchantDisplay[j].propName])
-				  li += val;
-			  li += '</li>';
-			 ul += li;
-		  }
-		  ul += '</ul>';
-		  col += ul + '</p>';
-		  col += '</div>';
-		  set += col;
-	  }
-	  set += '</div>';
-	  location.append(set);
-	  location.trigger('create');
-  }
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
+		  var set = $('<ul />', { 'data-role' : "listview"});
+		  for(var i = 0; i <list.length; i++){
+			  var collapseli = $('<li />');
 
+			  var col = $('<div />', { 'data-role' : "collapsible"});
+			  collapseli.append(col);
+
+			  col.prepend($('<h3 />', {text : list[i].Name}));
+
+			  var ul = $('<ul />', { 'data-role' : "listview"});
+			  col.append(ul);
+
+			  var button = $('<button />', { 'text' : 'Choose',
+				  'id'   : 'homeChoose' + list[i].Name,
+				  'name' : list[i].Name });
+			  /*Register event handler for this button*/
+			  button.bind('click', function(e){
+				  var name = $(this).attr('name');
+				  r.activeMerchant = r.getMerchantByName(name);
+				  /*Some page transition*/
+			  });
+
+			  ul.append(button);
+			  button = $('<button />', { 'text' : 'Edit',
+				  'id'   : 'homeEdit' + list[i].Name,
+				  'name' : list[i].Name });
+			  button.bind('click', function(e){
+				  var name = $(this).attr('name');
+				  r.merchantToEdit = r.getMerchantByName(name);
+				  $.mobile.changePage( "#editMerchant", { transition: "slideup", changeHash: true });
+			  });
+			  ul.append(button);
+
+			  ul.append($('<li />', { 'data-role' : "list-divider",
+				  'text' : 'Information'}));
+
+			  /*Add all the properties from list[i] to the list*/
+			  for (var j=0; j < MERCHANT.merchantDisplay.length; j++){
+				  var val;
+				  if(!(val = list[i][MERCHANT.merchantDisplay[j].propName]))
+					  val = "";
+				  var li = $('<li />', {text : MERCHANT.merchantDisplay[j].displayText + ': ' + val});
+				  ul.append(li);
+			  }
+			  set.append(collapseli);
+		  }
+		  var button = $('<button />', { 'text' : 'Add New',
+			  'id'   : 'merchantListAddNew',
+			  'name' : 'addNew'});
+		  /*Add event handlers to button?*/
+		  button.bind('click', function(){
+			  $.mobile.changePage('#editMerchant', {transition: "slideup", changeHash: true});
+		  });
+		  
+		  set.append(button);
+		  location.append(set);
+		  location.trigger('create');
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.writeMerchantList');
+	  }
+  };
+  
+  r.getMerchantByName = function(name){
+	  for(var i = 0; i < r.merchantList.length; i++){
+		  if(name === r.merchantList[i].Name)
+			  return r.merchantList[i];
+	  }
+  };
 
   try {
     r.router = new $.mobile.Router([
@@ -269,6 +438,9 @@ var EXELON = (function (r, $) {
       { '#home':                 { handler: 'homeBeforeCreate',  events: 'bc'  } },
       { '#home':                 { handler: 'homeInit',    events: 'i'  } },
       { '#home':                 { handler: 'homeShow',    events: 's'   } },
+      { '#home':                 { handler: 'homeHide',    events: 'h'   } },
+      { '#editMerchant':         { handler: 'editMerchantShow',     events: 's'} },
+      { '#editMerchant':         { handler: 'editMerchantHide',     events: 'h'} },
       { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
       { '#configure':            { handler: 'configureInit',    events: 'i'  } },
       { '#configure':            { handler: 'configureShow',    events: 's'   } }

@@ -9,7 +9,7 @@ var MERCHANT = (function($){
 		  { propName: "ZipCode",               displayText: "Zip Code",                           inputType: "text",     required:true},
 		  { propName: "Name",                  displayText: "Company Name",                       inputType: "text",     required:true},
 		  { propName: "Password",              displayText: "Password",                           inputType: "text",     required:true},
-		  { propName: "PaymentAccepted",       displayText: "Credit Card Payments Accepted?",     inputType: "checkbox", required:true},
+		  { propName: "PaymentAccepted",       displayText: "Credit Cards Accepted",              inputType: "text",     required:true},
 		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text",     required:true},
 		  { propName:"InvoiceExpiration",      displayText: "Invoice Experation Time",            inputType: "text",     required:false},
 		  { propName: "InvoiceExpirationUnit", displayText: "Invoice Experation Unit",            inputType: "text",     required:false},

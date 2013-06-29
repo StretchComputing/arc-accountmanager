@@ -68,31 +68,16 @@
         </li>
       </ul>
     </script>
-
-	<div data-role="page" id="customerSelect">
-		<div data-role="header" data-position="fixed" data-tap-toggle="false">
-			<h1>Please select a customer</h1>
-			<a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
-		</div>
-		
-		<div data-role="content">
-			<ul data-role="listview" id="recentCustomerList">
-				
-			</ul>
-		</div>
-	</div>
-	
-	<div data-role="page" id="newCustomer">
-		<div data-role="header" data-position="fixed" data-tap-toggle="false">
-			<h1>Create new customer</h1>
-		</div>
-		
-		<div data-role="content">
-			<div id="newCustForm">
-				<!-- Filled in by newCustomerBeforeCreate -->
-			</div>
-		</div>
-	</div>
+    
+    <div data-role="page" id="editMerchant">
+    	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+    	<h1>Edit Merchant</h1>
+    	</div>
+    	
+    	<div data-role="content" id="editMerchantContent">
+    	
+    	</div>
+    </div>
 
     <div data-role="page" id="home">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
@@ -101,7 +86,9 @@
       </div>
 
       <div data-role="content" id="homeContent">
+      
       </div>
+      
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
         <div data-role="header" data-theme="a" class="ui-corner-top">
           <h1>Confirm</h1>
