@@ -231,6 +231,8 @@ var EXELON = (function (r, $) {
     }
   };
 
+this.template = _.template($('#logEntryTemplate').html());
+
 
   try {
     r.router = new $.mobile.Router([

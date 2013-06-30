@@ -74,8 +74,9 @@
       </div>
 
       <div data-role="content">
-        <h1>This is the home page -- empty so far ...</h1>
+        <ul id="merchantList"></ul>
       </div>
+
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
         <div data-role="header" data-theme="a" class="ui-corner-top">
           <h1>Confirm</h1>
@@ -86,7 +87,12 @@
         </div>
       </div>
     </div><!-- /page -->
-    <script type="text/template" id="xyzTemplate">
+    <script type="text/template" id="merchantEntryTemplate">
+			<li data-role="fieldcontain">
+				<h1><%= Name %></h1>
+				<div><%= Street %></div>
+				<div><%= City %></div>
+			</li>
     </script>
 
     <div data-role="page" id="configure">
