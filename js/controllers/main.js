@@ -101,61 +101,24 @@ var EXELON = (function (r, $) {
     		var content = $('#editMerchantContent');
     		var merchant;
     		
-    		if(!r.merchantToEdit)
+    		if(!r.merchantToEdit){
     			r.merchantToEdit = { newMerchant : true};
+    			r.fixMerchants([r.merchantToEdit]);
+    		}
+    		
     		
     		merchant = r.merchantToEdit;
     		
-    		var list = $('<ul />', { 'data-role' : "listview",
-    								 'id' : 'editMerchantForm'});
-    		for(var i = 0; i < MERCHANT.merchantDisplay.length; i++){
-    			var input = MERCHANT.merchantDisplay[i];
-    			var li = $('<li />');
-    			var label = $('<label />', { 'for' : "editMerchant"+input.propName,
-    										 'text' : input.displayText });
-    			
-    			var inputTag;
-    			if(input.inputType === "select"){
-    				inputTag = $('<select />',  { 'id' : "editMerchant" + input.propName });
-    				for(var j = 0; j < input.options.length; j++){
-    					var optOptions = {};
-    					if(input.options[j] === merchant[input.propName]){
-    						optOptions.selected = 'selected';
-    					}
-    					optOptions.text = input.options[j];
-    					inputTag.append($('<option />', optOptions));
-    				}
-    			}
-    			
-    			else{
-    				var inputOpts = {};
-    				inputOpts.name = input.propName;
-    				inputOpts.id = 'editMerchant' + input.propName;
-    				inputOpts.type = input.inputType;
-        			if(input.required)
-        				inputOpts.required = 'required';
-        			if(input.inputType === 'checkbox'){
-        				if(merchant[input.propName])
-        					 inputOpts.checked = 'checked';
-        			}
-        			else{
-        				if(merchant[input.propName]){
-        					inputOpts.value = merchant[input.propName];
-        				}
-        					
-        			}
-        			inputTag = $('<input />', inputOpts);
-    			}
-    			li.append(label);
-    			li.append(inputTag);
-    			list.append(li);
-    		}
-    		var li = $('<li />');
+    		var editMerchantTemplate = _.template($('#editMerchantForm').html());
     		
+    		content.append(editMerchantTemplate(merchant));
+    		var list = $('#editMerchantList'); //Get the newly created form list
+    		
+    		var li = $('<li />');
     		var submit = $('<button />', {id : 'editMerchantSubmit',
     									  text : 'Submit'});
     		submit.bind('click', function(e){
-    			var form = $('#editMerchantForm :input');
+    			var form = $('#editMerchantList :input');
     			var merchant = r.merchantToEdit;
     			for(var i = 0; i < form.length; i++){
     				if(form[i].type === 'checkbox'){
@@ -173,17 +136,16 @@ var EXELON = (function (r, $) {
     			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
     		});
     		li.append(submit);
+    		list.append(li);
     		
+    		li = $('<li />');
     		var cancel = $('<button />', {id : 'editMerchantCancel',
     									  text : 'Cancel'});
     		cancel.bind('click', function(){
     			$.mobile.changePage("#home", {transition: "slideup", changeHash : true});
     		});
     		li.append(cancel);
-    		
     		list.append(li);
-    		
-    		content.append(list);
     		
     		content.trigger('create');
     		
@@ -341,9 +303,9 @@ var EXELON = (function (r, $) {
 				headers: {'Authorization' : r.getAuthorizationHeader()},
         success: function(data, status, jqXHR) {
                     try {
-                    	var homeContent = $('#homeContent');
                     	r.merchantList = data.Results;
-                    	r.writeMerchantList(homeContent, r.merchantList);
+                    	r.fixMerchants(r.merchantList);
+                    	r.writeMerchantList($('#homeContent'), r.merchantList);
                     	var jtest = 5;
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
@@ -355,65 +317,43 @@ var EXELON = (function (r, $) {
     }
   };
   
-  r.writeMerchantList = function(location, list){
+  r.writeMerchantList = function(location, merchantList){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
-		  var set = $('<ul />', { 'data-role' : "listview"});
-		  for(var i = 0; i <list.length; i++){
-			  var collapseli = $('<li />');
-
-			  var col = $('<div />', { 'data-role' : "collapsible"});
-			  collapseli.append(col);
-
-			  col.prepend($('<h3 />', {text : list[i].Name}));
-
-			  var ul = $('<ul />', { 'data-role' : "listview"});
-			  col.append(ul);
-
-			  var button = $('<button />', { 'text' : 'Choose',
-				  'id'   : 'homeChoose' + list[i].Name,
-				  'name' : list[i].Name });
-			  /*Register event handler for this button*/
-			  button.bind('click', function(e){
+		  var list = $('<ul />', {'data-role' : 'listview'});
+		  
+		  var merchantTemplate = _.template($('#collapsibleMercahntList').html());
+		  
+		  for(var i = 0; i < merchantList.length; i++){
+			  list.append(merchantTemplate(merchantList[i]));
+			  
+			  var choose = $('#merchantChoose'+merchantList[i].Name);
+			  choose.bind('click', function(e){
 				  var name = $(this).attr('name');
 				  r.activeMerchant = r.getMerchantByName(name);
 				  /*Some page transition*/
 			  });
-
-			  ul.append(button);
-			  button = $('<button />', { 'text' : 'Edit',
-				  'id'   : 'homeEdit' + list[i].Name,
-				  'name' : list[i].Name });
-			  button.bind('click', function(e){
+			  
+			  var edit = $('#merchantEdit' + merchantList[i].Name);
+			  edit.bind('click', function(e){
 				  var name = $(this).attr('name');
 				  r.merchantToEdit = r.getMerchantByName(name);
 				  $.mobile.changePage( "#editMerchant", { transition: "slideup", changeHash: true });
 			  });
-			  ul.append(button);
-
-			  ul.append($('<li />', { 'data-role' : "list-divider",
-				  'text' : 'Information'}));
-
-			  /*Add all the properties from list[i] to the list*/
-			  for (var j=0; j < MERCHANT.merchantDisplay.length; j++){
-				  var val;
-				  if(!(val = list[i][MERCHANT.merchantDisplay[j].propName]))
-					  val = "";
-				  var li = $('<li />', {text : MERCHANT.merchantDisplay[j].displayText + ': ' + val});
-				  ul.append(li);
-			  }
-			  set.append(collapseli);
 		  }
-		  var button = $('<button />', { 'text' : 'Add New',
+		  var addNew = $('<button />', { 'text' : 'Add New',
 			  'id'   : 'merchantListAddNew',
 			  'name' : 'addNew'});
-		  /*Add event handlers to button?*/
-		  button.bind('click', function(){
+		  
+		  addNew.bind('click', function(){
 			  $.mobile.changePage('#editMerchant', {transition: "slideup", changeHash: true});
 		  });
 		  
-		  set.append(button);
-		  location.append(set);
+		  var li = $('<li />');
+		  li.append(addNew);
+		  list.append(li);
+		  location.append(list);
+		  
 		  location.trigger('create');
 	  }
 	  catch(e){
@@ -427,6 +367,19 @@ var EXELON = (function (r, $) {
 			  return r.merchantList[i];
 	  }
   };
+  
+  r.fixMerchants = function(merchantList){
+	  var propList = MERCHANT.merchantDisplay;
+	  for(var merchIndex = 0; merchIndex < merchantList.length; merchIndex++){
+		  var merchant = merchantList[merchIndex];
+		  for(var propIndex = 0; propIndex < propList.length; propIndex++){
+			  var prop = propList[propIndex].propName
+			  if(merchant[prop] == undefined){
+				  merchant[prop] = '';
+			  }
+		  }
+	  }
+  }
 
   try {
     r.router = new $.mobile.Router([

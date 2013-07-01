@@ -11,7 +11,7 @@ var MERCHANT = (function($){
 		  { propName: "Password",              displayText: "Password",                           inputType: "text",     required:true},
 		  { propName: "PaymentAccepted",       displayText: "Credit Cards Accepted",              inputType: "text",     required:true},
 		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text",     required:true},
-		  { propName:"InvoiceExpiration",      displayText: "Invoice Experation Time",            inputType: "text",     required:false},
+		  { propName: "InvoiceExpiration",      displayText: "Invoice Experation Time",            inputType: "text",     required:false},
 		  { propName: "InvoiceExpirationUnit", displayText: "Invoice Experation Unit",            inputType: "text",     required:false},
 		  { propName: "StartWorkHour",         displayText: "Restaurant Work Start",              inputType: "text",     required:true},
 		  { propName: "EndWorkHour",           displayText: "Restaurant Work End",                inputType: "text",     required:true},
