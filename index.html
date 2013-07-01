@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="robots" content="noindex, follow">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="apple-mobile-web-app-capable" content="yes">
+
+      <title>Account Manager App</title>
+
+      <link rel="apple-touch-icon-precomposed" href="images/touch-icon-iphone.png" />
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/touch-icon-iphone.png" />
+      <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/touch-icon-iphone.png" />
+
+      <link rel="stylesheet" href="css/themes/font-awesome/css/font-awesome.min.css">
+      <link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.3.1.css">
+      <link rel="stylesheet"  href="css/themes/lightblue/apruvr_lblue.css">
+      <link href='http://fonts.googleapis.com/css?family=Ubuntu|Open+Sans:400,700' rel='stylesheet' type='text/css'>
+      <link rel="stylesheet" href="css/styles.css">
+
+      <script src="js/lib/jquery.js"></script>
+      <script src="js/lib/jquery.mobile.router.min.js"></script>
+      <script src="js/lib/jquery.mobile-1.3.1.min.js"></script>
+      <script src="js/lib/cookie.js"></script>
+
+      <script src="js/lib/underscore-min.js"></script>
+      <script src="js/lib/backbone-min.js"></script>
+      <script src="js/helpers/util.js"></script>
+      <script src="js/helpers/rskybox.js"></script>
+      <script src="js/helpers/store.js"></script>
+      <script src="js/helpers/session.js"></script>
+      <script src="js/controllers/main.js"></script>
+      <script src="js/models/base.js"></script>
+      <script src="js/models/login.js"></script>
+      <script src="js/models/user.js"></script>
+      <script src="js/views/base.js"></script>
+      <script src="js/views/login.js"></script>
+
+      <script>
+          $( document ).on( "pageshow", function(){
+              $( "p.message" ).hide().delay( 1500 ).show( "fast" );
+          });
+      </script>
+  </head>
+  <body>
+    <div data-role="page" id="login">
+      <div data-role="header">
+        <h1>Account Manager</h1>
+      </div>
+      <div data-role="content">
+        <form id="loginForm"></form>
+      </div>
+    </div>
+    <script type="text/template" id="loginTemplate">
+      <ul data-role="listview">
+        <li data-role="fieldcontain">
+          <label for="login" class="ui-hidden-accessible">Username:</label>
+          <input type="text" name="login" placeholder="Arc Username" value="<%= aduser %>" autocorrect="off" autocapitalize="off" data-mini="true">
+        </li>
+        <li data-role="fieldcontain">
+          <label for="password" class="ui-hidden-accessible">Password:</label>
+          <input id="password" name="password" type="password" placeholder="Password" value="<%= password %>" autocorrect="off" autocapitalize="off" data-mini="true">
+        </li>
+        <li data-role="fieldcontain">
+          <input type="submit" value="Login" data-mini="true">
+        </li>
+      </ul>
+    </script>
+
+    <div data-role="page" id="home">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Account Manager</h1>
+        <a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+      </div>
+
+      <div data-role="content">
+        <ul id="merchantList"></ul>
+      </div>
+
+      <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+        <div data-role="header" data-theme="a" class="ui-corner-top">
+          <h1>Confirm</h1>
+        </div>
+        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+          <a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+          <a href="#" class="confirmbtn" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">Approve</a>
+        </div>
+      </div>
+    </div><!-- /page -->
+    <script type="text/template" id="merchantEntryTemplate">
+      <li data-role="fieldcontain">
+        <h1><%= Name %></h1>
+        <div><%= Street %></div>
+        <div><%= City %></div>
+      </li>
+    </script>
+
+    <div data-role="page" id="configure">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Account Manager</h1>
+        <a href="#configure_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+      </div>
+
+      <div data-role="content">
+        <div>This is the Configure page</div>
+      </div>
+    </div><!-- /page -->
+
+    <div data-role="page" id="configureTest">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Account Manager</h1>
+        <a href="#configureTest_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+      </div>
+
+      <div data-role="content">
+        <div>This is the Configure Test page</div>
+      </div>
+    </div><!-- /page -->
+
+    <div data-role="page" id="reports">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Account Manager</h1>
+        <a href="#reports_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+      </div>
+
+      <div data-role="content">
+        <div>This is the Reports page</div>
+      </div>
+    </div><!-- /page -->
+
+    <script type="text/template" id="leftPanelTemplate">
+      <div data-role="panel" id="page_leftPanel" data-theme="c" data-position-fixed="true">
+         <ul data-role="listview" data-theme="b" data-divider-theme="b" style="margin-top:-16px;" class="nav-search">
+            <li data-icon="delete" style="background-color:#111;">
+              <a href="#" data-rel="close" class="userName">[USER NAME]</a>
+            </li>
+          </ul>
+          <ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:15px;">
+            <li data-icon="home">
+              <a class="home">Home</a>
+            </li>
+            <li>
+              <a class="configure">Configure</a>
+            </li>
+            <li>
+              <a class="configureTest">Configure Test</a>
+            </li>
+          </ul>
+          <ul data-role="listview" data-theme="b" data-divider-theme="b" style="margin-top:15px;">
+            <div data-role="collapsible" data-theme="b" data-content-theme="b" data-collapsed-icon="gear" data-expanded-icon="gear" data-iconpos="right" data-inset="true" style="margin-bottom:0px;">
+              <h2>Reports</h2>
+              <ul data-role="listview">
+                <li><a href="#">Cohort Report</a></li>
+                <li><a href="#">Sales Report</a></li>
+              </ul>
+            </div><!-- /collapsible -->
+            <li data-icon="alert">
+              <a href="#" class="logOut">Log Out</a>
+            </li>
+          </ul>
+      </div><!-- /panel -->
+    </script>
+
+
+</body>
+</html>
