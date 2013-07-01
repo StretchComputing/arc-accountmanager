@@ -205,6 +205,7 @@ var EXELON = (function (r, $) {
 	var prdUrl = 'https://arc.dagher.mobi/rest/v1/';
   r.getMerchants = function() {
     try {
+      RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = devUrl + 'merchants/list';
       var jsonobj = {};
 
@@ -218,9 +219,7 @@ var EXELON = (function (r, $) {
 				headers: {'Authorization' : r.getAuthorizationHeader()},
         success: function(data, status, jqXHR) {
                     try {
-											// Display returned data on the screen
-											// to create object from JSON, call -- JSON.parse(data)
-											var jtest = 5;
+											r.displayMerchants(data.Results);
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
                     }
@@ -231,6 +230,28 @@ var EXELON = (function (r, $) {
     }
   };
 
+	// merchants param:  an array of merchant javascript objects to be displayed
+  r.displayMerchants = function(merchants) {
+    try {
+      RSKYBOX.log.info('entering', 'main.js.displayMerchants');
+
+			// Creates the template object from the index.html <script> definition
+			var merchantEntryTemplate = _.template($('#merchantEntryTemplate').html());
+
+			var listHtmlContent = "";
+			for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+				// Call the template passing the merchant object.  This is where the fields in the merchant object are
+				// substituted into the  <%= xyzField  %> constructs in the template. The template returns HTML ready
+				// to be placed into the Document Object Model (DOM)
+				listHtmlContent += merchantEntryTemplate(merchants[merIndex]);
+			}
+
+			// ok, now put the concatenated HTML from the for loop above into the DOM
+			$('#merchantList').html(listHtmlContent);
+    } catch (e) {
+      RSKYBOX.log.error(e, 'displayMerchants');
+    }
+  };
 
   try {
     r.router = new $.mobile.Router([
