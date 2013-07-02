@@ -82,7 +82,7 @@
     <script type="text/template" id="editMerchantForm">
 		<ul data-role="listview" id="editMerchantList">
 			<li><label for="editMerchantAcceptTerms">Accepted Terms?</label>
-			<input type="checkbox" name="AcceptTerms" id="editMerchantAcceptTerms"></li>
+			<input type="checkbox" name="AcceptTerms" id="editMerchantAcceptTerms" <%if(AcceptTerms) { %>checked<% } %> ></li>
 
 			<li><label for="editMerchantEIN"> EIN </label>
 			<input type="text" name="EIN" id="editMerchantEIN" value="<%= EIN %>" ></li>
@@ -124,10 +124,10 @@
 			<input type="text" name="EndWorkHour" id="editMerchantEndWorkHour" value="<%= EndWorkHour %>" ></li>
 
 			<li><label for="editMerchantPOS"> POS Type </label>
-			<selector id="editMerchantPOS" name="POS">
-				<option>POS_MICROS</option>
-				<option>POS_ISIS<option>
-			</selector></li>
+			<select id="editMerchantPOS" name="POS">
+				<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> >POS_MICROS</option>
+				<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> >POS_ISIS</option>
+			</select></li>
 
 			<li><label for="editMerchanteMail"> eMail </label>
 			<input type="text" name="eMail" id="editMerchanteMail" value="<%= eMail %>" ></li>
@@ -184,9 +184,9 @@
 		<li>
 			<div data-role="collapsible">
 				<h3><%= Name %></h3>
-				<ul data-role="listview">
-					<li> <button name="<%= Name %>" id="merchantChoose<%= Name %>"> Choose </button></li>
-					<li> <button name="<%= Name %>" id="merchantEdit<%= Name %>" > Edit </button></li>
+				<ul data-role="listview" id="merchantList<%=Number%>">
+					<li><button name="<%=Name%>" id="merchantChoose<%=Number%>">Choose</button> </li>
+					<li><button name="<%=Name%>" id="merchantEdit<%=Number%>">Edit</button> </li>
 					<li data-role="list-divider">Info</li>
 					<li> Terms Accepted? : <%= AcceptTerms %> </li>
 					<li> EIN : <%= EIN %> </li>

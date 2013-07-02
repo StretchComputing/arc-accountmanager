@@ -49,6 +49,7 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.loginShow');
         r.loginView.render();
         r.flash.check();
+      
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.loginShow');
       }
@@ -130,9 +131,11 @@ var EXELON = (function (r, $) {
     			}
     			if(merchant.newMerchant){
     				r.merchantList.push(merchant);
+    				r.createMerchant(merchant);
     				delete merchant.newMerchant;
     			}
-    			//TODO:Send edit to server
+    			else
+    				r.updateMerchant(merchant);
     			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
     		});
     		li.append(submit);
@@ -317,6 +320,77 @@ var EXELON = (function (r, $) {
     }
   };
   
+  /*Makes a call to Merchant Create*/
+  r.createMerchant = function(merchant){
+	try {
+		RSKYBOX.log.info('entering', 'main.js.createMerchant');
+		RSKYBOX.log.info('Currently stubbed off:', 'main.js.createMerchant');
+		/*
+		var closeurl = devUrl + 'merchants/new';
+		var jsonobj = cleanMerchant(merchant);
+		
+		$.ajax({
+			type: 'post',
+			data: JSON.stringify(jsonobj),
+			datatype: 'json',
+			contenttype: 'application/json',
+			url: closeurl,
+			statuscode : r.statusCodeHandlers(),
+			success: function(){
+				RSKYBOX.log.info('finished', 'main.js.createMerchant');
+			}
+		});*/
+	}  
+	catch(e){
+		RSKYBOX.log.error(e,'main.js.createMerchant');
+	};
+  };
+  
+  r.updateMerchant = function(merchant){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.updateMerchant');
+		  RSKYBOX.log.info('Currently stubbed off:', 'main.js.updateMerchant');
+		  
+		  /*
+		  if(merchant.EIN)
+			  var closeurl = devUrl + merchants/update/ + merchant.EIN;
+		  else
+			  return; fail
+		  
+		  var jsonobj = cleanMerchant(merchant);
+		  
+		  $.ajax({
+			  type : 'put',
+			  data : JSON.stringify(jsonobj),
+			  contenttype : 'application/json',
+			  url : closeurl,
+			  statuscode : r.statusCodeHandlers(),
+			  success : function(){
+				  RSKYBOX.log.info('finished', 'main.js.updateMerchant');
+			  }
+		  });
+		  */
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e, 'main.js.updateMerchant');
+	  }
+  };
+  
+  /*Remove all forms equal to "" */
+  r.cleanMerchant = function(merchant){
+	  var newMerchant = {};
+	  for(var i = 0; i < MERCHANT.merchantDisplay.length; i++){
+		  var prop = MERCHANT.merchantDisplay[i].propName;
+		  if(merchant[prop] === "" || merchant[prop] === undefined){
+			  continue;
+		  }
+		  else{
+			  newMerchant[prop] = merchant[prop];
+		  }
+	  }
+	  return newMerchant;
+  };
+  
   r.writeMerchantList = function(location, merchantList){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
@@ -325,16 +399,18 @@ var EXELON = (function (r, $) {
 		  var merchantTemplate = _.template($('#collapsibleMercahntList').html());
 		  
 		  for(var i = 0; i < merchantList.length; i++){
+			  merchantList[i].Number = i.toString();
 			  list.append(merchantTemplate(merchantList[i]));
+			  delete merchantList[i].Number;
 			  
-			  var choose = $('#merchantChoose'+merchantList[i].Name);
+			  var choose = $('#merchantChoose'+i,list);
 			  choose.bind('click', function(e){
 				  var name = $(this).attr('name');
 				  r.activeMerchant = r.getMerchantByName(name);
 				  /*Some page transition*/
 			  });
 			  
-			  var edit = $('#merchantEdit' + merchantList[i].Name);
+			  var edit = $('#merchantEdit' + i, list);
 			  edit.bind('click', function(e){
 				  var name = $(this).attr('name');
 				  r.merchantToEdit = r.getMerchantByName(name);
@@ -379,7 +455,9 @@ var EXELON = (function (r, $) {
 			  }
 		  }
 	  }
-  }
+  };
+  
+
 
   try {
     r.router = new $.mobile.Router([
