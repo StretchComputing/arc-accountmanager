@@ -73,8 +73,11 @@
         <a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
       </div>
 
-      <div data-role="content">
-        <ul id="merchantList"></ul>
+      <div data-role="content" class="ui-grid-a">
+        <div class="ui-block-a">
+          <ul data-role="listview" id="merchantList"></ul>
+        </div>
+        <div class="ui-block-b" id="merchantInfo"><h1>This is where the merchant information will go.</h1></div>
       </div>
 
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
@@ -89,10 +92,32 @@
     </div><!-- /page -->
     <script type="text/template" id="merchantEntryTemplate">
       <li data-role="fieldcontain">
-        <h1><%= Name %></h1>
-        <div><%= Street %></div>
-        <div><%= City %></div>
+          <div data-role="collapsible" data-theme="b" data-content-theme="b">
+            <h1><%= Name %></h1>
+            <div class="ui-grid-a">
+              <div class="ui-block-a">
+                <div><%= Street %></div>
+                <div><%= City %></div>
+              </div>
+              <div class="ui-block-b">
+                <a data-role="button" id="merchant_showInfo">show all info</a>
+              </div>
+            </div>
+          </div>
       </li>
+    </script>
+    <script type="text/template" id="merchantInfoTemplate">
+      <div class="ui-grid-a">
+        <div class="ui-block-a">
+          <img src="images/RestaurantLogoOrPicture.png"></img>
+        </div>
+        <div class="ui-block-b">
+          <h1><%= Name %></h1>
+          <div><%= Street %></div>
+          <div><%= City %></div>
+        </div>
+      </div>
+      <div style="text-align: center"><%= AllContent %></div>
     </script>
 
     <div data-role="page" id="configure">
