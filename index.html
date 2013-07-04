@@ -36,6 +36,8 @@
       <script src="js/views/base.js"></script>
       <script src="js/views/login.js"></script>
 
+	  <script src="js/lib/merchantobject.js"></script>
+
       <script>
           $( document ).on( "pageshow", function(){
               $( "p.message" ).hide().delay( 1500 ).show( "fast" );
@@ -66,6 +68,95 @@
         </li>
       </ul>
     </script>
+    
+    <div data-role="page" id="editMerchant">
+    	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+    	<h1>Edit Merchant</h1>
+    	</div>
+    	
+    	<div data-role="content" id="editMerchantContent">
+
+    	</div>
+    </div>
+    
+    <script type="text/template" id="editMerchantForm">
+		<ul data-role="listview" id="editMerchantList">
+			<li><label for="editMerchantAcceptTerms">Accepted Terms?</label>
+			<input type="checkbox" name="AcceptTerms" id="editMerchantAcceptTerms" <%if(AcceptTerms) { %>checked<% } %> ></li>
+
+			<li><label for="editMerchantEIN"> EIN </label>
+			<input type="text" name="EIN" id="editMerchantEIN" value="<%= EIN %>" ></li>
+
+			<li><label for="editMerchantStreet"> Street </label>
+			<input type="text" name="Street" id="editMerchantStreet" value="<%= Street %>" ></li>
+
+			<li><label for="editMerchantCity"> City </label>
+			<input type="text" name="City" id="editMerchantCity" value="<%= City %>" ></li>
+
+			<li><label for="editMerchantState"> State </label>
+			<input type="text" name="State" id="editMerchantState" value="<%= State %>" ></li>
+
+			<li><label for="editMerchantZipCode"> ZipCode </label>
+			<input type="text" name="ZipCode" id="editMerchantZipCode" value="<%= ZipCode %>" ></li>
+
+			<li><label for="editMerchantName"> Name </label>
+			<input type="text" name="Name" id="editMerchantName" value="<%= Name %>" ></li>
+
+			<li><label for="editMerchantPassword"> Password </label>
+			<input type="text" name="Password" id="editMerchantPassword" value="<%= Password %>" ></li>
+
+			<li><label for="editMerchantPaymentAccepted"> PaymentAccepted </label>
+			<input type="text" name="PaymentAccepted" id="editMerchantPaymentAccepted" value="<%= PaymentAccepted %>" ></li>
+
+			<li><label for="editMerchantTypeId"> TypeId </label>
+			<input type="text" name="TypeId" id="editMerchantTypeId" value="<%= TypeId %>" ></li>
+
+			<li><label for="editMerchantInvoiceExpiration"> InvoiceExpiration </label>
+			<input type="text" name="InvoiceExpiration" id="editMerchantInvoiceExpiration" value="<%= InvoiceExpiration %>" ></li>
+
+			<li><label for="editMerchantInvoiceExpirationUnit"> InvoiceExpirationUnit </label>
+			<input type="text" name="InvoiceExpirationUnit" id="editMerchantInvoiceExpirationUnit" value="<%= InvoiceExpirationUnit %>" ></li>
+
+			<li><label for="editMerchantStartWorkHour"> StartWorkHour </label>
+			<input type="text" name="StartWorkHour" id="editMerchantStartWorkHour" value="<%= StartWorkHour %>" ></li>
+
+			<li><label for="editMerchantEndWorkHour"> EndWorkHour </label>
+			<input type="text" name="EndWorkHour" id="editMerchantEndWorkHour" value="<%= EndWorkHour %>" ></li>
+
+			<li><label for="editMerchantPOS"> POS Type </label>
+			<select id="editMerchantPOS" name="POS">
+				<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> >POS_MICROS</option>
+				<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> >POS_ISIS</option>
+			</select></li>
+
+			<li><label for="editMerchanteMail"> eMail </label>
+			<input type="text" name="eMail" id="editMerchanteMail" value="<%= eMail %>" ></li>
+
+			<li><label for="editMerchantTwitterHandler"> TwitterHandler </label>
+			<input type="text" name="TwitterHandler" id="editMerchantTwitterHandler" value="<%= TwitterHandler %>" ></li>
+
+			<li><label for="editMerchantFacebookHandler"> FacebookHandler </label>
+			<input type="text" name="FacebookHandler" id="editMerchantFacebookHandler" value="<%= FacebookHandler %>" ></li>
+
+			<li><label for="editMerchantDeviceId"> DeviceId </label>
+			<input type="text" name="DeviceId" id="editMerchantDeviceId" value="<%= DeviceId %>" ></li>
+
+			<li><label for="editMerchantPushType"> PushType </label>
+			<input type="text" name="PushType" id="editMerchantPushType" value="<%= PushType %>" ></li>
+
+			<li><label for="editMerchantMinReviewThreshold"> MinReviewThreshold </label>
+			<input type="text" name="MinReviewThreshold" id="editMerchantMinReviewThreshold" value="<%= MinReviewThreshold %>" ></li>
+
+			<li><label for="editMerchantMaxReviewThreshold"> MaxReviewThreshold </label>
+			<input type="text" name="MaxReviewThreshold" id="editMerchantMaxReviewThreshold" value="<%= MaxReviewThreshold %>" ></li>
+
+			<li><label for="editMerchantCurrentCreditRate"> CurrentCreditRate </label>
+			<input type="text" name="CurrentCreditRate" id="editMerchantCurrentCreditRate" value="<%= CurrentCreditRate %>" ></li>
+
+			<li><label for="editMerchantCurrentCreditFee"> CurrentCreditFee </label>
+			<input type="text" name="CurrentCreditFee" id="editMerchantCurrentCreditFee" value="<%= CurrentCreditFee %>" ></li>
+
+	</script>
 
     <div data-role="page" id="home">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
@@ -73,10 +164,9 @@
         <a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
       </div>
 
-      <div data-role="content">
-        <ul id="merchantList"></ul>
+      <div data-role="content" id="homeContent">
       </div>
-
+      
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
         <div data-role="header" data-theme="a" class="ui-corner-top">
           <h1>Confirm</h1>
@@ -94,6 +184,42 @@
 				<div><%= City %></div>
 			</li>
     </script>
+
+<script type="script/template" id="collapsibleMercahntList">
+		<li>
+			<div data-role="collapsible">
+				<h3><%= Name %></h3>
+				<ul data-role="listview" id="merchantList<%=Number%>">
+					<li><button name="<%=Name%>" id="merchantChoose<%=Number%>">Choose</button> </li>
+					<li><button name="<%=Name%>" id="merchantEdit<%=Number%>">Edit</button> </li>
+					<li data-role="list-divider">Info</li>
+					<li> Terms Accepted? : <%= AcceptTerms %> </li>
+					<li> EIN : <%= EIN %> </li>
+					<li> Street : <%= Street %> </li>
+					<li> City : <%= City %> </li>
+					<li> State : <%= State %> </li>
+					<li> ZipCode : <%= ZipCode %> </li>
+					<li> Name : <%= Name %> </li>
+					<li> Password : <%= Password %> </li>
+					<li> Payments Accepts : <%= PaymentAccepted %> </li>
+					<li> Type ID : <%= TypeId %> </li>
+					<li> Invoice Expiration : <%= InvoiceExpiration %> </li>
+					<li> Invoice Expiration : <%= InvoiceExpirationUnit %> </li>
+					<li> Opening Hour : <%= StartWorkHour %> </li>
+					<li> Closing Hour <%= EndWorkHour %> </li>
+					<li> POS Type : <%= POS %> </li>
+					<li> Twitter Handle : <%= TwitterHandler %> </li>
+					<li> Facebook Handle : <%= FacebookHandler %> </li>
+					<li> Device ID : <%= DeviceId %> </li>
+					<li> Push Type : <%= PushType %> </li>
+					<li> Min Review Threshold : <%= MinReviewThreshold %> </li>
+					<li> Max Review Threshold : <%= MaxReviewThreshold %> </li>
+					<li> Current Credit Rate : <%= CurrentCreditRate %> </li>
+					<li> Curent Credit Fee : <%= CurrentCreditFee %> </li>
+				</ul>
+			</div>
+		</li>
+	</script>
 
     <div data-role="page" id="configure">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
