@@ -80,7 +80,7 @@ var EXELON = (function (r, $) {
         if(!r.merchantList)
         	r.getMerchants();
         else
-        	r.writeMerchantList($('#homeContent'), r.merchantList);
+        	r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeShow');
       }
@@ -89,7 +89,8 @@ var EXELON = (function (r, $) {
     homeHide: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.homeHide');
-    		$('#homeContent').empty();
+    		var toClear = $('#merchantListCollapsible');
+    		toClear.empty(); /*Remove all old html in the list*/
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.homeHide');
@@ -99,26 +100,24 @@ var EXELON = (function (r, $) {
     editMerchantShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.editMerchantShow');
+    		
+    		var merchant = r.merchantToEdit;
+    		
+    		/*Modify the Header*/
+    		var head = $('#editMerchantHead').text('Editing ' + merchant.Name);
+    		
+    		/*Modify the body*/
     		var content = $('#editMerchantContent');
-    		var merchant;
     		
-    		if(!r.merchantToEdit){
-    			r.merchantToEdit = { newMerchant : true};
-    			r.fixMerchants([r.merchantToEdit]);
-    		}
-    		
-    		
-    		merchant = r.merchantToEdit;
-    		
+    		merchant.pageIdPrefix = "editMerchant";//Used in the template call
     		var editMerchantTemplate = _.template($('#editMerchantForm').html());
     		
     		content.append(editMerchantTemplate(merchant));
-    		var list = $('#editMerchantList'); //Get the newly created form list
+    		delete merchant.pageIdPrefix; //Clean up
     		
-    		var li = $('<li />');
-    		var submit = $('<button />', {id : 'editMerchantSubmit',
-    									  text : 'Submit'});
-    		submit.bind('click', function(e){
+    		var save = $('#editMerchantSave');
+
+    		save.bind('click', function(e){
     			var form = $('#editMerchantList :input');
     			var merchant = r.merchantToEdit;
     			for(var i = 0; i < form.length; i++){
@@ -129,26 +128,10 @@ var EXELON = (function (r, $) {
     					merchant[form[i].name] = form[i].value;
     				}
     			}
-    			if(merchant.newMerchant){
-    				r.merchantList.push(merchant);
-    				r.createMerchant(merchant);
-    				delete merchant.newMerchant;
-    			}
-    			else
-    				r.updateMerchant(merchant);
+    			
+    			r.updateMerchant(merchant);
     			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
     		});
-    		li.append(submit);
-    		list.append(li);
-    		
-    		li = $('<li />');
-    		var cancel = $('<button />', {id : 'editMerchantCancel',
-    									  text : 'Cancel'});
-    		cancel.bind('click', function(){
-    			$.mobile.changePage("#home", {transition: "slideup", changeHash : true});
-    		});
-    		li.append(cancel);
-    		list.append(li);
     		
     		content.trigger('create');
     		
@@ -161,11 +144,64 @@ var EXELON = (function (r, $) {
     editMerchantHide: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.editMerchantHide');
-    		r.merchantToEdit = undefined;
     		$('#editMerchantContent').empty();
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.editMerchantHide');
+    	}
+    },
+    
+    createNewMerchantShow : function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.createNewMerchantShow');
+
+    		var merchant = {};
+    		r.fixMerchants([merchant]);//create the necessary properties
+
+    		/*Modify the body*/
+    		var content = $('#createNewMerchantContent');
+
+    		merchant.pageIdPrefix = "createNewMerchant";//Used for template
+    		var editMerchantTemplate = _.template($('#editMerchantForm').html());
+    		
+    		
+    		content.append(editMerchantTemplate(merchant));
+    		delete merchant.pageIdPrefix;//Cleanup
+    		
+    		var save = $('#createNewMerchantSave');
+
+    		save.bind('click', function(e){
+    			var form = $('#createNewMerchantList :input');
+    			for(var i = 0; i < form.length; i++){
+    				if(form[i].type === 'checkbox'){
+    					merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
+    				}
+    				else{
+    					merchant[form[i].name] = form[i].value;
+    				}
+    			}
+
+    			r.createMerchant(merchant);
+    			r.merchantList.push(merchant);
+    			
+    			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+    		});
+
+    		content.trigger('create');
+
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.createNewMerchantShow');
+    	}
+    },
+    
+    createNewMerchantHide: function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.createNewMerchantHide');
+    		$('#createNewMerchantContent').empty();
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.createNewMerchantHide');
     	}
     },
 
@@ -309,7 +345,7 @@ var EXELON = (function (r, $) {
                     try {
                     	r.merchantList = data.Results;
                     	r.fixMerchants(r.merchantList);
-                    	r.writeMerchantList($('#homeContent'), r.merchantList);
+                    	r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
                     	var jtest = 5;
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
@@ -395,43 +431,30 @@ var EXELON = (function (r, $) {
   r.writeMerchantList = function(location, merchantList){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
-		  var list = $('<ul />', {'data-role' : 'listview'});
 		  
 		  var merchantTemplate = _.template($('#collapsibleMercahntList').html());
 		  
 		  for(var i = 0; i < merchantList.length; i++){
 			  merchantList[i].Number = i.toString();
-			  list.append(merchantTemplate(merchantList[i]));
+			  location.append(merchantTemplate(merchantList[i]));
 			  delete merchantList[i].Number;
 			  
-			  var choose = $('#merchantChoose'+i,list);
+			  var choose = $('#merchantChoose'+i,location);
 			  choose.bind('click', function(e){
-				  var name = $(this).attr('name');
+				  var name = $(this).attr('merchantName');
 				  r.activeMerchant = r.getMerchantByName(name);
 				  /*Some page transition*/
 			  });
 			  
-			  var edit = $('#merchantEdit' + i, list);
+			  var edit = $('#merchantEdit' + i, location);
 			  edit.bind('click', function(e){
-				  var name = $(this).attr('name');
+				  var name = $(this).attr('merchantName');
 				  r.merchantToEdit = r.getMerchantByName(name);
 				  $.mobile.changePage( "#editMerchant", { transition: "slideup", changeHash: true });
 			  });
 		  }
-		  var addNew = $('<button />', { 'text' : 'Add New',
-			  'id'   : 'merchantListAddNew',
-			  'name' : 'addNew'});
 		  
-		  addNew.bind('click', function(){
-			  $.mobile.changePage('#editMerchant', {transition: "slideup", changeHash: true});
-		  });
-		  
-		  var li = $('<li />');
-		  li.append(addNew);
-		  list.append(li);
-		  location.append(list);
-		  
-		  location.trigger('create');
+		  $('#homeContent').trigger('create');
 	  }
 	  catch(e){
 		  RSKYBOX.log.error(e,'main.js.writeMerchantList');
@@ -451,10 +474,11 @@ var EXELON = (function (r, $) {
 		  var merchant = merchantList[merchIndex];
 		  for(var propIndex = 0; propIndex < propList.length; propIndex++){
 			  var prop = propList[propIndex].propName
-			  if(merchant[prop] == undefined){
-				  merchant[prop] = '';
+			  if(merchant[prop] === undefined){
+				  merchant[prop] = "";
 			  }
 		  }
+		  merchantList[merchIndex].DecisonMakers = []; //Must be a list
 	  }
   };
   
@@ -495,6 +519,8 @@ var EXELON = (function (r, $) {
       { '#home':                 { handler: 'homeHide',    events: 'h'   } },
       { '#editMerchant':         { handler: 'editMerchantShow',     events: 's'} },
       { '#editMerchant':         { handler: 'editMerchantHide',     events: 'h'} },
+      { '#createNewMerchant':    { handler: 'createNewMerchantShow', events: 's' } },
+      { '#createNewMerchant':    { handler: 'createNewMerchantHide', events: 'h' } },
       { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
       { '#configure':            { handler: 'configureInit',    events: 'i'  } },
       { '#configure':            { handler: 'configureShow',    events: 's'   } }
