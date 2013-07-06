@@ -158,8 +158,58 @@
 			<li><label for="<%=pageIdPrefix%>CurrentCreditFee"> Current Credit Fee </label>
 			<input type="text" name="CurrentCreditFee" id="<%=pageIdPrefix%>CurrentCreditFee" value="<%= CurrentCreditFee %>" ></li>
 
-		</div><!-- ui-block-a -->
+		</div><!-- ui-block-b -->
 		</div><!-- ui-grid-a -->
+
+		<li data-role="list-divider">Points of Contact</li>
+		<div id="<%=pageIdPrefix%>PocList">
+
+			<% _.each(DecisionMakers, function(Poc) { %>
+				<% template = _.template($('#decisionMakerForm').html()); %>
+				<% Poc.index = index; %>
+				<% Poc.pageIdPrefix = pageIdPrefix %>
+				<%=template(Poc)%>
+				<% delete Poc.index %>
+				<% delete Poc.pageIdPrefix %>
+				
+			<%  }); %>
+
+		</div>
+		<li><button id="pocAddNew" data-icon="plus">Add New Point of Contact</button></li>
+		</ul>
+
+	</script>
+
+	<script type="text/template" id="decisionMakerForm">
+		<div formType="Poc" id="pocForm<%=index%>">
+		<div class="ui-grid-a">
+
+		<div class="ui-block-a">
+
+			<li><label for="<%=pageIdPrefix%>PocFirstName<%=index%>" >First Name</label>
+				<input type="text" PocProp="FirstName" index="<%=index%>" id="pageIdPrefix%>PocFirstName<%=index%>" value="<%=FirstName%>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>PocPhone<%=index %>" >Phone Number</label>
+				<input type="text" PocProp="Phone" index="<%=index%>" id="<%=pageIdPrefix%>PocPhone<%=index %>" value="<%=Phone%>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>PoceMail<%=index %>" >eMail Address</label>
+				<input type="text" PocProp="eMail" index="<%=index%>" id="<%=pageIdPrefix%>PoceMail<%=index %>" value="<%=eMail%>" ></li>
+
+		</div>
+
+		<div class="ui-block-b">
+			<li><label for="<%=pageIdPrefix%>PocLastName<%=index %>" >Last Name</label>
+			<input type="text" PocProp="LastName" index="<%=index%>" id="<%=pageIdPrefix%>PocLastName<%=index %>" value="<%=LastName%>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>PocPosition<%=index %>" >Position</label>
+			<input type="text" PocProp="Position" index="<%=index%>" id="<%=pageIdPrefix%>PocPosition<%=index %>" value="<%=Position%>" ></li>
+
+			<li><button id="<%=pageIdPrefix%>Delete<%=index%>" data-icon="delete">Delete</button></li>
+		</div>
+		</div>
+		<li data-role="list-divider">--------------------------------------------------------</li>
+		</div>
+		
 	</script>
 
     <div data-role="page" id="home">
@@ -219,7 +269,7 @@
 					<li>Current Credit Card Rate: <%=CurrentCreditRate %></li>
 				</ul></div>
 				</div><!-- End Grid -->
-				<% _.each(DecisonMakers, function(person) { %>
+				<% _.each(DecisionMakers, function(person) { %>
 					<h3>Point of Contact: <%= person.FirstName %> <%= person.LastName %> </h3>
 					<div class="ui-grid-a">
 					<div class="ui-block-a">

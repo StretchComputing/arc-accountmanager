@@ -110,30 +110,64 @@ var EXELON = (function (r, $) {
     		var content = $('#editMerchantContent');
     		
     		merchant.pageIdPrefix = "editMerchant";//Used in the template call
+    		merchant.index = 0; //Also used in the template call
     		var editMerchantTemplate = _.template($('#editMerchantForm').html());
     		
     		content.append(editMerchantTemplate(merchant));
-    		delete merchant.pageIdPrefix; //Clean up
+    	
+    		var addNewPoc = $('#pocAddNew');
+    		
+    		/*Register all the delete button handlers*/
+    		for(var i = 0; i < merchant.index; i++){
+    			r.registerDelete('editMerchant',i);
+    		};
+    		
+    		addNewPoc.bind('click', function(e){
+    			var pocTemplate = _.template($('#decisionMakerForm').html());
+    			$('#editMerchantPocList').append(pocTemplate({FirstName : "", LastName : "", 
+			  	  	   										  Phone : "", Position : "", eMail : "", index : merchant.index,
+			  	  	   										  pageIdPrefix : merchant.pageIdPrefix}));
+    			$('#editMerchantPocList').trigger('create');
+    			
+    			r.registerDelete('editMerchant',merchant.index);
+    			
+    		});
     		
     		var save = $('#editMerchantSave');
 
     		save.bind('click', function(e){
     			var form = $('#editMerchantList :input');
     			var merchant = r.merchantToEdit;
-    			for(var i = 0; i < form.length; i++){
+    			
+    			for(var i = 0; i < form.length; i++){//Update the regular properties
+    				
     				if(form[i].type === 'checkbox'){
     					merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
     				}
     				else{
     					merchant[form[i].name] = form[i].value;
     				}
+    				
     			}
+    			var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
+    			var pocList = [];
+    			for(var i = 0; i < pocForm.length; i++){
+    				var inputs = $(':input',pocForm[i]);
+    				var poc = {};
+    				for(var j = 0; j < inputs.length; j++){
+    					poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
+    				}
+    				pocList.push(poc);
+    			}
+    			merchant.DecisionMakers = pocList;
     			
-    			r.updateMerchant(merchant);
+    			r.updateMerchant(merchant);//Send to server
     			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
     		});
     		
-    		content.trigger('create');
+
+    		
+    		content.trigger('create');//Add jquery mobile styling to elements
     		
     	}
     	catch(e){
@@ -145,11 +179,14 @@ var EXELON = (function (r, $) {
     	try{
     		RSKYBOX.log.info('entering', 'main.js.editMerchantHide');
     		$('#editMerchantContent').empty();
+    		delete r.merchantToEdit.index;
+    		delete r.merchantToEdit.pageIdPrefix;
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.editMerchantHide');
     	}
     },
+
     
     createNewMerchantShow : function(){
     	try{
@@ -165,8 +202,29 @@ var EXELON = (function (r, $) {
     		var editMerchantTemplate = _.template($('#editMerchantForm').html());
     		
     		
-    		content.append(editMerchantTemplate(merchant));
-    		delete merchant.pageIdPrefix;//Cleanup
+    		 merchant.pageIdPrefix = "createNewMerchant";//Used in the template call
+    		 merchant.index = 0; //Also used in the template call
+    		 var editMerchantTemplate = _.template($('#editMerchantForm').html());
+
+    		 content.append(editMerchantTemplate(merchant));
+
+    		 var addNewPoc = $('#pocAddNew');
+
+    		 /*Register all the delete button handlers*/
+    		 for(var i = 0; i < merchant.index; i++){
+    			 r.registerDelete('createNewMerchant',i);
+    		 };
+
+    		 addNewPoc.bind('click', function(e){
+    			 var pocTemplate = _.template($('#decisionMakerForm').html());
+    			 $('#createNewMerchantPocList').append(pocTemplate({FirstName : "", LastName : "", 
+    				 Phone : "", Position : "", eMail : "", index : merchant.index,
+    				 pageIdPrefix : merchant.pageIdPrefix}));
+    			 $('#createNewMerchantPocList').trigger('create');
+
+    			 r.registerDelete('createNewMerchant',merchant.index);
+
+    		 });
     		
     		var save = $('#createNewMerchantSave');
 
@@ -180,6 +238,18 @@ var EXELON = (function (r, $) {
     					merchant[form[i].name] = form[i].value;
     				}
     			}
+    			
+    			var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
+    			var pocList = [];
+    			for(var i = 0; i < pocForm.length; i++){
+    				var inputs = $(':input',pocForm[i]);
+    				var poc = {};
+    				for(var j = 0; j < inputs.length; j++){
+    					poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
+    				}
+    				pocList.push(poc);
+    			}
+    			merchant.DecisionMakers = pocList;
 
     			r.createMerchant(merchant);
     			r.merchantList.push(merchant);
@@ -478,7 +548,7 @@ var EXELON = (function (r, $) {
 				  merchant[prop] = "";
 			  }
 		  }
-		  merchantList[merchIndex].DecisonMakers = []; //Must be a list
+		  merchantList[merchIndex].DecisionMakers = []; //Must be a list
 	  }
   };
   
@@ -504,6 +574,15 @@ var EXELON = (function (r, $) {
     } catch (e) {
       RSKYBOX.log.error(e, 'displayMerchants');
     }
+  };
+  
+  /*Register handlers for the delete buttons for POC objects given prefix and index*/
+  r.registerDelete = function(idPrefix, i){
+		var del = $('#'+idPrefix + 'Delete' +i);
+		del.bind('click', function(e){
+			$('#pocForm'+i).remove();
+		});
+		$('#'+idPrefix + 'PocList').trigger('create');
   };
 
   try {
