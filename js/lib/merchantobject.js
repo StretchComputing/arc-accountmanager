@@ -22,7 +22,8 @@ var MERCHANT = (function($){
 		  { propName: "DecisionMakers",         displayText: "Decision Maker",                     inputType: "special",  required:false},
 		  { propName: "TypeOfService",         displayText: "Type of Service",                    inputType: "option",   required:false, options: ["Sit Down", "Take Out"]},
 		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text",     required:false},
-		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text",     required:false}
+		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text",     required:false},
+		  { propName: "Comments",			   displayText: "Comments",							  inputType: "text",	 required:false}
                             ],
                             
 			decisionMaker : [

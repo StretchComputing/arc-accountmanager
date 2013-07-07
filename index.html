@@ -299,20 +299,106 @@
 		</li>
 	</script>
 
-<div data-role="page" id="createNewMerchant">
+	<div data-role="page" id="createNewMerchant">
 	
-	<div data-role="header" data-position="fixed" data-tap-toggle="false">
-		<a href="#home" data-icon="arrow-l">Back</a>
-		<h1>Create New Merchant</h1>
-		<button data-icon="check" id="createNewMerchantSave">Save</button>
+		<div data-role="header" data-position="fixed" data-tap-toggle="false">
+			<a href="#home" data-icon="arrow-l">Back</a>
+			<h1>Create New Merchant</h1>
+			<button data-icon="check" id="createNewMerchantSave">Save</button>
+		</div>
+
+		<div data-role="content" id="createNewMerchantContent">
+	
+    	</div>	
+
+	</div>
+	
+	<div data-role="page" id="merchantDisplay">
+	
+		<div data-role="header" data-position="fixed" data-tap-toggle="false">
+			<a href="#merchantDisplay_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+			<h1>Merchant Name Goes Here</h1>
+		</div>
+		
+		<div data-role="content" id="merchantDisplayContent">
+		
+		</div>
+		
+		<div id="merchantDisplayCommentPopup" data-role="popup">
+			<label for="merchantDisplayCommentTextArea">Enter Your Comment Here:</label>
+			<textarea cols="40" rows="10" id="merchantDisplayCommentTextArea"></textarea>
+			<div class="ui-grid-b">
+				<div class="ui-block-a">
+					<button id="merchantDisplayCommentSave" data-icon="check">Save</button>
+				</div>
+				<div class="ui-block-b">
+					<button id="merchantDisplayCommentCancel" data-icon="delete">Cancel</button>
+				</div>
+			</div>
+		</div>
+	
+	</div>
+	
+	<script type="script/template" id="merchantDisplayContentTemplate">
+
+	<div class="ui-grid-b">
+
+	<div class="ui-block-a">
+		<a href="#home" data-role="button">Change Merchant</a>
 	</div>
 
-	<div data-role="content" id="createNewMerchantContent">
-	
-    </div>	
-	
+	<div class="ui-block-b">
+		<button id="merchantDisplayEdit">Edit</button>
+	</div>
 
-</div>
+	<div class="ui-block-c">
+		<a data-role="button" data-icon="plus" href="#merchantDisplayCommentPopup" data-rel="popup">Add Comment</a>
+	</div>
+
+	</div>
+
+	<ul data-role="listview">
+		<li>
+			<!--<img src="default"></img>-->
+			<h3>Name: <%= Name%></h3>
+			<h3>Address: <%= Street %> <%= City %>, <%= State %> <%= ZipCode%></h3>
+		</li>
+		<li data-role="list-divider">Contact</li>
+		<li>
+			<h3>Email Address: <%= eMail %></h3>
+			<h3>Twitter Handle: <%= TwitterHandler%></h3>
+			<h3>Facebook Page: <%= FacebookHandler%></h3>
+			<h3>Website: <%= Website %></h3>
+		</li>
+		<li data-role="list-divider">Financial</li>
+		<li>
+			<h3>Price Level: <%= PriceLevel%></h3>
+			<h3>Number of Tables: <%= NumTables %></h3>
+			<h3>Number of Seats: <%= NumSeats%></h3>
+			<h3>Point of Sale Device: <%= POS %></h3>
+		</li>
+		<li data-role="list-divider">Points of Contact</li>
+			<% _.each(DecisionMakers, function(poc) { %>
+				<li>
+					<h1><%=poc.FirstName%> <%=poc.LastName%></h1>
+					<h3>Phone Number: <%=poc.Phone%></h3>
+					<h3>Position: <%=poc.Position%></h3>
+					<h3>Email Address: <%= poc.eMail%></h3>
+				</li>
+				<li data-role="list-divider"></li>
+	<% }); %>
+
+	<li data-role="list-divider">Comments</li>
+	<div id="merchantDisplayCommentsDisplay">
+		<% for(var i = Comments.length-1; i >= 0; i--){ var com = Comments[i]; %>
+			<li>
+				<h3><%=com.UserName%> at <%=com.Date%> wrote:</h3>
+				<p><%=com.Comment%></p>
+			</li>
+		<% } %>
+	</div>
+
+	</script>
 
     <div data-role="page" id="configure">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
