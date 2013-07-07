@@ -300,11 +300,16 @@ var EXELON = (function (r, $) {
     		
     		$('#merchantDisplayCommentSave').bind('click', function(e){
     			var textArea = $('#merchantDisplayCommentTextArea');
-    			r.activeMerchant.Comments.push({ UserName : r.getUserName(),
-    											 'Date' : (new Date()).toJSON(),
-    											 Comment : textArea.prop('value') });
+    			var newComment = { UserName : r.getUserName(),
+						 'Date' : (new Date()).toJSON(),
+						 Comment : textArea.prop('value') };
+    			r.activeMerchant.Comments.push(newComment);
     			textArea.prop('value', "");
     			$('#merchantDisplayCommentPopup').popup('close');
+    			
+    			var commentTemplate = _.template($('#commentDisplayTemplate').html())
+    			$('#merchantDisplayCommentsDisplay').prepend(commentTemplate(newComment));
+    			$('#merchantDisplayCommentsDisplay').trigger('create');
     		});
     		
     		$('#merchantDisplayCommentCancel').bind('click', function(e){

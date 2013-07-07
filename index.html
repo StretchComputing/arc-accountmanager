@@ -390,14 +390,19 @@
 
 	<li data-role="list-divider">Comments</li>
 	<div id="merchantDisplayCommentsDisplay">
-		<% for(var i = Comments.length-1; i >= 0; i--){ var com = Comments[i]; %>
-			<li>
-				<h3><%=com.UserName%> at <%=com.Date%> wrote:</h3>
-				<p><%=com.Comment%></p>
-			</li>
+		<% for(var i = Comments.length-1; i >= 0; i--){  %>
+			<% var t = _.template($('#commentDisplayTemplate').html()); %>
+			<%= t(Comments[i]) %>
 		<% } %>
 	</div>
 
+	</script>
+	
+	<script type="text/template" id="commentDisplayTemplate">
+		<li>
+			<h3><%=UserName%> at <%=Date%> wrote:</h3>
+			<p><%=Comment%></p>
+		</li>
 	</script>
 
     <div data-role="page" id="configure">
