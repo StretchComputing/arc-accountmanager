@@ -220,6 +220,7 @@ var EXELON = (function (r, $) {
         success: function(data, status, jqXHR) {
                     try {
                       r.displayMerchants(data.Results);
+                      r.setConfigurePage(data.Results);
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
                     }
@@ -253,9 +254,7 @@ var EXELON = (function (r, $) {
 
       // ok, now put the concatenated HTML from the for loop above into the DOM
       $('#merchantList').html(listHtmlContent);
-      
       r.setShowAllInfo(merchants);
-
       $('#home').trigger('create');
     
     } catch (e) {
@@ -292,6 +291,35 @@ var EXELON = (function (r, $) {
       RSKYBOX.log.error(e, 'setShowAllInfo');
     }
   };
+
+  r.setConfigurePage = function(merchants) {
+    try{
+      RSKYBOX.log.info('entering','main.js.setConfigurePage');
+
+      var merchantConfigureTemplate = _.template($('#merchantConfigureTemplate').html());
+      var merListConfigHtml = "";
+      var nextMer;
+
+
+      for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+        nextMer = merchantConfigureTemplate(merchants[merIndex]);
+        nextMer = nextMer.replace("merchant_configSelect", merIndex + "configSelect");
+        merListConfigHtml += nextMer;
+      }
+      $('#merchantConfigureList').html(merListConfigHtml);
+
+      for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+        $('#' + merIndex + 'configSelect').attr("merNum",merIndex);
+        $('#' + merIndex + 'configSelect').click(function(){
+          $("#startConfigure").attr("merchant", $(this).attr("merNum"));
+        });
+      }
+      $('#configure').trigger('create');
+
+    } catch (e) {
+      RSKYBOX.log.error(e,'setConfigurePage')
+    }
+  }
 
   try {
     r.router = new $.mobile.Router([
