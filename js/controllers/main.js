@@ -671,7 +671,7 @@ var EXELON = (function (r, $) {
           var merIndex = $(this).attr("merNum");
           $("#startConfigure").attr("merchant", merIndex);
           $("#startConfigure").empty();
-          $("#startConfigure").append(merchants[merIndex].Name + ": Start Configuration");
+          $("#startConfigure").text(merchants[merIndex].Name + ": Start Configuration");
           $('#configure').trigger('create');
         });
       }

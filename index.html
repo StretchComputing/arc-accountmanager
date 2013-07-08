@@ -416,16 +416,47 @@
         <div class="ui-grid-a">
           <ul data-role="listview" id="merchantConfigureList" class="ui-block-a"></ul>
           <div class="ui-block-b">
-            <a href="#configureProcess" merchant="" data-role="button" id="startConfigure">Start Configuration</a>
+            <a href="#microsTask_Number" merchant="" data-role="button" id="startConfigure">Start Configuration</a>
           </div>
         </div>
       </div>
     </div><!-- /page -->
     <script type="text/template" id="merchantConfigureTemplate">
       <li data-role="fieldcontain">
-        <a data-role="button" id="merchant_configSelect" merNum=""><%= Name %></a>
+        <a data-role="button" id="merchant_configSelect" merNum="" ><%= Name %></a>
       </li>
     </script>
+
+    <div data-role="page" id="microsTask_Number">
+      <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Micros Configuration</h1>
+        <a href="#configure_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+        <a href="#microsCOnfigureCheckList" data-icon="check">List</a>
+      </div>
+
+      <div data-role="content">
+        <h1>Technical Settings</h1>
+        <div data-role="fieldcontain">
+          <input type="checkbox" id="microsCheckbox_Number" />
+          <label for="microsCheckbox_Number">Create API POS Web Services</label>
+        </div>
+        <div data-role="collapsible">
+          <h2>Instructions</h2>
+          <p>In order to use the API Web Services the POS Configuration needs to have an interface to access it.
+            <br/><br/>Go to: POS Config >> Devices >> Devices
+            <br/><br/>Verify that there is a device already setup as a POS API Web Service. If not, use the [+]
+            sign in the menu to create the device.
+            <br/><br/>If a device is not present, please set the values as follows:
+            <br/>&#09Device Type: PosAPI Web Service
+            <br/>&#09Network Node: [Local Micros Server]
+          </p>
+        </div>
+        <div data-role="fieldcontain">
+          <img src="images/CreateAPIPOSWebService.png" width="500" style="text-align: center"/>
+        </div>
+        <div>
+        </div>
+      </div>
 
     <div data-role="page" id="configureTest">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
