@@ -7,7 +7,7 @@ var MERCHANT = (function($){
 		  { propName: "Street",                displayText: "Street Address",                     inputType: "text",     required:true},
 		  { propName: "City",                  displayText: "City",                               inputType: "text",     required:true},
 		  { propName: "State",                 displayText: "State",                              inputType: "text",     required:true},
-		  { propName: "ZipCode",               displayText: "Zip Code",                           inputType: "text",     required:true},
+		  { propName: "Zipcode",               displayText: "Zip Code",                           inputType: "text",     required:true},
 		  { propName: "Name",                  displayText: "Company Name",                       inputType: "text",     required:true},
 		  { propName: "PaymentAccepted",       displayText: "Credit Card Types Accepted",         inputType: "text",     required:true},
 		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text",     required:true},
@@ -19,7 +19,7 @@ var MERCHANT = (function($){
 		  { propName: "PriceLevel",            displayText: "Price Level",                        inputType: "option",   required:false, options: ["LOW", "MEDIUM", "HIGH"]},
 		  { propName: "NumTables",             displayText: "Number of Tables",                   inputType: "text",     required:false},
 		  { propName: "NumSeats",              displayText: "Number of Seats",                    inputType: "text",     required:false},
-		  { propName: "DecisionMakers",         displayText: "Decision Maker",                     inputType: "special",  required:false},
+		  { propName: "DecisionMakers",        displayText: "Decision Maker",                     inputType: "special",  required:false},
 		  { propName: "TypeOfService",         displayText: "Type of Service",                    inputType: "option",   required:false, options: ["Sit Down", "Take Out"]},
 		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text",     required:false},
 		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text",     required:false},
@@ -32,6 +32,58 @@ var MERCHANT = (function($){
 		  { propName: "Phone",                 displayText: "Phone Number",                       inputType: "text",     required:true },
 		  { propName: "Position",              displayText: "Position",                           inputType: "text",     required:true },
 		  { propName: "eMail",                 displayText: "Email Address",                      inputType: "text",     required:true }
-	                        ]
+	                        ],
+	                        
+	       activityFeed : { 
+	    	  "MerchantCreate" : function(activity) {
+	    		  dispString = ""; 
+	    		  dispString += activity.Date.toLocaleDateString() + " ";
+	    		  dispString += activity.Date.toLocaleTimeString() + ": ";
+	    		  dispString += activity.UserName + " created this merchant in ";
+	    		  dispString += (activity.CreateTime / 1000) + " seconds ";
+	    		  dispString += "while filling in ";
+	    		  for(var i = 0; i < activity.FormsFilled.length; i++){
+	    			  if(i > 3){
+	    				  dispString += " and " + (activity.FormsFilled.length - i) + " others.";
+	    				  break;
+	    			  }
+	    			  dispString += ", " + activity.FormsFilled[i];
+	    		  }
+
+	    		  return dispString;
+	    	  },
+	    
+	    	 "MerchantEdit" : function(activity) {
+	    		 dispString = "";
+	    		 dispString += activity.Date.toLocaleDateString() + " ";
+	    		 dispString += activity.Date.toLocaleTimeString() + ": ";
+	    		 dispString += activity.UserName + " edited this merhcant in ";
+	    		 dispString += (activity.EditTime / 1000) + " seconds ";
+	    		 dispString += "while editing ";
+	    		 for(var i = 0; i <activity.FormsFilled.length; i++){
+	    			 if(i > 3){
+	    				 dispString += " and " + (activity.FormsFilled.length - i) + " others.";
+	    				 break;
+	    			 }
+	    			 if(i != 0)
+	    				 dispString += ", ";
+	    			 dispString += activity.FormsFilled[i];
+	    		 }
+	    		 return dispString;
+	    	},
+	    	
+	    	"Comment" : function(activity){
+	    		dispString = "";
+	    		dispString += activity.Date.toLocaleDateString() + " " ;
+	    		dispString += activity.Date.toLocaleTimeString() + ": ";
+	    		dispString += activity.UserName + "left a comment. ";
+	    		dispString += '"' + activity.Comment.substring(0,100);
+	    		if(activity.Comment.length > 100)
+	    			dispString += "...";
+	    		dispString += '"';
+	    		return dispString;
+	    	}
+	    }
 	};
+			                  
 }(jQuery));

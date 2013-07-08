@@ -91,24 +91,24 @@
 			<li><label for="<%=pageIdPrefix%>Name"> Name </label>
 			<input type="text" name="Name" id="<%=pageIdPrefix%>Name" value="<%= Name %>" ></li>
 
+			<li><label for="<%=pageIdPrefix%>POS"> POS Type </label>
+				<select id="<%=pageIdPrefix%>POS" name="POS">
+					<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> >POS_MICROS</option>
+					<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> >POS_ISIS</option>
+					<option <%if(POS == 'POS_ALOHA'){ %>selected<% } %> >POS_ALOHA</option>
+				</select></li>
+
 			<li><label for="<%=pageIdPrefix%>Street"> Street </label>
 			<input type="text" name="Street" id="<%=pageIdPrefix%>Street" value="<%= Street %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>City"> City </label>
 			<input type="text" name="City" id="<%=pageIdPrefix%>City" value="<%= City %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>ZipCode"> Zip Code </label>
-			<input type="text" name="ZipCode" id="<%=pageIdPrefix%>ZipCode" value="<%= ZipCode %>" ></li>
+			<li><label for="<%=pageIdPrefix%>Zipcode"> Zip Code </label>
+			<input type="text" name="Zipcode" id="<%=pageIdPrefix%>Zipcode" value="<%= Zipcode %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>TypeOfService"> Type Of Service </label>
 			<input type="text" name="TypeOfService" id="<%=pageIdPrefix%>TypeOfService" value="<%= TypeOfService %>" ></li>
-
-			<li><label for="<%=pageIdPrefix%>POS"> POS Type </label>
-			<select id="<%=pageIdPrefix%>POS" name="POS">
-				<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> >POS_MICROS</option>
-				<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> >POS_ISIS</option>
-				<option <%if(POS == 'POS_ALOHA'){ %>selected<% } %> >POS_ALOHA</option>
-			</select></li>
 
 			<li><label for="<%=pageIdPrefix%>NumTables"> Number of Tables </label>
 			<input type="text" name="NumTables" id="<%=pageIdPrefix%>NumTables" value="<%= NumTables %>" ></li>
@@ -125,17 +125,17 @@
 
 		<div class="ui-block-b">
 
+			<li><label for="<%=pageIdPrefix%>EIN"> EIN </label>
+			<input type="text" name="EIN" id="<%=pageIdPrefix%>EIN" value="<%= EIN %>" ></li>			
+
 			<li><label for="<%=pageIdPrefix%>Status"> Status </label>
-			<select id="<%=pageIdPrefix%>Status">
+			<select name="Status" id="<%=pageIdPrefix%>Status">
 				<option <%if(Status === 'Potential'){ %>selected<% } %> >Potential</option>
 				<option <%if(Status === 'In Talks'){ %>selected<% } %> >In Talks</option>
 				<option <%if(Status === 'Configuration'){ %>selected<% } %> >Configuration</option>
 				<option <%if(Status === 'Ready'){ %>selected<% } %> >Ready</option>
 				<option <%if(Status === 'Active'){ %>selected<% } %> >Active</option>
 			</select></li>
-
-			<li><label for="<%=pageIdPrefix%>EIN"> EIN </label>
-			<input type="text" name="EIN" id="<%=pageIdPrefix%>EIN" value="<%= EIN %>" ></li>			
 
 			<li><label for="<%=pageIdPrefix%>State"> State </label>
 			<input type="text" name="State" id="<%=pageIdPrefix%>State" value="<%= State %>" ></li>
@@ -171,6 +171,7 @@
 				<%=template(Poc)%>
 				<% delete Poc.index %>
 				<% delete Poc.pageIdPrefix %>
+				<li data-role="list-divider"></li>
 				
 			<%  }); %>
 
@@ -204,11 +205,12 @@
 			<li><label for="<%=pageIdPrefix%>PocPosition<%=index %>" >Position</label>
 			<input type="text" PocProp="Position" index="<%=index%>" id="<%=pageIdPrefix%>PocPosition<%=index %>" value="<%=Position%>" ></li>
 
+			<br>
 			<li><button id="<%=pageIdPrefix%>Delete<%=index%>" data-icon="delete">Delete</button></li>
 		</div>
 		</div>
-		<li data-role="list-divider">--------------------------------------------------------</li>
 		</div>
+
 		
 	</script>
 
@@ -260,7 +262,7 @@
 				<ul>
 					<li>Employer ID Number: <%= EIN %></li>
 					<li>City: <%= City %></li>
-					<li>ZipCode: <%= ZipCode %></li>
+					<li>Zipcode: <%= Zipcode %></li>
 					<li>Payment Accepted: <%= PaymentAccepted %></li>
 					<li>eMail Address: <%= eMail %></li>
 					<li>Facebook Handle: <%= FacebookHandler %></li>
@@ -352,7 +354,7 @@
 	</div>
 
 	<div class="ui-block-c">
-		<a data-role="button" data-icon="plus" href="#merchantDisplayCommentPopup" data-rel="popup">Add Comment</a>
+		
 	</div>
 
 	</div>
@@ -361,9 +363,18 @@
 		<li>
 			<!--<img src="default"></img>-->
 			<h3>Name: <%= Name%></h3>
-			<h3>Address: <%= Street %> <%= City %>, <%= State %> <%= ZipCode%></h3>
+			<h3>Address: <%= Street %> <%= City %>, <%= State %> <%= Zipcode%></h3>
+			<h3>Status: <%= Status %></h3>
 		</li>
+
+		<li data-role="list-divider">Activity Feed</li>
+
+		<li><% for(var i = Activities.length-1; i >= 0 ; i--){ %>
+			<% var act = Activities[i]; %>
+			<li><%= (MERCHANT.activityFeed[act.Type])(act) %></li>
+			<% } %>
 		<li data-role="list-divider">Contact</li>
+
 		<li>
 			<h3>Email Address: <%= eMail %></h3>
 			<h3>Twitter Handle: <%= TwitterHandler%></h3>
@@ -386,21 +397,25 @@
 					<h3>Email Address: <%= poc.eMail%></h3>
 				</li>
 				<li data-role="list-divider"></li>
-	<% }); %>
+			<% }); %>
+		<li data-role="list-divider">Comments</li>
+		<a data-role="button" data-icon="plus" href="#merchantDisplayCommentPopup" data-rel="popup">Add Comment</a>
+	</ul>
+	<br>
+	<br>
+	<ul id="merchantDisplayCommentsDisplay" data-role="listview">
 
-	<li data-role="list-divider">Comments</li>
-	<div id="merchantDisplayCommentsDisplay">
 		<% for(var i = Comments.length-1; i >= 0; i--){  %>
 			<% var t = _.template($('#commentDisplayTemplate').html()); %>
 			<%= t(Comments[i]) %>
 		<% } %>
-	</div>
+	</ul>
 
 	</script>
 	
 	<script type="text/template" id="commentDisplayTemplate">
 		<li>
-			<h3><%=UserName%> at <%=Date%> wrote:</h3>
+			<h3><%=UserName%> at <%=Date.toLocaleTimeString()%> <%=Date.toLocaleDateString()%> wrote:</h3>
 			<p><%=Comment%></p>
 		</li>
 	</script>
