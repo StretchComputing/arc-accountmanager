@@ -356,6 +356,7 @@ var EXELON = (function (r, $) {
     configureShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.configureShow');
+        r.setConfigurePage(r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.configureShow');
       }
@@ -648,6 +649,38 @@ var EXELON = (function (r, $) {
     });
     $('#'+idPrefix + 'PocList').trigger('create');
   };
+
+  r.setConfigurePage = function(merchants) {
+    try{
+      RSKYBOX.log.info('entering','main.js.setConfigurePage');
+
+      var merchantConfigureTemplate = _.template($('#merchantConfigureTemplate').html());
+      var merListConfigHtml = "";
+      var nextMer;
+
+      for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+        nextMer = merchantConfigureTemplate(merchants[merIndex]);
+        nextMer = nextMer.replace("merchant_configSelect", merIndex + "configSelect");
+        merListConfigHtml += nextMer;
+      }
+      $('#merchantConfigureList').html(merListConfigHtml);
+
+      for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+        $('#' + merIndex + 'configSelect').attr("merNum",merIndex);
+        $('#' + merIndex + 'configSelect').click(function() {
+          var merIndex = $(this).attr("merNum");
+          $("#startConfigure").attr("merchant", merIndex);
+          $("#startConfigure").empty();
+          $("#startConfigure").append(merchants[merIndex].Name + ": Start Configuration");
+          $('#configure').trigger('create');
+        });
+      }
+      $('#configure').trigger('create');
+
+    } catch (e) {
+      RSKYBOX.log.error(e,'setConfigurePage')
+    }
+  }
 
   try {
     r.router = new $.mobile.Router([

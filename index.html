@@ -412,9 +412,20 @@
       </div>
 
       <div data-role="content">
-        <div>This is the Configure page</div>
+        <h1 style="text-align: center">Select a Merchant and Start Configuration</h1>
+        <div class="ui-grid-a">
+          <ul data-role="listview" id="merchantConfigureList" class="ui-block-a"></ul>
+          <div class="ui-block-b">
+            <a href="#configureProcess" merchant="" data-role="button" id="startConfigure">Start Configuration</a>
+          </div>
+        </div>
       </div>
     </div><!-- /page -->
+    <script type="text/template" id="merchantConfigureTemplate">
+      <li data-role="fieldcontain">
+        <a data-role="button" id="merchant_configSelect" merNum=""><%= Name %></a>
+      </li>
+    </script>
 
     <div data-role="page" id="configureTest">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
