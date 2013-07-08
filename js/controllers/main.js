@@ -180,7 +180,7 @@ var EXELON = (function (r, $) {
     									   });
     			
     			r.updateMerchant(merchant);//Send to server
-    			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+    			$.mobile.back();
     		});
     		
     		content.trigger('create');//Add jquery mobile styling to elements
@@ -293,7 +293,7 @@ var EXELON = (function (r, $) {
     									   CreateTime : createTime
     									   });
     			
-    			$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+    			$.mobile.changePage.back();
 
     		});
 
