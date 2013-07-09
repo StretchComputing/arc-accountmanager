@@ -84,7 +84,7 @@
     </div>
     
     <script type="text/template" id="editMerchantForm">
-		<ul data-role="listview" id="<%=pageIdPrefix%>List">
+		<ul data-role="listview" id="<%=pageIdPrefix%>List" data-inset="true">
 
 		<div class="ui-grid-a">
 		
@@ -247,9 +247,9 @@
 
 <script type="script/template" id="collapsibleMercahntList">
 		<li>
-			<div data-role="collapsible">
+			<div data-role="collapsible" data-theme="<%=r.getStatusTheme(Status)%>">
 				<h3><%= Name %></h3>
-				<div class="ui-grid-a" id="merchantList<%=Number%>">
+				<div class="ui-grid-a" id="merchantList<%=Number%>" >
 
 				<div class="ui-block-a"><!-- Left hand side -->
 				<ul>
@@ -366,7 +366,7 @@
 
 	</div>
 
-	<ul data-role="listview">
+	<ul data-role="listview" data-inset="true">
 		<li>
 			<!--<img src="default"></img>-->
 			<h3>Name: <%= Name%></h3>
@@ -408,9 +408,7 @@
 		<li data-role="list-divider">Comments</li>
 		<a data-role="button" data-icon="plus" href="#merchantDisplayCommentPopup" data-rel="popup">Add Comment</a>
 	</ul>
-	<br>
-	<br>
-	<ul id="merchantDisplayCommentsDisplay" data-role="listview">
+	<ul id="merchantDisplayCommentsDisplay" data-role="listview" data-inset="true">
 
 		<% for(var i = Comments.length-1; i >= 0; i--){  %>
 			<% var t = _.template($('#commentDisplayTemplate').html()); %>

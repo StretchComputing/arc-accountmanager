@@ -131,6 +131,7 @@ var EXELON = (function (r, $) {
     			$('#editMerchantPocList').trigger('create');
     			
     			r.registerDelete('editMerchant',merchant.index);
+    			merchant.index++;
     			
     		});
     		
@@ -256,6 +257,7 @@ var EXELON = (function (r, $) {
     			 $('#createNewMerchantPocList').trigger('create');
 
     			 r.registerDelete('createNewMerchant',merchant.index);
+    			 merchant.index++;
 
     		 });
     		 
@@ -642,8 +644,10 @@ var EXELON = (function (r, $) {
 		  
 		  for(var i = 0; i < merchantList.length; i++){
 			  merchantList[i].Number = i.toString();
+			  merchantList[i].r = r; //Reference to other functions
 			  location.append(merchantTemplate(merchantList[i]));
 			  delete merchantList[i].Number;
+			  delete merchantList[i].r;
 			  
 			  var choose = $('#merchantChoose'+i,location);
 			  choose.bind('click', function(e){
@@ -772,6 +776,19 @@ var EXELON = (function (r, $) {
 		$('#'+idPrefix + 'PocList').trigger('create');
   };
   
+  /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
+  r.getStatusTheme = function(Status){
+	  var key = MERCHANT.merchantDisplay[0].options;
+	  if(Status === key[1])
+		  return 'b';
+	  if(Status === key[2])
+		  return 'e';
+	  if(Status === key[3])
+		  return 'c';
+	  if(Status === key[4])
+		  return 'a';
+	  return 'd';
+  };  
 
   try {
     r.router = new $.mobile.Router([
