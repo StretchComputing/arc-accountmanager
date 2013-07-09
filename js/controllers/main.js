@@ -160,6 +160,14 @@ var EXELON = (function (r, $) {
     				if(form[i].getAttribute('pocProp') !== null)
     					continue;//Skip these, do them below
     				
+    				if(form[i].required && form[i].value === ""){
+    					var pop = $('#editMerchantRequiredPopup');
+    					pop.empty();
+    					pop.append($('<h1 />', {text : "The " + form[i].name + " field is required."}));
+    					pop.popup("open");
+    					return;
+    				}
+    				
     				if(form[i].type === 'checkbox'){
     					var newCheck = ( (form[i].value === 'on') ? true : false);
     					if(newCheck != merchant[form[i].name])
@@ -283,7 +291,14 @@ var EXELON = (function (r, $) {
     			for(var i = 0; i < form.length; i++){
     				if(form[i].getAttribute('pocProp') !== null){
     					continue;//Skip these, do them below
-    					
+    				}
+    				
+    				if(form[i].required && form[i].value === ""){
+    					var pop = $('#createNewMerchantRequiredPopup');
+    					pop.empty();
+    					pop.append($('<h1 />', {text : "The " + form[i].name + " field is required."}));
+    					pop.popup("open");
+    					return;
     				}
     				
     				if(form[i].type === 'checkbox'){
@@ -323,7 +338,7 @@ var EXELON = (function (r, $) {
     									   CreateTime : createTime
     									   });
     			
-    			$.mobile.changePage.back();
+    			$.mobile.back();
 
     		});
 
@@ -384,6 +399,9 @@ var EXELON = (function (r, $) {
     merchantDisplayShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayShow');
+    		
+    		$('#merchantDisplayHead').text(r.activeMerchant.Name);
+    		
     		var content = $('#merchantDisplayContent');
     		var template = _.template($('#merchantDisplayContentTemplate').html());
     		
@@ -407,6 +425,7 @@ var EXELON = (function (r, $) {
     	try{
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayHide');
     		$('#merchantDisplayContent').empty();
+    		$('#merchantDisplayHead').empty();
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.merchantDisplayHide');
