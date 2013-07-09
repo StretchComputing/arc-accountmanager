@@ -134,6 +134,20 @@ var EXELON = (function (r, $) {
     			
     		});
     		
+    		$('#editMerchantGetLngLat').bind('click', function(e){
+    			var lngObj = $('#editMerchantLongitude');
+    			var latObj = $('#editMerchantLatitude');
+    			
+    			var street = $('#editMerchantStreet').val();
+    			var city = $('#editMerchantCity').val();
+    			var state = $('#editMerchantState').val();
+    			var zip = $('#editMerchantZipCode').val();
+    			var address = r.readyAddress(street,city,state,zip);
+    			
+    			r.fetchLngLat(lngObj,latObj,address);
+    			
+    		});
+    		
     		var save = $('#editMerchantSave');
 
     		save.bind('click', function(e){
@@ -244,6 +258,20 @@ var EXELON = (function (r, $) {
     			 r.registerDelete('createNewMerchant',merchant.index);
 
     		 });
+    		 
+     		$('#createNewMerchantGetLngLat').bind('click', function(e){
+    			var lngObj = $('#createNewMerchantLongitude');
+    			var latObj = $('#createNewMerchantLatitude');
+    			
+    			var street = $('#createNewMerchantStreet').val();
+    			var city = $('#createNewMerchantCity').val();
+    			var state = $('#createNewMerchantState').val();
+    			var zip = $('#createNewMerchantZipCode').val();
+    			var address = r.readyAddress(street,city,state,zip);
+    			
+    			r.fetchLngLat(lngObj,latObj,address);
+    			
+    		});
     		
     		var save = $('#createNewMerchantSave');
 
@@ -688,6 +716,51 @@ var EXELON = (function (r, $) {
     } catch (e) {
       RSKYBOX.log.error(e, 'displayMerchants');
     }
+  };
+  
+  /* Makes a call to the geocode API to get the longitude and latitude from the address
+   * Expects the longitude and latiude forms to write into and a properly formatted address
+   * address should encode all spaces as +'s
+   */
+  r.fetchLngLat = function(lngObj, latObj, Address){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.fetchLngLat');
+		  var geocodeURL = "http://maps.googleapis.com/maps/api/geocode/json?address="+ Address;
+		  geocodeURL += '&sensor=false';
+		  $.ajax({
+			  dataType : 'json',
+			  url : geocodeURL,
+			  type : "GET",
+			  success : function(data){
+				  if(data.results.length >= 1){
+					  var res = data.results[0];
+					  lngObj.val(res.geometry.location.lng);
+					  latObj.val(res.geometry.location.lat);
+				  }
+				  
+			  }
+		  });
+	  }
+	  catch(e){
+		  RSKYBOX.log.info(e, 'main.js.fetchLngLat');
+	  }
+  };
+  
+  r.readyAddress = function(street,city,state,zip){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.readyAddress');
+			var address = street.replace(/\s+/g, '+');//replace all white space with +
+			address += ',+';
+			address += city.replace(/\s+/g, '+');
+			address += ',+';
+			address += state.replace(/\s+/g, '+');
+			address += ',+';
+			address += zip.replace(/\s+/g, '+');
+			return address;
+	  }
+	  catch(e){
+		  RSKYBOX.log.info(e,'main.js.readyAddress');
+	  }
   };
   
   /*Register handlers for the delete buttons for POC objects given prefix and index*/

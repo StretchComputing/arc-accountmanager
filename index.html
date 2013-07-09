@@ -105,8 +105,8 @@
 			<li><label for="<%=pageIdPrefix%>City"> City </label>
 			<input type="text" name="City" id="<%=pageIdPrefix%>City" value="<%= City %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>Zipcode"> Zip Code </label>
-			<input type="text" name="Zipcode" id="<%=pageIdPrefix%>Zipcode" value="<%= Zipcode %>" ></li>
+			<li><label for="<%=pageIdPrefix%>ZipCode"> Zip Code </label>
+			<input type="text" name="ZipCode" id="<%=pageIdPrefix%>ZipCode" value="<%= ZipCode %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>TypeOfService"> Type Of Service </label>
 			<input type="text" name="TypeOfService" id="<%=pageIdPrefix%>TypeOfService" value="<%= TypeOfService %>" ></li>
@@ -120,9 +120,10 @@
 			<li><label for="<%=pageIdPrefix%>CurrentCreditRate"> Current Credit Rate </label>
 			<input type="text" name="CurrentCreditRate" id="<%=pageIdPrefix%>CurrentCreditRate" value="<%= CurrentCreditRate %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>AcceptTerms">Accepted Terms?</label>
-			<input type="checkbox" name="AcceptTerms" id="<%=pageIdPrefix%>AcceptTerms" <%if(AcceptTerms) { %>checked<% } %> ></li>
+			<li><label for="<%=pageIdPrefix%>Longitude">Longitude</label>
+				<input type="text" name="Longitude" id="<%=pageIdPrefix%>Longitude" value="<%= Longitude %>"></li>
 		</div>
+
 
 		<div class="ui-block-b">
 
@@ -159,8 +160,13 @@
 			<li><label for="<%=pageIdPrefix%>CurrentCreditFee"> Current Credit Fee </label>
 			<input type="text" name="CurrentCreditFee" id="<%=pageIdPrefix%>CurrentCreditFee" value="<%= CurrentCreditFee %>" ></li>
 
+			<li><label for="<%= pageIdPrefix%>Latitude">Latitude</label>
+			<input type="text" name="Latitude" id="<%= pageIdPrefix%>Latitude" value="<%=Latitude%>"></li>
+
 		</div><!-- ui-block-b -->
 		</div><!-- ui-grid-a -->
+
+		<button id="<%=pageIdPrefix%>GetLngLat" data-icon="grid">Fetch Longitude and Latitude</button>
 
 		<li data-role="list-divider">Points of Contact</li>
 		<div id="<%=pageIdPrefix%>PocList">
@@ -263,7 +269,7 @@
 				<ul>
 					<li>Employer ID Number: <%= EIN %></li>
 					<li>City: <%= City %></li>
-					<li>Zipcode: <%= Zipcode %></li>
+					<li>ZipCode: <%= ZipCode %></li>
 					<li>Payment Accepted: <%= PaymentAccepted %></li>
 					<li>eMail Address: <%= eMail %></li>
 					<li>Facebook Handle: <%= FacebookHandler %></li>
@@ -364,7 +370,7 @@
 		<li>
 			<!--<img src="default"></img>-->
 			<h3>Name: <%= Name%></h3>
-			<h3>Address: <%= Street %> <%= City %>, <%= State %> <%= Zipcode%></h3>
+			<h3>Address: <%= Street %> <%= City %>, <%= State %> <%= ZipCode%></h3>
 			<h3>Status: <%= Status %></h3>
 		</li>
 
