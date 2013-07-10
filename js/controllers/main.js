@@ -143,7 +143,18 @@ var EXELON = (function (r, $) {
     			var city = $('#editMerchantCity').val();
     			var state = $('#editMerchantState').val();
     			var zip = $('#editMerchantZipCode').val();
+    			
+    			if(street === "" || city === "" || state === ""){
+    				var pop = $('#editMerchantRequiredPopup');
+    				pop.empty();
+    				pop.append($('<h1 />', {text : "You must fill out a full address to find the longitude /latitude"}));
+    				pop.popup("open");
+    				return;
+    			}
+    			
     			var address = r.readyAddress(street,city,state,zip);
+    			
+    			
     			
     			r.fetchLngLat(lngObj,latObj,address);
     			
@@ -277,6 +288,15 @@ var EXELON = (function (r, $) {
     			var city = $('#createNewMerchantCity').val();
     			var state = $('#createNewMerchantState').val();
     			var zip = $('#createNewMerchantZipCode').val();
+    			if(street === "" || city === "" || state === ""){
+    				var pop = $('#createNewMerchantRequiredPopup');
+    				pop.empty();
+    				pop.append($('<h1 />', {text : "You must fill out a fill address to find the longitude /latitude"}));
+    				pop.popup("open");
+    				return;
+    			}
+    			
+    			
     			var address = r.readyAddress(street,city,state,zip);
     			
     			r.fetchLngLat(lngObj,latObj,address);

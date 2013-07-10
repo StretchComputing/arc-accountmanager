@@ -92,7 +92,7 @@
 		<div class="ui-grid-a">
 		
 		<div class="ui-block-a">
-			<li><label for="<%=pageIdPrefix%>Name"> Name </label>
+			<li><label for="<%=pageIdPrefix%>Name"> Name* </label>
 			<input type="text" name="Name" id="<%=pageIdPrefix%>Name" value="<%= Name %>" required="true"></li>
 
 			<li><label for="<%=pageIdPrefix%>POS"> POS Type </label>
@@ -108,17 +108,17 @@
 			<li><label for="<%=pageIdPrefix%>City"> City </label>
 			<input type="text" name="City" id="<%=pageIdPrefix%>City" value="<%= City %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>ZipCode"> Zip Code </label>
+			<li><label for="<%=pageIdPrefix%>ZipCode"> Zipcode </label>
 			<input type="text" name="ZipCode" id="<%=pageIdPrefix%>ZipCode" value="<%= ZipCode %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>TypeOfService"> Type Of Service </label>
 			<input type="text" name="TypeOfService" id="<%=pageIdPrefix%>TypeOfService" value="<%= TypeOfService %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>NumTables"> Number of Tables </label>
-			<input type="text" name="NumTables" id="<%=pageIdPrefix%>NumTables" value="<%= NumTables %>" ></li>
+			<input type="number" name="NumTables" id="<%=pageIdPrefix%>NumTables" value="<%= NumTables %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>FacebookHandler"> Facebook Handle </label>
-			<input type="text" name="FacebookHandler" id="<%=pageIdPrefix%>FacebookHandler" value="<%= FacebookHandler %>" ></li>
+			<input type="email" name="FacebookHandler" id="<%=pageIdPrefix%>FacebookHandler" value="<%= FacebookHandler %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>CurrentCreditRate"> Current Credit Rate </label>
 			<input type="text" name="CurrentCreditRate" id="<%=pageIdPrefix%>CurrentCreditRate" value="<%= CurrentCreditRate %>" ></li>
@@ -128,7 +128,7 @@
 		</div>
 
 
-		<div class="ui-block-b">
+		<div class="ui-block-b" style="text-align: left">
 
 			<li><label for="<%=pageIdPrefix%>EIN"> EIN </label>
 			<input type="text" name="EIN" id="<%=pageIdPrefix%>EIN" value="<%= EIN %>"></li>			
@@ -145,20 +145,20 @@
 			<li><label for="<%=pageIdPrefix%>State"> State </label>
 			<input type="text" name="State" id="<%=pageIdPrefix%>State" value="<%= State %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>PaymentAccepted"> PaymentAccepted </label>
+			<li><label for="<%=pageIdPrefix%>PaymentAccepted"> Payment Accepted </label>
 			<input type="text" name="PaymentAccepted" id="<%=pageIdPrefix%>PaymentAccepted" value="<%= PaymentAccepted %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>eMail"> eMail </label>
-			<input type="text" name="eMail" id="<%=pageIdPrefix%>eMail" value="<%= eMail %>" ></li>
+			<input type="email" name="eMail" id="<%=pageIdPrefix%>eMail" value="<%= eMail %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>Website"> Website </label>
-			<input type="text" name="Website" id="<%=pageIdPrefix%>Website" value="<%= Website %>" ></li>
+			<input type="url" name="Website" id="<%=pageIdPrefix%>Website" value="<%= Website %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>NumSeats"> Number of Seats </label>
-			<input type="text" name="NumSeats" id="<%=pageIdPrefix%>NumSeats" value="<%= NumSeats %>" ></li>
+			<input type="number" name="NumSeats" id="<%=pageIdPrefix%>NumSeats" value="<%= NumSeats %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>TwitterHandler"> Twitter Handle </label>
-			<input type="text" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
+			<input type="email" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>CurrentCreditFee"> Current Credit Fee </label>
 			<input type="text" name="CurrentCreditFee" id="<%=pageIdPrefix%>CurrentCreditFee" value="<%= CurrentCreditFee %>" ></li>
@@ -204,7 +204,7 @@
 				<input type="text" PocProp="Phone" index="<%=index%>" id="<%=pageIdPrefix%>PocPhone<%=index %>" value="<%=Phone%>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>PoceMail<%=index %>" >eMail Address</label>
-				<input type="text" PocProp="eMail" index="<%=index%>" id="<%=pageIdPrefix%>PoceMail<%=index %>" value="<%=eMail%>" ></li>
+				<input type="email" PocProp="eMail" index="<%=index%>" id="<%=pageIdPrefix%>PoceMail<%=index %>" value="<%=eMail%>" ></li>
 
 		</div>
 
@@ -228,7 +228,7 @@
     
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
        <a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
-       <h1>Account Manager</h1>
+       <h1>Select Merchant</h1>
        <a href="#createNewMerchant" data-icon="plus" data-role="button">Add</a>
        
       </div>
@@ -256,29 +256,29 @@
 
 				<div class="ui-block-a"><!-- Left hand side -->
 				<ul>
-					<li>Status: <%= Status %></li>
-					<li>Accepted Terms and Conditions: <%= AcceptTerms %></li>
-					<li>Street: <%= Street %></li>
-					<li>State: <%= State %></li>
-					<li>Point of Sale Device: <%= POS %></li>
-					<li>Twitter Handle: <%= TwitterHandler %></li>
-					<li>Website : <%= Website %></li>
-					<li>Number of Tables: <%= NumTables %></li>
-					<li>Type of Service : <%= TypeOfService %></li>
-					<li>Current Credit Fee : <%= CurrentCreditFee%></li>
+					<li>Status: <b><%= Status %></b></li>
+					<li>Accepted Terms and Conditions:<b><%= AcceptTerms %></b></li>
+					<li>Street: <b><%= Street %></b></li>
+					<li>State: <b><%= State %></b></li>
+					<li>Point of Sale Device: <b><%= POS %></b></li>
+					<li>Twitter Handle: <b><%= TwitterHandler %></b></li>
+					<li>Website : <b><%= Website %></b></li>
+					<li>Number of Tables: <b><%= NumTables %></b></li>
+					<li>Type of Service : <b><%= TypeOfService %></b></li>
+					<li>Current Credit Fee : <b><%= CurrentCreditFee%></b></li>
 				</ul></div>
 
-				<div class="ui-block-b"><!-- Right hand side -->
+				<div class="ui-block-b" style="text-align: left"><!-- Right hand side -->
 				<ul>
-					<li>Employer ID Number: <%= EIN %></li>
-					<li>City: <%= City %></li>
-					<li>ZipCode: <%= ZipCode %></li>
-					<li>Payment Accepted: <%= PaymentAccepted %></li>
-					<li>eMail Address: <%= eMail %></li>
-					<li>Facebook Handle: <%= FacebookHandler %></li>
-					<li>Price Level: <%= PriceLevel %></li>
-					<li>Number of Seats: <%= NumSeats %></li>
-					<li>Current Credit Card Rate: <%=CurrentCreditRate %></li>
+					<li>Employer ID Number: <b><%= EIN %></b></li>
+					<li>City: <b><%= City %></b></li>
+					<li>ZipCode: <b><%= ZipCode %></b></li>
+					<li>Payment Accepted: <b><%= PaymentAccepted %></b></li>
+					<li>eMail Address: <b><%= eMail %></b></li>
+					<li>Facebook Handle: <b><%= FacebookHandler %></b></li>
+					<li>Price Level: <b><%= PriceLevel %></b></li>
+					<li>Number of Seats: <b><%= NumSeats %></b></li>
+					<li>Current Credit Card Rate: <b><%=CurrentCreditRate %></b></li>
 				</ul></div>
 				</div><!-- End Grid -->
 				<% _.each(DecisionMakers, function(person) { %>
@@ -286,14 +286,14 @@
 					<div class="ui-grid-a">
 					<div class="ui-block-a">
 						<ul>
-						<li>Position : <%= person.Position %></li>
-						<li>eMail Address : <%= person.eMail %></li>
+						<li>Position : <b><%= person.Position %></b></li>
+						<li>eMail Address : <b><%= person.eMail %></b></li>
 						</ul>
 					</div>
 					
 					<div class="ui-block-b">
 						<ul>
-						<li>Phone Number: <%= person.Phone %></li>
+						<li>Phone Number: <b><%= person.Phone %></b></li>
 						</ul>
 					</div>
 					</div>
