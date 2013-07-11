@@ -153,28 +153,37 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
     		r.attachPanel("merchantDisplay");
     		
-    		  $('#merchantDisplayCommentSave').bind('click', function(e){
-    				var textArea = $('#merchantDisplayCommentTextArea');
-    				var newComment = { UserName : r.getUserName(),
-    						 		  'Date' : new Date(),
-    						 		  Comment : textArea.prop('value') };
-    				r.activeMerchant.Comments.push(newComment);
+    		  $('#merchantDisplayNoteSave').bind('click', function(e){
+    				var textArea = $('#merchantDisplayNoteTextArea');
+    				var newNote = {  UserName : r.getUserName(),
+    						 		 LastUpdated : new Date(),
+    						 		 Note : textArea.prop('value') };
+    				r.activeMerchant.Notes.push(newNote);
     				textArea.prop('value', "");
-    				$('#merchantDisplayCommentPopup').popup('close');
+    				$('#merchantDisplayNotePopup').popup('close');
     				
-    				r.activeMerchant.Activities.push({ 'Type' : 'Comment',
-    												  'UserName' : r.getUserName(),
-    												  'Date' : newComment.Date,
-    												  'Comment' : newComment.Comment});
+    				var act = { 'Type' : 'Note',
+							  'UserName' : r.getUserName(),
+							  'Date' : newNote.LastUpdated,
+							  'Note' : newNote.Note};
+    				r.activeMerchant.Activities.push(act);
     				
-    				var commentTemplate = _.template($('#commentDisplayTemplate').html())
-    				$('#merchantDisplayCommentsDisplay').prepend(commentTemplate(newComment));
-    				$('#merchantDisplayCommentsDisplay').listview('refresh');
+    				/*Update the displays on this page*/
+    				var NoteTemplate = _.template($('#NoteDisplayTemplate').html())
+    				var notesDisplay = $('#merchantDisplayNotesDisplay');
+    				notesDisplay.prepend(NoteTemplate(newNote));
+    				notesDisplay.listview('refresh');
+    				
+    				var activityDisplay = $('#merchantDisplayActivityFeed');
+    				activityDisplay.prepend($('<li />', {
+    					text : (MERCHANT.activityFeed[act.Type])(act) }));
+    				activityDisplay.listview('refresh');
+
     			});
     			
-    			$('#merchantDisplayCommentCancel').bind('click', function(e){
-    				$('#merchantDisplayCommentTextArea').prop('value', "");
-    				$('#merchantDisplayCommentPopup').popup('close');
+    			$('#merchantDisplayNoteCancel').bind('click', function(e){
+    				$('#merchantDisplayNoteTextArea').prop('value', "");
+    				$('#merchantDisplayNotePopup').popup('close');
     			});
     	}
     	catch(e){
@@ -496,8 +505,8 @@ var EXELON = (function (r, $) {
 		  var elm;
 		  if( !(merchantList[merchIndex].DecisionMakers))
 			  merchantList[merchIndex].DecisionMakers = [];
-		  if( !(merchantList[merchIndex].Comments))
-			  merchantList[merchIndex].Comments = [];
+		  if( !(merchantList[merchIndex].Notes))
+			  merchantList[merchIndex].Notes = [];
 		  if( !(merchantList[merchIndex].Activities))
 			  merchantList[merchIndex].Activities = [];
 	  }
@@ -593,9 +602,31 @@ var EXELON = (function (r, $) {
 		  r.fetchLngLat(lngObj,latObj,address);
 	  });
 
-	  var save = $('#'+pageId+'Save');
-
-	  save.bind('click', function(e){
+	  var notesToAdd = [];
+	  var activitiesToAdd = [];
+	  
+	  $('#'+pageId+'NoteSave').bind('click', function(e){
+			var textArea = $('#'+pageId+'NoteTextArea');
+			var newNote = {  UserName : r.getUserName(),
+					 		 LastUpdated : new Date(),
+					 		 Note : textArea.prop('value') };
+			notesToAdd.push(newNote);
+			textArea.prop('value', "");
+			$('#'+pageId+'NotePopup').popup('close');
+			
+			var act = { 'Type' : 'Note',
+					  'UserName' : r.getUserName(),
+					  'Date' : newNote.LastUpdated,
+					  'Note' : newNote.Note};
+			activitiesToAdd.push(act);
+	  });
+	  
+	  $('#'+pageId+'NoteCancel').bind('click', function(e){
+			$('#'+pageId+'NoteTextArea').prop('value', "");
+			$('#'+pageId+'NotePopup').popup('close');
+		});
+	  
+	  $('#'+pageId+'Save').bind('click', function(e){
 		  var form = $('#'+pageId+'List :input');
 		  var formsFilled = [];
 		  for(var i = 0; i < form.length; i++){
@@ -634,6 +665,9 @@ var EXELON = (function (r, $) {
 		  }
 		  merchant.DecisionMakers = pocList;
 
+		  merchant.Notes = merchant.Notes.concat(notesToAdd);
+		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
+		  
 		  if(newMerchant){
 			  r.createMerchant(merchant);
 			  r.merchantList.push(merchant);
@@ -642,7 +676,6 @@ var EXELON = (function (r, $) {
 			  r.updateMerchant(merchant);
 		  }
 
-		  merchant.Activities = [];
 		  /*Create the activity*/
 		  var end = new Date();
 		  var editTime = end.getTime() - start.getTime();

@@ -25,7 +25,10 @@ var MERCHANT = (function($){
 		  { propName: "TypeOfService",         displayText: "Type of Service",                    inputType: "option",   required:false, options: ["Sit Down", "Take Out"]},
 		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text",     required:false},
 		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text",     required:false},
-		  { propName: "Comments",			   displayText: "Comments",							  inputType: "text",	 required:false}
+		  { propName: "AvgNumServers",         displayText: "Average Number of Servers",          inputType: "text",     required:false},
+		  { propName: "NumPOSTerminals",       displayText: "Number of Point of Sale Terminals",  inputType: "text",     required:false},
+		  { propName: "TypeOfFood",            displayText: "Type of Food",                       inputType: "text",     required:false},
+		  { propName: "Notes",			       displayText: "Notes",							  inputType: "text",	 required:false}
                             ],
                             
 			decisionMaker : [
@@ -74,13 +77,13 @@ var MERCHANT = (function($){
 	    		 return dispString;
 	    	},
 	    	
-	    	"Comment" : function(activity){
+	    	"Note" : function(activity){
 	    		dispString = "";
 	    		dispString += activity.Date.toLocaleDateString() + " " ;
 	    		dispString += activity.Date.toLocaleTimeString() + ": ";
-	    		dispString += activity.UserName + "left a comment. ";
-	    		dispString += '"' + activity.Comment.substring(0,100);
-	    		if(activity.Comment.length > 100)
+	    		dispString += activity.UserName + "left a note. ";
+	    		dispString += '"' + activity.Note.substring(0,100);
+	    		if(activity.Note.length > 100)
 	    			dispString += "...";
 	    		dispString += '"';
 	    		return dispString;
