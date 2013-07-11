@@ -42,7 +42,7 @@ var MERCHANT = (function($){
 	    		  dispString += activity.Date.toLocaleDateString() + " ";
 	    		  dispString += activity.Date.toLocaleTimeString() + ": ";
 	    		  dispString += activity.UserName + " created this merchant in ";
-	    		  dispString += (activity.CreateTime / 1000) + " seconds ";
+	    		  dispString += (activity.EditTime / 1000) + " seconds ";
 	    		  dispString += "while filling in ";
 	    		  for(var i = 0; i < activity.FormsFilled.length; i++){
 	    			  if(i > 3){

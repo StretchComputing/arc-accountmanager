@@ -97,127 +97,13 @@ var EXELON = (function (r, $) {
     	}
     },
     
+    
+    
     editMerchantShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.editMerchantShow');
     		
-    		var merchant = r.merchantToEdit;
-    		var start = new Date();
-    		
-    		/*Modify the Header*/
-    		var head = $('#editMerchantHead').text('Editing ' + merchant.Name);
-    		
-    		/*Modify the body*/
-    		var content = $('#editMerchantContent');
-    		
-    		merchant.pageIdPrefix = "editMerchant";//Used in the template call
-    		merchant.index = 0; //Also used in the template call
-    		var editMerchantTemplate = _.template($('#editMerchantForm').html());
-    		
-    		content.append(editMerchantTemplate(merchant));
-    	
-    		var addNewPoc = $('#pocAddNew');
-    		
-    		/*Register all the delete button handlers*/
-    		for(var i = 0; i < merchant.index; i++){
-    			r.registerDelete('editMerchant',i);
-    		};
-    		
-    		addNewPoc.bind('click', function(e){
-    			var pocTemplate = _.template($('#decisionMakerForm').html());
-    			$('#editMerchantPocList').append(pocTemplate({FirstName : "", LastName : "", 
-			  	  	   										  Phone : "", Position : "", eMail : "", index : merchant.index,
-			  	  	   										  pageIdPrefix : merchant.pageIdPrefix}));
-    			$('#editMerchantPocList').trigger('create');
-    			
-    			r.registerDelete('editMerchant',merchant.index);
-    			merchant.index++;
-    			
-    		});
-    		
-    		$('#editMerchantGetLngLat').bind('click', function(e){
-    			var lngObj = $('#editMerchantLongitude');
-    			var latObj = $('#editMerchantLatitude');
-    			
-    			var street = $('#editMerchantStreet').val();
-    			var city = $('#editMerchantCity').val();
-    			var state = $('#editMerchantState').val();
-    			var zip = $('#editMerchantZipCode').val();
-    			
-    			if(street === "" || city === "" || state === ""){
-    				var pop = $('#editMerchantRequiredPopup');
-    				pop.empty();
-    				pop.append($('<h1 />', {text : "You must fill out a full address to find the longitude /latitude"}));
-    				pop.popup("open");
-    				return;
-    			}
-    			
-    			var address = r.readyAddress(street,city,state,zip);
-    			
-    			
-    			
-    			r.fetchLngLat(lngObj,latObj,address);
-    			
-    		});
-    		
-    		var save = $('#editMerchantSave');
-
-    		save.bind('click', function(e){
-    			var form = $('#editMerchantList :input');
-    			var merchant = r.merchantToEdit;
-    			
-    			var formsFilled = [];
-    			for(var i = 0; i < form.length; i++){//Update the regular properties
-    				if(form[i].getAttribute('pocProp') !== null)
-    					continue;//Skip these, do them below
-    				
-    				if(form[i].required && form[i].value === ""){
-    					var pop = $('#editMerchantRequiredPopup');
-    					pop.empty();
-    					pop.append($('<h1 />', {text : "The " + form[i].name + " field is required."}));
-    					pop.popup("open");
-    					return;
-    				}
-    				
-    				if(form[i].type === 'checkbox'){
-    					var newCheck = ( (form[i].value === 'on') ? true : false);
-    					if(newCheck != merchant[form[i].name])
-    						formsFilled.push(form[i].name);
-    					merchant[form[i].name] = newCheck;
-    				}
-    				else{
-    					if(form[i].value !== merchant[form[i].name])
-    						formsFilled.push(form[i].name);
-    					merchant[form[i].name] = form[i].value;
-    				}
-    				
-    			}
-    			var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
-    			var pocList = [];
-    			for(var i = 0; i < pocForm.length; i++){
-    				var inputs = $(':input',pocForm[i]);
-    				var poc = {};
-    				for(var j = 0; j < inputs.length; j++){
-    					poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
-    				}
-    				pocList.push(poc);
-    			}
-    			merchant.DecisionMakers = pocList;
-    			
-    			var end = new Date();
-    			var editTime = end.getTime() - start.getTime();
-    			merchant.Activities.push({'Type' : 'MerchantEdit',
-    									  'Date' : end,
-    									   UserName : r.getUserName(),
-    									   FormsFilled : formsFilled,
-    									   EditTime : editTime
-    									   });
-    			
-    			r.updateMerchant(merchant);//Send to server
-    			$.mobile.back();
-    		});
-    		
-    		content.trigger('create');//Add jquery mobile styling to elements
+    		r.merchantForm("editMerchant", false);
     		
     	}
     	catch(e){
@@ -243,127 +129,7 @@ var EXELON = (function (r, $) {
     createNewMerchantShow : function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.createNewMerchantShow');
-
-    		var merchant = {};
-    		r.fixMerchants([merchant]);//create the necessary properties
-    		var start = new Date(); //measures the time it takes to fill out the form.
-
-    		/*Modify the body*/
-    		var content = $('#createNewMerchantContent');
-
-    		merchant.pageIdPrefix = "createNewMerchant";//Used for template
-    		var editMerchantTemplate = _.template($('#editMerchantForm').html());
-    		
-    		
-    		 merchant.pageIdPrefix = "createNewMerchant";//Used in the template call
-    		 merchant.index = 0; //Also used in the template call
-    		 var editMerchantTemplate = _.template($('#editMerchantForm').html());
-
-    		 content.append(editMerchantTemplate(merchant));
-
-    		 var addNewPoc = $('#pocAddNew');
-
-    		 /*Register all the delete button handlers*/
-    		 for(var i = 0; i < merchant.index; i++){
-    			 r.registerDelete('createNewMerchant',i);
-    		 };
-
-    		 addNewPoc.bind('click', function(e){
-    			 var pocTemplate = _.template($('#decisionMakerForm').html());
-    			 $('#createNewMerchantPocList').append(pocTemplate({FirstName : "", LastName : "", 
-    				 Phone : "", Position : "", eMail : "", index : merchant.index,
-    				 pageIdPrefix : merchant.pageIdPrefix}));
-    			 $('#createNewMerchantPocList').trigger('create');
-
-    			 r.registerDelete('createNewMerchant',merchant.index);
-    			 merchant.index++;
-
-    		 });
-    		 
-     		$('#createNewMerchantGetLngLat').bind('click', function(e){
-    			var lngObj = $('#createNewMerchantLongitude');
-    			var latObj = $('#createNewMerchantLatitude');
-    			
-    			var street = $('#createNewMerchantStreet').val();
-    			var city = $('#createNewMerchantCity').val();
-    			var state = $('#createNewMerchantState').val();
-    			var zip = $('#createNewMerchantZipCode').val();
-    			if(street === "" || city === "" || state === ""){
-    				var pop = $('#createNewMerchantRequiredPopup');
-    				pop.empty();
-    				pop.append($('<h1 />', {text : "You must fill out a fill address to find the longitude /latitude"}));
-    				pop.popup("open");
-    				return;
-    			}
-    			
-    			
-    			var address = r.readyAddress(street,city,state,zip);
-    			
-    			r.fetchLngLat(lngObj,latObj,address);
-    			
-    		});
-    		
-    		var save = $('#createNewMerchantSave');
-
-    		save.bind('click', function(e){
-    			var form = $('#createNewMerchantList :input');
-    			var formsFilled = [];
-    			for(var i = 0; i < form.length; i++){
-    				if(form[i].getAttribute('pocProp') !== null){
-    					continue;//Skip these, do them below
-    				}
-    				
-    				if(form[i].required && form[i].value === ""){
-    					var pop = $('#createNewMerchantRequiredPopup');
-    					pop.empty();
-    					pop.append($('<h1 />', {text : "The " + form[i].name + " field is required."}));
-    					pop.popup("open");
-    					return;
-    				}
-    				
-    				if(form[i].type === 'checkbox'){
-    					merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
-    				}
-    				else{
-    					merchant[form[i].name] = form[i].value;
-    					if(form[i].value !== ""){//This field was actually filled out
-    						formsFilled.push(form[i].name);
-    					}
-    				}
-    			}
-    			
-    			var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
-    			var pocList = [];
-    			for(var i = 0; i < pocForm.length; i++){
-    				var inputs = $(':input',pocForm[i]);
-    				var poc = {};
-    				for(var j = 0; j < inputs.length; j++){
-    					poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
-    				}
-    				pocList.push(poc);
-    			}
-    			merchant.DecisionMakers = pocList;
-
-    			r.createMerchant(merchant);
-    			r.merchantList.push(merchant);
-    			
-    			merchant.Activities = [];
-    			/*Create the activity*/
-    			var end = new Date();
-    			var createTime = end.getTime() - start.getTime();
-    			merchant.Activities.push({'Type' : 'MerchantCreate',
-    									  'Date' : end,
-    									   UserName : r.getUserName(),
-    									   FormsFilled : formsFilled,
-    									   CreateTime : createTime
-    									   });
-    			
-    			$.mobile.back();
-
-    		});
-
-    		content.trigger('create');
-
+    		r.merchantForm("createNewMerchant", true);
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.createNewMerchantShow');
@@ -759,6 +525,152 @@ var EXELON = (function (r, $) {
     } catch (e) {
       RSKYBOX.log.error(e, 'displayMerchants');
     }
+  };
+  
+  /*builds either the editMerchant or createNewMerchant page depending on the
+   * given pageId and value of newMerchant (true for createNewMerchant, false for editMerhcant
+   */
+  r.merchantForm = function(pageId, newMerchant){
+
+	  var merchant;
+	  if(newMerchant){
+		  merchant = {};
+		  r.fixMerchants([merchant]);//create the necessary properties
+		  //Do not modify the header
+	  }
+	  else{
+		  merchant = r.merchantToEdit;
+		  var head = $('#'+pageId+'Head').text('Editing ' + merchant.Name);//Modify the header
+	  }
+
+	  var start = new Date(); //measures the time it takes to fill out the form.
+
+	  /*Modify the body*/
+	  var content = $('#'+pageId+'Content');
+
+	  merchant.pageIdPrefix = pageId;//Used for template
+	  merchant.index = 0; //Also used in the template call
+	  var editMerchantTemplate = _.template($('#editMerchantForm').html());
+
+	  content.append(editMerchantTemplate(merchant));
+
+	  var addNewPoc = $('#pocAddNew');
+
+	  /*Register all the delete button handlers*/
+	  for(var i = 0; i < merchant.index; i++){
+		  r.registerDelete(pageId,i);
+	  };
+
+	  addNewPoc.bind('click', function(e){
+		  var pocTemplate = _.template($('#decisionMakerForm').html());
+		  $('#'+pageId+'PocList').append(pocTemplate({FirstName : "", LastName : "", 
+			  Phone : "", Position : "", eMail : "", index : merchant.index,
+			  pageIdPrefix : merchant.pageIdPrefix}));
+		  $('#'+pageId+'PocList').trigger('create');
+
+		  r.registerDelete(pageId,merchant.index);
+		  merchant.index++;
+	  });
+
+	  $('#'+pageId+'GetLngLat').bind('click', function(e){
+		  var lngObj = $('#'+pageId+'Longitude');
+		  var latObj = $('#'+pageId+'Latitude');
+
+		  var street = $('#'+pageId+'Street').val();
+		  var city = $('#'+pageId+'City').val();
+		  var state = $('#'+pageId+'State').val();
+		  var zip = $('#'+pageId+'ZipCode').val();
+		  if(street === "" || city === "" || state === ""){
+			  var pop = $('#'+pageId+'RequiredPopup');
+			  pop.empty();
+			  pop.append($('<h1 />', {text : "You must fill out a fill address to find the longitude /latitude"}));
+			  pop.popup("open");
+			  return;
+		  }
+
+		  var address = r.readyAddress(street,city,state,zip);
+
+		  r.fetchLngLat(lngObj,latObj,address);
+	  });
+
+	  var save = $('#'+pageId+'Save');
+
+	  save.bind('click', function(e){
+		  var form = $('#'+pageId+'List :input');
+		  var formsFilled = [];
+		  for(var i = 0; i < form.length; i++){
+			  if(form[i].getAttribute('pocProp') !== null){
+				  continue;//Skip these, do them below
+			  }
+
+			  if(form[i].required && form[i].value === ""){
+				  var pop = $('#'+pageId+'RequiredPopup');
+				  pop.empty();
+				  pop.append($('<h1 />', {text : "The " + form[i].name + " field is required."}));
+				  pop.popup("open");
+				  return;
+			  }
+
+			  if(form[i].type === 'checkbox'){
+				  merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
+			  }
+			  else{
+				  merchant[form[i].name] = form[i].value;
+				  if(form[i].value !== ""){//This field was actually filled out
+					  formsFilled.push(form[i].name);
+				  }
+			  }
+		  }
+
+		  var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
+		  var pocList = [];
+		  for(var i = 0; i < pocForm.length; i++){
+			  var inputs = $(':input',pocForm[i]);
+			  var poc = {};
+			  for(var j = 0; j < inputs.length; j++){
+				  poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
+			  }
+			  pocList.push(poc);
+		  }
+		  merchant.DecisionMakers = pocList;
+
+		  if(newMerchant){
+			  r.createMerchant(merchant);
+			  r.merchantList.push(merchant);
+		  }
+		  else{
+			  r.updateMerchant(merchant);
+		  }
+
+		  merchant.Activities = [];
+		  /*Create the activity*/
+		  var end = new Date();
+		  var editTime = end.getTime() - start.getTime();
+		  var activity;
+
+		  if(newMerchant){
+			  activity = {'Type' : 'MerchantCreate',
+					  'Date' : end,
+					  UserName : r.getUserName(),
+					  FormsFilled : formsFilled,
+					  EditTime : editTime
+			  }
+		  }
+		  else{
+			  activity = {'Type' : 'MerchantEdit',
+					  'Date' : end,
+					  UserName : r.getUserName(),
+					  FormsFilled : formsFilled,
+					  EditTime : editTime
+			  }
+		  }
+		  merchant.Activities.push(activity);
+
+		  $.mobile.back();
+
+	  });
+
+	  content.trigger('create');
   };
   
   /* Makes a call to the geocode API to get the longitude and latitude from the address
