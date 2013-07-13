@@ -78,261 +78,153 @@ var EXELON = (function (r, $) {
       try {
         RSKYBOX.log.info('entering', 'main.js.homeShow');
         if(!r.merchantList)
-          r.getMerchants();
+        	r.getMerchants();
         else
-          r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
+        	r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.homeShow');
       }
     },
     
     homeHide: function(){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.homeHide');
-        var toClear = $('#merchantListCollapsible');
-        toClear.empty(); /*Remove all old html in the list*/
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.homeHide');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.homeHide');
+    		var toClear = $('#merchantListCollapsible');
+    		toClear.empty(); /*Remove all old html in the list*/
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.homeHide');
+    	}
     },
     
+    
+    
     editMerchantShow: function(){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.editMerchantShow');
-        
-        var merchant = r.merchantToEdit;
-        
-        /*Modify the Header*/
-        var head = $('#editMerchantHead').text('Editing ' + merchant.Name);
-        
-        /*Modify the body*/
-        var content = $('#editMerchantContent');
-        
-        merchant.pageIdPrefix = "editMerchant";//Used in the template call
-        merchant.index = 0; //Also used in the template call
-        var editMerchantTemplate = _.template($('#editMerchantForm').html());
-        
-        content.append(editMerchantTemplate(merchant));
-      
-        var addNewPoc = $('#pocAddNew');
-        
-        /*Register all the delete button handlers*/
-        for(var i = 0; i < merchant.index; i++){
-          r.registerDelete('editMerchant',i);
-        };
-        
-        addNewPoc.bind('click', function(e){
-          var pocTemplate = _.template($('#decisionMakerForm').html());
-          $('#editMerchantPocList').append(pocTemplate({FirstName : "", LastName : "", 
-                                      Phone : "", Position : "", eMail : "", index : merchant.index,
-                                      pageIdPrefix : merchant.pageIdPrefix}));
-          $('#editMerchantPocList').trigger('create');
-          
-          r.registerDelete('editMerchant',merchant.index);
-          
-        });
-        
-        var save = $('#editMerchantSave');
-
-        save.bind('click', function(e){
-          var form = $('#editMerchantList :input');
-          var merchant = r.merchantToEdit;
-          
-          for(var i = 0; i < form.length; i++){//Update the regular properties
-            
-            if(form[i].type === 'checkbox'){
-              merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
-            }
-            else{
-              merchant[form[i].name] = form[i].value;
-            }
-            
-          }
-          var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
-          var pocList = [];
-          for(var i = 0; i < pocForm.length; i++){
-            var inputs = $(':input',pocForm[i]);
-            var poc = {};
-            for(var j = 0; j < inputs.length; j++){
-              poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
-            }
-            pocList.push(poc);
-          }
-          merchant.DecisionMakers = pocList;
-          
-          r.updateMerchant(merchant);//Send to server
-          $.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
-        });
-        
-
-        
-        content.trigger('create');//Add jquery mobile styling to elements
-        
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.editMerchantShow');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.editMerchantShow');
+    		
+    		r.merchantForm("editMerchant", false);
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.editMerchantShow');
+    	}
     },
     
     editMerchantHide: function(){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.editMerchantHide');
-        $('#editMerchantContent').empty();
-        delete r.merchantToEdit.index;
-        delete r.merchantToEdit.pageIdPrefix;
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.editMerchantHide');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.editMerchantHide');
+    		$('#editMerchantContent').empty();
+    		delete r.merchantToEdit.index;
+    		delete r.merchantToEdit.pageIdPrefix;
+    		
+    		//deregister event handler for save
+    		$('#editMerchantSave').unbind('click');
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.editMerchantHide');
+    	}
     },
 
     createNewMerchantShow : function(){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.createNewMerchantShow');
-
-        var merchant = {};
-        r.fixMerchants([merchant]);//create the necessary properties
-
-        /*Modify the body*/
-        var content = $('#createNewMerchantContent');
-
-        merchant.pageIdPrefix = "createNewMerchant";//Used for template
-        var editMerchantTemplate = _.template($('#editMerchantForm').html());
-        
-        
-         merchant.pageIdPrefix = "createNewMerchant";//Used in the template call
-         merchant.index = 0; //Also used in the template call
-         var editMerchantTemplate = _.template($('#editMerchantForm').html());
-
-         content.append(editMerchantTemplate(merchant));
-
-         var addNewPoc = $('#pocAddNew');
-
-         /*Register all the delete button handlers*/
-         for(var i = 0; i < merchant.index; i++){
-           r.registerDelete('createNewMerchant',i);
-         };
-
-         addNewPoc.bind('click', function(e){
-           var pocTemplate = _.template($('#decisionMakerForm').html());
-           $('#createNewMerchantPocList').append(pocTemplate({FirstName : "", LastName : "", 
-             Phone : "", Position : "", eMail : "", index : merchant.index,
-             pageIdPrefix : merchant.pageIdPrefix}));
-           $('#createNewMerchantPocList').trigger('create');
-
-           r.registerDelete('createNewMerchant',merchant.index);
-
-         });
-        
-        var save = $('#createNewMerchantSave');
-
-        save.bind('click', function(e){
-          var form = $('#createNewMerchantList :input');
-          for(var i = 0; i < form.length; i++){
-            if(form[i].type === 'checkbox'){
-              merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
-            }
-            else{
-              merchant[form[i].name] = form[i].value;
-            }
-          }
-          
-          var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
-          var pocList = [];
-          for(var i = 0; i < pocForm.length; i++){
-            var inputs = $(':input',pocForm[i]);
-            var poc = {};
-            for(var j = 0; j < inputs.length; j++){
-              poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
-            }
-            pocList.push(poc);
-          }
-          merchant.DecisionMakers = pocList;
-
-          r.createMerchant(merchant);
-          r.merchantList.push(merchant);
-          
-          $.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
-        });
-
-        content.trigger('create');
-
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.createNewMerchantShow');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.createNewMerchantShow');
+    		r.merchantForm("createNewMerchant", true);
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.createNewMerchantShow');
+    	}
     },
     
     createNewMerchantHide: function(){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.createNewMerchantHide');
-        $('#createNewMerchantContent').empty();
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.createNewMerchantHide');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.createNewMerchantHide');
+    		$('#createNewMerchantContent').empty();
+    		$('#createNewMerchantSave').unbind('click');
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.createNewMerchantHide');
+    	}
     },
     
     /*Merchant Display Screen (displays information about the active merchant*/
     merchantDisplayBeforeCreate: function (){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
-        r.attachPanel("merchantDisplay");
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.merchantDisplayBeforeCreate');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
+    		r.attachPanel("merchantDisplay");
+    		
+    		  $('#merchantDisplayNoteSave').bind('click', function(e){
+    				var textArea = $('#merchantDisplayNoteTextArea');
+    				var newNote = {  UserName : r.getUserName(),
+    						 		 LastUpdated : new Date(),
+    						 		 Note : textArea.prop('value') };
+    				r.activeMerchant.Notes.push(newNote);
+    				textArea.prop('value', "");
+    				$('#merchantDisplayNotePopup').popup('close');
+    				
+    				var act = { 'Type' : 'Note',
+							  'UserName' : r.getUserName(),
+							  'Date' : newNote.LastUpdated,
+							  'Note' : newNote.Note};
+    				r.activeMerchant.Activities.push(act);
+    				
+    				/*Update the displays on this page*/
+    				var NoteTemplate = _.template($('#NoteDisplayTemplate').html())
+    				var notesDisplay = $('#merchantDisplayNotesDisplay');
+    				notesDisplay.prepend(NoteTemplate(newNote));
+    				notesDisplay.listview('refresh');
+    				
+    				var activityDisplay = $('#merchantDisplayActivityFeed');
+    				activityDisplay.prepend($('<li />', {
+    					text : (MERCHANT.activityFeed[act.Type])(act) }));
+    				activityDisplay.listview('refresh');
+
+    			});
+    			
+    			$('#merchantDisplayNoteCancel').bind('click', function(e){
+    				$('#merchantDisplayNoteTextArea').prop('value', "");
+    				$('#merchantDisplayNotePopup').popup('close');
+    			});
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.merchantDisplayBeforeCreate');
+    	}
     },
     
     merchantDisplayShow: function(){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.merchantDisplayShow');
-        var content = $('#merchantDisplayContent');
-        var template = _.template($('#merchantDisplayContentTemplate').html());
-        
-        content.append(template(r.activeMerchant));
-        
-        $('#merchantDisplayEdit').bind('click', function(e){
-          r.merchantToEdit = r.activeMerchant;
-          $.mobile.changePage("#editMerchant", { transition: "slideup", changeHash: true });
-        });
-        
-        $('#merchantDisplayCommentSave').bind('click', function(e){
-          var textArea = $('#merchantDisplayCommentTextArea');
-          var newComment = { UserName : r.getUserName(),
-             'Date' : (new Date()).toJSON(),
-             Comment : textArea.prop('value') };
-          r.activeMerchant.Comments.push(newComment);
-          textArea.prop('value', "");
-          $('#merchantDisplayCommentPopup').popup('close');
-          
-          var commentTemplate = _.template($('#commentDisplayTemplate').html())
-          $('#merchantDisplayCommentsDisplay').prepend(commentTemplate(newComment));
-          $('#merchantDisplayCommentsDisplay').trigger('create');
-        });
-        
-        $('#merchantDisplayCommentCancel').bind('click', function(e){
-          $('#merchantDisplayCommentTextArea').prop('value', "");
-          $('#merchantDisplayCommentPopup').popup('close');
-        });
-        
-        content.trigger('create');
-        
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.merchantDisplayShow');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.merchantDisplayShow');
+    		
+    		$('#merchantDisplayHead').text(r.activeMerchant.Name);
+    		
+    		var content = $('#merchantDisplayContent');
+    		var template = _.template($('#merchantDisplayContentTemplate').html());
+    		
+    		content.append(template(r.activeMerchant));
+    		
+    		$('#merchantDisplayEdit').bind('click', function(e){
+    			r.merchantToEdit = r.activeMerchant;
+    			$.mobile.changePage("#editMerchant", { transition: "slideup", changeHash: true });
+    		});
+    		
+    		
+    		content.trigger('create');
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.merchantDisplayShow');
+    	}
     },
     
     merchantDisplayHide: function(){
-      try{
-        RSKYBOX.log.info('entering', 'main.js.merchantDisplayHide');
-        $('#merchantDisplayContent').empty();
-      }
-      catch(e){
-        RSKYBOX.log.error(e, 'main.js.merchantDisplayHide');
-      }
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.merchantDisplayHide');
+    		$('#merchantDisplayContent').empty();
+    		$('#merchantDisplayHead').empty();
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.merchantDisplayHide');
+    	}
     },
 
     // Configure Screen
@@ -356,7 +248,6 @@ var EXELON = (function (r, $) {
     configureShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.configureShow');
-        r.setConfigurePage(r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.configureShow');
       }
@@ -421,43 +312,43 @@ var EXELON = (function (r, $) {
   
   // Define event handlers for panel. Done here so it only happens one time -- when HTML page is loaded
   $(document).on('click', '.logOut', function(){
-    try {
-      r.logOut();
-      $.mobile.changePage( "#login", { transition: "slideup", changeHash: true });
-      return false;
+		try {
+			r.logOut();
+			$.mobile.changePage( "#login", { transition: "slideup", changeHash: true });
+			return false;
     } catch (e) {
       RSKYBOX.log.error(e, 'main.js.click.logOut');
     }
   });
 
   $(document).on('click', '.home', function(e){
-    try {
-      if($.mobile.activePage.is('#home')) {
-        $('#home_leftPanel').panel("close");
-      } else {
-        $.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
-      }
-      return false;
+		try {
+			if($.mobile.activePage.is('#home')) {
+				$('#home_leftPanel').panel("close");
+			} else {
+				$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+			}
+			return false;
     } catch (e) {
       RSKYBOX.log.error(e, 'main.js.click.home');
     }
   });
 
   $(document).on('click', '.configure', function(e){
-    try {
-      if($.mobile.activePage.is('#configure')) {
-        $('#configure_leftPanel').panel("close");
-      } else {
-        $.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
-      }
-      return false;
+		try {
+			if($.mobile.activePage.is('#configure')) {
+				$('#configure_leftPanel').panel("close");
+			} else {
+				$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
+			}
+			return false;
     } catch (e) {
       RSKYBOX.log.error(e, 'main.js.click.configure');
     }
   });
 
   var devUrl = 'http://dev.dagher.mobi/rest/v1/';
-  var prdUrl = 'https://arc.dagher.mobi/rest/v1/';
+	var prdUrl = 'https://arc.dagher.mobi/rest/v1/';
   r.getMerchants = function() {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
@@ -471,13 +362,13 @@ var EXELON = (function (r, $) {
         contenttype: 'application/json',
         url: closeurl,
         statuscode: r.statusCodeHandlers(),
-        headers: {'Authorization' : r.getAuthorizationHeader()},
+				headers: {'Authorization' : r.getAuthorizationHeader()},
         success: function(data, status, jqXHR) {
                     try {
-                      r.merchantList = data.Results;
-                      r.fixMerchants(r.merchantList);
-                      r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
-                      var jtest = 5;
+                    	r.merchantList = data.Results;
+                    	r.fixMerchants(r.merchantList);
+                    	r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
+                    	var jtest = 5;
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
                     }
@@ -490,197 +381,398 @@ var EXELON = (function (r, $) {
   
   /*Makes a call to Merchant Create*/
   r.createMerchant = function(merchant){
-  try {
-    RSKYBOX.log.info('entering', 'main.js.createMerchant');
-    RSKYBOX.log.info('Currently stubbed off:', 'main.js.createMerchant');
-    /*
-    var closeurl = devUrl + 'merchants/new';
-    var jsonobj = cleanMerchant(merchant);
-    
-    $.ajax({
-      type: 'post',
-      data: JSON.stringify(jsonobj),
-      datatype: 'json',
-      contenttype: 'application/json',
-      url: closeurl,
-      statuscode : r.statusCodeHandlers(),
-      success: function(){
-        RSKYBOX.log.info('finished', 'main.js.createMerchant');
-      }
-    });*/
-  }  
-  catch(e){
-    RSKYBOX.log.error(e,'main.js.createMerchant');
-  };
+	try {
+		RSKYBOX.log.info('entering', 'main.js.createMerchant');
+		RSKYBOX.log.info('Currently stubbed off:', 'main.js.createMerchant');
+		/*
+		var closeurl = devUrl + 'merchants/new';
+		var jsonobj = cleanMerchant(merchant);
+		
+		$.ajax({
+			type: 'post',
+			data: JSON.stringify(jsonobj),
+			datatype: 'json',
+			contenttype: 'application/json',
+			url: closeurl,
+			statuscode : r.statusCodeHandlers(),
+			success: function(){
+				RSKYBOX.log.info('finished', 'main.js.createMerchant');
+			}
+		});*/
+	}  
+	catch(e){
+		RSKYBOX.log.error(e,'main.js.createMerchant');
+	};
   };
   
   r.updateMerchant = function(merchant){
-    try{
-      RSKYBOX.log.info('entering', 'main.js.updateMerchant');
-      RSKYBOX.log.info('Currently stubbed off:', 'main.js.updateMerchant');
-
-      /*
-      if(merchant.EIN)
-        var closeurl = devUrl + merchants/update/ + merchant.EIN;
-      else
-        return; fail
-      
-      var jsonobj = cleanMerchant(merchant);
-      
-      $.ajax({
-        type : 'put',
-        data : JSON.stringify(jsonobj),
-        contenttype : 'application/json',
-        url : closeurl,
-        statuscode : r.statusCodeHandlers(),
-        success : function(){
-          RSKYBOX.log.info('finished', 'main.js.updateMerchant');
-        }
-      });
-      */
-    }
-    catch(e){
-      RSKYBOX.log.error(e, 'main.js.updateMerchant');
-    }
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.updateMerchant');
+		  RSKYBOX.log.info('Currently stubbed off:', 'main.js.updateMerchant');
+		  
+		  /*
+		  if(merchant.EIN)
+			  var closeurl = devUrl + merchants/update/ + merchant.EIN;
+		  else
+			  return; fail
+		  
+		  var jsonobj = cleanMerchant(merchant);
+		  
+		  $.ajax({
+			  type : 'put',
+			  data : JSON.stringify(jsonobj),
+			  contenttype : 'application/json',
+			  url : closeurl,
+			  statuscode : r.statusCodeHandlers(),
+			  success : function(){
+				  RSKYBOX.log.info('finished', 'main.js.updateMerchant');
+			  }
+		  });
+		  */
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e, 'main.js.updateMerchant');
+	  }
   };
   
   /*Remove all forms equal to "" */
   r.cleanMerchant = function(merchant){
-    var newMerchant = {};
-    for(var i = 0; i < MERCHANT.merchantDisplay.length; i++){
-      var prop = MERCHANT.merchantDisplay[i].propName;
-      if(merchant[prop] === "" || merchant[prop] === undefined){
-        continue;
-      }
-      else{
-        newMerchant[prop] = merchant[prop];
-      }
-    }
-    return newMerchant;
+	  var newMerchant = {};
+	  for(var i = 0; i < MERCHANT.merchantDisplay.length; i++){
+		  var prop = MERCHANT.merchantDisplay[i].propName;
+		  if(merchant[prop] === "" || merchant[prop] === undefined){
+			  continue;
+		  }
+		  else{
+			  newMerchant[prop] = merchant[prop];
+		  }
+	  }
+	  return newMerchant;
   };
   
   r.writeMerchantList = function(location, merchantList){
-    try{
-      RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
-
-      var merchantTemplate = _.template($('#collapsibleMercahntList').html());
-
-      for(var i = 0; i < merchantList.length; i++){
-        merchantList[i].Number = i.toString();
-        location.append(merchantTemplate(merchantList[i]));
-        delete merchantList[i].Number;
-
-        var choose = $('#merchantChoose'+i,location);
-        choose.bind('click', function(e){
-          var name = $(this).attr('merchantName');
-          r.activeMerchant = r.getMerchantByName(name);
-          $.mobile.changePage("#merchantDisplay");
-        });
-
-        var edit = $('#merchantEdit' + i, location);
-        edit.bind('click', function(e){
-          var name = $(this).attr('merchantName');
-          r.merchantToEdit = r.getMerchantByName(name);
-          $.mobile.changePage( "#editMerchant", { transition: "slideup", changeHash: true });
-        });
-      }
-
-      $('#homeContent').trigger('create');
-    }
-    catch(e){
-      RSKYBOX.log.error(e,'main.js.writeMerchantList');
-    }
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
+		  
+		  var merchantTemplate = _.template($('#collapsibleMercahntList').html());
+		  
+		  for(var i = 0; i < merchantList.length; i++){
+			  merchantList[i].Number = i.toString();
+			  merchantList[i].r = r; //Reference to other functions
+			  location.append(merchantTemplate(merchantList[i]));
+			  delete merchantList[i].Number;
+			  delete merchantList[i].r;
+			  
+			  var choose = $('#merchantChoose'+i,location);
+			  choose.bind('click', function(e){
+				  var name = $(this).attr('merchantName');
+				  r.activeMerchant = r.getMerchantByName(name);
+				  $.mobile.changePage("#merchantDisplay");
+			  });
+			  
+			  var edit = $('#merchantEdit' + i, location);
+			  edit.bind('click', function(e){
+				  var name = $(this).attr('merchantName');
+				  r.merchantToEdit = r.getMerchantByName(name);
+				  $.mobile.changePage( "#editMerchant", { transition: "slideup", changeHash: true });
+			  });
+		  }
+		  
+		  $('#homeContent').trigger('create');
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.writeMerchantList');
+	  }
   };
   
   r.getMerchantByName = function(name){
-    for(var i = 0; i < r.merchantList.length; i++){
-      if(name === r.merchantList[i].Name)
-        return r.merchantList[i];
-    }
+	  for(var i = 0; i < r.merchantList.length; i++){
+		  if(name === r.merchantList[i].Name)
+			  return r.merchantList[i];
+	  }
   };
   
   r.fixMerchants = function(merchantList){
-    var propList = MERCHANT.merchantDisplay;
-    for(var merchIndex = 0; merchIndex < merchantList.length; merchIndex++){
-      var merchant = merchantList[merchIndex];
-      for(var propIndex = 0; propIndex < propList.length; propIndex++){
-        var prop = propList[propIndex].propName
-        if(merchant[prop] === undefined){
-          merchant[prop] = "";
-        }
-      }
-      var elm;
-      if( !(merchantList[merchIndex].DecisionMakers))
-        merchantList[merchIndex].DecisionMakers = [];
-      if( !(merchantList[merchIndex].Comments))
-        merchantList[merchIndex].Comments = [];
-    }
+	  var propList = MERCHANT.merchantDisplay;
+	  for(var merchIndex = 0; merchIndex < merchantList.length; merchIndex++){
+		  var merchant = merchantList[merchIndex];
+		  for(var propIndex = 0; propIndex < propList.length; propIndex++){
+			  var prop = propList[propIndex].propName
+			  if(merchant[prop] === undefined){
+				  merchant[prop] = "";
+			  }
+		  }
+		  var elm;
+		  if( !(merchantList[merchIndex].DecisionMakers))
+			  merchantList[merchIndex].DecisionMakers = [];
+		  if( !(merchantList[merchIndex].Notes))
+			  merchantList[merchIndex].Notes = [];
+		  if( !(merchantList[merchIndex].Activities))
+			  merchantList[merchIndex].Activities = [];
+	  }
   };
   
 
-  // merchants param:  an array of merchant javascript objects to be displayed
+	// merchants param:  an array of merchant javascript objects to be displayed
   r.displayMerchants = function(merchants) {
     try {
       RSKYBOX.log.info('entering', 'main.js.displayMerchants');
 
-      // Creates the template object from the index.html <script> definition
-      var merchantEntryTemplate = _.template($('#merchantEntryTemplate').html());
+			// Creates the template object from the index.html <script> definition
+			var merchantEntryTemplate = _.template($('#merchantEntryTemplate').html());
 
-      var listHtmlContent = "";
-      for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
-        // Call the template passing the merchant object.  This is where the fields in the merchant object are
-        // substituted into the  <%= xyzField  %> constructs in the template. The template returns HTML ready
-        // to be placed into the Document Object Model (DOM)
-        listHtmlContent += merchantEntryTemplate(merchants[merIndex]);
-      }
+			var listHtmlContent = "";
+			for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+				// Call the template passing the merchant object.  This is where the fields in the merchant object are
+				// substituted into the  <%= xyzField  %> constructs in the template. The template returns HTML ready
+				// to be placed into the Document Object Model (DOM)
+				listHtmlContent += merchantEntryTemplate(merchants[merIndex]);
+			}
 
-      // ok, now put the concatenated HTML from the for loop above into the DOM
-      $('#merchantList').html(listHtmlContent);
+			// ok, now put the concatenated HTML from the for loop above into the DOM
+			$('#merchantList').html(listHtmlContent);
     } catch (e) {
       RSKYBOX.log.error(e, 'displayMerchants');
     }
   };
   
+  /*builds either the editMerchant or createNewMerchant page depending on the
+   * given pageId and value of newMerchant (true for createNewMerchant, false for editMerhcant
+   */
+  r.merchantForm = function(pageId, newMerchant){
+
+	  var merchant;
+	  if(newMerchant){
+		  merchant = {};
+		  r.fixMerchants([merchant]);//create the necessary properties
+		  //Do not modify the header
+	  }
+	  else{
+		  merchant = r.merchantToEdit;
+		  var head = $('#'+pageId+'Head').text('Editing ' + merchant.Name);//Modify the header
+	  }
+
+	  var start = new Date(); //measures the time it takes to fill out the form.
+
+	  /*Modify the body*/
+	  var content = $('#'+pageId+'Content');
+
+	  merchant.pageIdPrefix = pageId;//Used for template
+	  merchant.index = 0; //Also used in the template call
+	  var editMerchantTemplate = _.template($('#editMerchantForm').html());
+
+	  content.append(editMerchantTemplate(merchant));
+
+	  var addNewPoc = $('#pocAddNew');
+
+	  /*Register all the delete button handlers*/
+	  for(var i = 0; i < merchant.index; i++){
+		  r.registerDelete(pageId,i);
+	  };
+
+	  addNewPoc.bind('click', function(e){
+		  var pocTemplate = _.template($('#decisionMakerForm').html());
+		  $('#'+pageId+'PocList').append(pocTemplate({FirstName : "", LastName : "", 
+			  Phone : "", Position : "", eMail : "", index : merchant.index,
+			  pageIdPrefix : merchant.pageIdPrefix}));
+		  $('#'+pageId+'PocList').trigger('create');
+
+		  r.registerDelete(pageId,merchant.index);
+		  merchant.index++;
+	  });
+
+	  $('#'+pageId+'GetLngLat').bind('click', function(e){
+		  var lngObj = $('#'+pageId+'Longitude');
+		  var latObj = $('#'+pageId+'Latitude');
+
+		  var street = $('#'+pageId+'Street').val();
+		  var city = $('#'+pageId+'City').val();
+		  var state = $('#'+pageId+'State').val();
+		  var zip = $('#'+pageId+'ZipCode').val();
+		  if(street === "" || city === "" || state === ""){
+			  var pop = $('#'+pageId+'RequiredPopup');
+			  pop.empty();
+			  pop.append($('<h1 />', {text : "You must fill out a fill address to find the longitude /latitude"}));
+			  pop.popup("open");
+			  return;
+		  }
+
+		  var address = r.readyAddress(street,city,state,zip);
+
+		  r.fetchLngLat(lngObj,latObj,address);
+	  });
+
+	  var notesToAdd = [];
+	  var activitiesToAdd = [];
+	  
+	  $('#'+pageId+'NoteSave').bind('click', function(e){
+			var textArea = $('#'+pageId+'NoteTextArea');
+			var newNote = {  UserName : r.getUserName(),
+					 		 LastUpdated : new Date(),
+					 		 Note : textArea.prop('value') };
+			notesToAdd.push(newNote);
+			textArea.prop('value', "");
+			$('#'+pageId+'NotePopup').popup('close');
+			
+			var act = { 'Type' : 'Note',
+					  'UserName' : r.getUserName(),
+					  'Date' : newNote.LastUpdated,
+					  'Note' : newNote.Note};
+			activitiesToAdd.push(act);
+	  });
+	  
+	  $('#'+pageId+'NoteCancel').bind('click', function(e){
+			$('#'+pageId+'NoteTextArea').prop('value', "");
+			$('#'+pageId+'NotePopup').popup('close');
+		});
+	  
+	  $('#'+pageId+'Save').bind('click', function(e){
+		  var form = $('#'+pageId+'List :input');
+		  var formsFilled = [];
+		  for(var i = 0; i < form.length; i++){
+			  if(form[i].getAttribute('pocProp') !== null){
+				  continue;//Skip these, do them below
+			  }
+
+			  if(form[i].required && form[i].value === ""){
+				  var pop = $('#'+pageId+'RequiredPopup');
+				  pop.empty();
+				  pop.append($('<h1 />', {text : "The " + form[i].name + " field is required."}));
+				  pop.popup("open");
+				  return;
+			  }
+
+			  if(form[i].type === 'checkbox'){
+				  merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
+			  }
+			  else{
+				  merchant[form[i].name] = form[i].value;
+				  if(form[i].value !== ""){//This field was actually filled out
+					  formsFilled.push(form[i].name);
+				  }
+			  }
+		  }
+
+		  var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
+		  var pocList = [];
+		  for(var i = 0; i < pocForm.length; i++){
+			  var inputs = $(':input',pocForm[i]);
+			  var poc = {};
+			  for(var j = 0; j < inputs.length; j++){
+				  poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
+			  }
+			  pocList.push(poc);
+		  }
+		  merchant.DecisionMakers = pocList;
+
+		  merchant.Notes = merchant.Notes.concat(notesToAdd);
+		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
+		  
+		  if(newMerchant){
+			  r.createMerchant(merchant);
+			  r.merchantList.push(merchant);
+		  }
+		  else{
+			  r.updateMerchant(merchant);
+		  }
+
+		  /*Create the activity*/
+		  var end = new Date();
+		  var editTime = end.getTime() - start.getTime();
+		  var activity;
+
+		  if(newMerchant){
+			  activity = {'Type' : 'MerchantCreate',
+					  'Date' : end,
+					  UserName : r.getUserName(),
+					  FormsFilled : formsFilled,
+					  EditTime : editTime
+			  }
+		  }
+		  else{
+			  activity = {'Type' : 'MerchantEdit',
+					  'Date' : end,
+					  UserName : r.getUserName(),
+					  FormsFilled : formsFilled,
+					  EditTime : editTime
+			  }
+		  }
+		  merchant.Activities.push(activity);
+
+		  $.mobile.back();
+
+	  });
+
+	  content.trigger('create');
+  };
+  
+  /* Makes a call to the geocode API to get the longitude and latitude from the address
+   * Expects the longitude and latiude forms to write into and a properly formatted address
+   * address should encode all spaces as +'s
+   */
+  r.fetchLngLat = function(lngObj, latObj, Address){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.fetchLngLat');
+		  var geocodeURL = "http://maps.googleapis.com/maps/api/geocode/json?address="+ Address;
+		  geocodeURL += '&sensor=false';
+		  $.ajax({
+			  dataType : 'json',
+			  url : geocodeURL,
+			  type : "GET",
+			  success : function(data){
+				  if(data.results.length >= 1){
+					  var res = data.results[0];
+					  lngObj.val(res.geometry.location.lng);
+					  latObj.val(res.geometry.location.lat);
+				  }
+				  
+			  }
+		  });
+	  }
+	  catch(e){
+		  RSKYBOX.log.info(e, 'main.js.fetchLngLat');
+	  }
+  };
+  
+  r.readyAddress = function(street,city,state,zip){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.readyAddress');
+			var address = street.replace(/\s+/g, '+');//replace all white space with +
+			address += ',+';
+			address += city.replace(/\s+/g, '+');
+			address += ',+';
+			address += state.replace(/\s+/g, '+');
+			address += ',+';
+			address += zip.replace(/\s+/g, '+');
+			return address;
+	  }
+	  catch(e){
+		  RSKYBOX.log.info(e,'main.js.readyAddress');
+	  }
+  };
+  
   /*Register handlers for the delete buttons for POC objects given prefix and index*/
   r.registerDelete = function(idPrefix, i){
-    var del = $('#'+idPrefix + 'Delete' +i);
-    del.bind('click', function(e){
-      $('#pocForm'+i).remove();
-    });
-    $('#'+idPrefix + 'PocList').trigger('create');
+		var del = $('#'+idPrefix + 'Delete' +i);
+		del.bind('click', function(e){
+			$('#pocForm'+i).remove();
+		});
+		$('#'+idPrefix + 'PocList').trigger('create');
   };
-
-  r.setConfigurePage = function(merchants) {
-    try{
-      RSKYBOX.log.info('entering','main.js.setConfigurePage');
-
-      var merchantConfigureTemplate = _.template($('#merchantConfigureTemplate').html());
-      var merListConfigHtml = "";
-      var nextMer;
-
-      for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
-        nextMer = merchantConfigureTemplate(merchants[merIndex]);
-        nextMer = nextMer.replace("merchant_configSelect", merIndex + "configSelect");
-        merListConfigHtml += nextMer;
-      }
-      $('#merchantConfigureList').html(merListConfigHtml);
-
-      for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
-        $('#' + merIndex + 'configSelect').attr("merNum",merIndex);
-        $('#' + merIndex + 'configSelect').click(function() {
-          var merIndex = $(this).attr("merNum");
-          $("#startConfigure").attr("merchant", merIndex);
-          $("#startConfigure").empty();
-          $("#startConfigure").text(merchants[merIndex].Name + ": Start Configuration");
-          $('#configure').trigger('create');
-        });
-      }
-      $('#configure').trigger('create');
-
-    } catch (e) {
-      RSKYBOX.log.error(e,'setConfigurePage')
-    }
-  }
+  
+  /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
+  r.getStatusTheme = function(Status){
+	  var key = MERCHANT.merchantDisplay[0].options;
+	  if(Status === key[1])
+		  return 'b';
+	  if(Status === key[2])
+		  return 'e';
+	  if(Status === key[3])
+		  return 'c';
+	  if(Status === key[4])
+		  return 'a';
+	  return 'd';
+  };  
 
   try {
     r.router = new $.mobile.Router([
@@ -697,9 +789,9 @@ var EXELON = (function (r, $) {
       { '#editMerchant':         { handler: 'editMerchantHide',     events: 'h'} },
       { '#createNewMerchant':    { handler: 'createNewMerchantShow', events: 's' } },
       { '#createNewMerchant':    { handler: 'createNewMerchantHide', events: 'h' } },
-      { '#merchantDisplay':    { handler: 'merchantDisplayBeforeCreate',  events: 'bc'} },
-      { '#merchantDisplay':      { handler: 'merchantDisplayShow',      events: 's' } },
-      { '#merchantDisplay':      { handler: 'merchantDisplayHide',      events: 'h' } },
+      { '#merchantDisplay':		 { handler: 'merchantDisplayBeforeCreate',  events: 'bc'} },
+      { '#merchantDisplay':      { handler: 'merchantDisplayShow',			events: 's' } },
+      { '#merchantDisplay':      { handler: 'merchantDisplayHide',			events: 'h' } },
       { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
       { '#configure':            { handler: 'configureInit',    events: 'i'  } },
       { '#configure':            { handler: 'configureShow',    events: 's'   } }
