@@ -70,6 +70,7 @@
     </script>
     
     <div data-role="page" id="editMerchant">
+<<<<<<< HEAD
       <div data-role="header" data-position="fixed" data-tap-toggle="false" >
           <a href="#home" data-role="button" data-icon="arrow-l">Back</a>
         <h1 id="editMerchantHead">Editing </h1>
@@ -86,6 +87,55 @@
     <ul data-role="listview" id="<%=pageIdPrefix%>List">
 
     <div class="ui-grid-a">
+=======
+    	<div data-role="header" data-position="fixed" data-tap-toggle="false" >
+    		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
+    			<a href="#home" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
+    		</div>
+    		<h1 id="editMerchantHead">Editing </h1>
+    		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
+    			<a href="#editMerchantNotePopup" data-icon="plus" data-rel="popup" data-role="button">Add Note</a>
+    			<button data-icon="check" id="editMerchantSave">Save</button>
+  			</div>
+    	</div>
+    	
+    	<div data-role="content" id="editMerchantContent">
+
+    	</div>
+    	
+    	<div data-role="popup" id="editMerchantNotePopup">
+    		<label for="editMerchantNoteTextArea">Enter Your Note Here:</label>
+			<textarea cols="40" rows="10" id="editMerchantNoteTextArea"></textarea>
+			<div class="ui-grid-b">
+				<div class="ui-block-a">
+					<button id="editMerchantNoteSave" data-icon="check">Save</button>
+				</div>
+				<div class="ui-block-b">
+					<button id="editMerchantNoteCancel" data-icon="delete">Cancel</button>
+				</div>
+			</div>
+    	</div>
+    	
+    	 <div data-role="popup" id="editMerchantRequiredPopup" class="ui-content">
+    	</div>
+    </div>
+    
+    <script type="text/template" id="editMerchantForm">
+		<ul data-role="listview" id="<%=pageIdPrefix%>List" data-inset="true">
+
+		<div class="ui-grid-a">
+		
+		<div class="ui-block-a">
+			<li><label for="<%=pageIdPrefix%>Name"> Name* </label>
+			<input type="text" name="Name" id="<%=pageIdPrefix%>Name" value="<%= Name %>" required="true"></li>
+
+			<li><label for="<%=pageIdPrefix%>POS"> POS Type </label>
+				<select id="<%=pageIdPrefix%>POS" name="POS">
+					<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> >POS_MICROS</option>
+					<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> >POS_ISIS</option>
+					<option <%if(POS == 'POS_ALOHA'){ %>selected<% } %> >POS_ALOHA</option>
+				</select></li>
+>>>>>>> master
 
     <div class="ui-block-a">
       <li><label for="<%=pageIdPrefix%>Name"> Name </label>
@@ -94,6 +144,7 @@
       <li><label for="<%=pageIdPrefix%>Street"> Street </label>
       <input type="text" name="Street" id="<%=pageIdPrefix%>Street" value="<%= Street %>" ></li>
 
+<<<<<<< HEAD
       <li><label for="<%=pageIdPrefix%>City"> City </label>
       <input type="text" name="City" id="<%=pageIdPrefix%>City" value="<%= City %>" ></li>
 
@@ -112,10 +163,27 @@
 
       <li><label for="<%=pageIdPrefix%>NumTables"> Number of Tables </label>
       <input type="text" name="NumTables" id="<%=pageIdPrefix%>NumTables" value="<%= NumTables %>" ></li>
+=======
+			<li><label for="<%=pageIdPrefix%>ZipCode"> Zipcode </label>
+			<input type="text" name="ZipCode" id="<%=pageIdPrefix%>ZipCode" value="<%= ZipCode %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>TypeOfService"> Type of Service </label>
+			<input type="text" name="TypeOfService" id="<%=pageIdPrefix%>TypeOfService" value="<%= TypeOfService %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>NumPOSTerminals"> Number of Point of Sale Terminals </label>
+			<input type="number" name="NumPOSTerminals" id="<%=pageIdPrefix%>NumPOSTerminals" value="<%= NumPOSTerminals %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>AvgNumServers"> Average Number of Servers </label>
+			<input type="number" name="AvgNumServers" id="<%=pageIdPrefix%>AvgNumServers" value="<%= AvgNumServers %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>FacebookHandler"> Facebook Handle </label>
+			<input type="email" name="FacebookHandler" id="<%=pageIdPrefix%>FacebookHandler" value="<%= FacebookHandler %>" ></li>
+>>>>>>> master
 
       <li><label for="<%=pageIdPrefix%>FacebookHandler"> Facebook Handle </label>
       <input type="text" name="FacebookHandler" id="<%=pageIdPrefix%>FacebookHandler" value="<%= FacebookHandler %>" ></li>
 
+<<<<<<< HEAD
       <li><label for="<%=pageIdPrefix%>CurrentCreditRate"> Current Credit Rate </label>
       <input type="text" name="CurrentCreditRate" id="<%=pageIdPrefix%>CurrentCreditRate" value="<%= CurrentCreditRate %>" ></li>
 
@@ -151,10 +219,52 @@
 
       <li><label for="<%=pageIdPrefix%>NumSeats"> Number of Seats </label>
       <input type="text" name="NumSeats" id="<%=pageIdPrefix%>NumSeats" value="<%= NumSeats %>" ></li>
+=======
+			<li><label for="<%=pageIdPrefix%>Longitude">Longitude</label>
+				<input type="text" name="Longitude" id="<%=pageIdPrefix%>Longitude" value="<%= Longitude %>"></li>
+		</div>
+
+
+		<div class="ui-block-b" style="text-align: left">
+
+			<li><label for="<%=pageIdPrefix%>TypeOfFood"> Type of Food </label>
+			<input type="text" name="TypeOfFood" id="<%=pageIdPrefix%>TypeOfFood" value="<%= TypeOfFood %>"></li>
+
+			<li><label for="<%=pageIdPrefix%>Status"> Status </label>
+			<select name="Status" id="<%=pageIdPrefix%>Status">
+				<option <%if(Status === 'Potential'){ %>selected<% } %> >Potential</option>
+				<option <%if(Status === 'In Talks'){ %>selected<% } %> >In Talks</option>
+				<option <%if(Status === 'Configuration'){ %>selected<% } %> >Configuration</option>
+				<option <%if(Status === 'Ready'){ %>selected<% } %> >Ready</option>
+				<option <%if(Status === 'Active'){ %>selected<% } %> >Active</option>
+			</select></li>
+
+			<li><label for="<%=pageIdPrefix%>State"> State </label>
+			<input type="text" name="State" id="<%=pageIdPrefix%>State" value="<%= State %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>PaymentAccepted"> Payment Accepted </label>
+			<input type="text" name="PaymentAccepted" id="<%=pageIdPrefix%>PaymentAccepted" value="<%= PaymentAccepted %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>eMail"> eMail </label>
+			<input type="email" name="eMail" id="<%=pageIdPrefix%>eMail" value="<%= eMail %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>Website"> Website </label>
+			<input type="url" name="Website" id="<%=pageIdPrefix%>Website" value="<%= Website %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>NumSeats"> Number of Seats </label>
+			<input type="number" name="NumSeats" id="<%=pageIdPrefix%>NumSeats" value="<%= NumSeats %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>PriceLevel"> Average Price of a Menu Item </label>
+			<input type="text" name="PriceLevel" id="<%=pageIdPrefix%>PriceLevel" value="<%= PriceLevel %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>TwitterHandler"> Twitter Handle </label>
+			<input type="email" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
+>>>>>>> master
 
       <li><label for="<%=pageIdPrefix%>TwitterHandler"> Twitter Handle </label>
       <input type="text" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
 
+<<<<<<< HEAD
       <li><label for="<%=pageIdPrefix%>CurrentCreditFee"> Current Credit Fee </label>
       <input type="text" name="CurrentCreditFee" id="<%=pageIdPrefix%>CurrentCreditFee" value="<%= CurrentCreditFee %>" ></li>
 
@@ -163,6 +273,29 @@
 
     <li data-role="list-divider">Points of Contact</li>
     <div id="<%=pageIdPrefix%>PocList">
+=======
+			<li><label for="<%= pageIdPrefix%>Latitude">Latitude</label>
+			<input type="text" name="Latitude" id="<%= pageIdPrefix%>Latitude" value="<%=Latitude%>"></li>
+
+		</div><!-- ui-block-b -->
+		</div><!-- ui-grid-a -->
+
+		<button id="<%=pageIdPrefix%>GetLngLat" data-icon="grid">Fetch Longitude and Latitude</button>
+
+		<li data-role="list-divider">Points of Contact</li>
+		<div id="<%=pageIdPrefix%>PocList">
+
+			<% _.each(DecisionMakers, function(Poc) { %>
+				<% template = _.template($('#decisionMakerForm').html()); %>
+				<% Poc.index = index; %>
+				<% Poc.pageIdPrefix = pageIdPrefix %>
+				<%=template(Poc)%>
+				<% delete Poc.index %>
+				<% delete Poc.pageIdPrefix %>
+				<li data-role="list-divider"></li>
+				
+			<%  }); %>
+>>>>>>> master
 
       <% _.each(DecisionMakers, function(Poc) { %>
         <% template = _.template($('#decisionMakerForm').html()); %>
@@ -186,14 +319,25 @@
 
     <div class="ui-block-a">
 
+<<<<<<< HEAD
       <li><label for="<%=pageIdPrefix%>PocFirstName<%=index%>" >First Name</label>
         <input type="text" PocProp="FirstName" index="<%=index%>" id="pageIdPrefix%>PocFirstName<%=index%>" value="<%=FirstName%>" ></li>
+=======
+			<li><label for="<%=pageIdPrefix%>PoceMail<%=index %>" >eMail Address</label>
+				<input type="email" PocProp="eMail" index="<%=index%>" id="<%=pageIdPrefix%>PoceMail<%=index %>" value="<%=eMail%>" ></li>
+>>>>>>> master
 
       <li><label for="<%=pageIdPrefix%>PocPhone<%=index %>" >Phone Number</label>
         <input type="text" PocProp="Phone" index="<%=index%>" id="<%=pageIdPrefix%>PocPhone<%=index %>" value="<%=Phone%>" ></li>
 
+<<<<<<< HEAD
       <li><label for="<%=pageIdPrefix%>PoceMail<%=index %>" >eMail Address</label>
         <input type="text" PocProp="eMail" index="<%=index%>" id="<%=pageIdPrefix%>PoceMail<%=index %>" value="<%=eMail%>" ></li>
+=======
+		<div class="ui-block-b" style="text-align: left">
+			<li><label for="<%=pageIdPrefix%>PocLastName<%=index %>" >Last Name</label>
+			<input type="text" PocProp="LastName" index="<%=index%>" id="<%=pageIdPrefix%>PocLastName<%=index %>" value="<%=LastName%>" ></li>
+>>>>>>> master
 
     </div>
 
@@ -210,13 +354,23 @@
     <li data-role="list-divider">--------------------------------------------------------</li>
     </div>
 
+<<<<<<< HEAD
   </script>
+=======
+			<br>
+			<li><button id="<%=pageIdPrefix%>Delete<%=index%>" data-icon="delete">Delete</button></li>
+		</div>
+		</div>
+		</div>
+		
+	</script>
+>>>>>>> master
 
     <div data-role="page" id="home">
     
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
        <a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
-       <h1>Account Manager</h1>
+       <h1>Select Merchant</h1>
        <a href="#createNewMerchant" data-icon="plus" data-role="button">Add</a>
        
       </div>
@@ -237,6 +391,7 @@
     </div><!-- /page -->
 
 <script type="script/template" id="collapsibleMercahntList">
+<<<<<<< HEAD
     <li>
       <div data-role="collapsible">
         <h3><%= Name %></h3>
@@ -404,6 +559,210 @@
       <p><%=Comment%></p>
     </li>
   </script>
+=======
+		<li>
+			<div data-role="collapsible" data-theme="<%=r.getStatusTheme(Status)%>">
+				<h3><%= Name %></h3>
+				<div class="ui-grid-a" id="merchantList<%=Number%>" >
+
+				<div class="ui-block-a"><!-- Left hand side -->
+				<ul style="list-style-type: square">
+					<li>Status: <b><%= Status %></b></li>
+					<li>Accepted Terms and Conditions:<b><%= AcceptTerms %></b></li>
+					<li>Street: <b><%= Street %></b></li>
+					<li>State: <b><%= State %></b></li>
+					<li>Point of Sale Device: <b><%= POS %></b></li>
+					<li>Twitter Handle: <b><%= TwitterHandler %></b></li>
+					<li>Website : <b><%= Website %></b></li>
+					<li>Number of Tables: <b><%= NumTables %></b></li>
+					<li>Type of Service : <b><%= TypeOfService %></b></li>
+					<li>Current Credit Fee : <b><%= CurrentCreditFee%></b></li>
+				</ul></div>
+
+				<div class="ui-block-b" style="text-align: left"><!-- Right hand side -->
+				<ul style="list-style-type: square">
+					<li>Employer ID Number: <b><%= EIN %></b></li>
+					<li>City: <b><%= City %></b></li>
+					<li>ZipCode: <b><%= ZipCode %></b></li>
+					<li>Payment Accepted: <b><%= PaymentAccepted %></b></li>
+					<li>eMail Address: <b><%= eMail %></b></li>
+					<li>Facebook Handle: <b><%= FacebookHandler %></b></li>
+					<li>Price Level: <b><%= PriceLevel %></b></li>
+					<li>Number of Seats: <b><%= NumSeats %></b></li>
+					<li>Current Credit Card Rate: <b><%=CurrentCreditRate %></b></li>
+				</ul></div>
+				</div><!-- End Grid -->
+				<% _.each(DecisionMakers, function(person) { %>
+					<h3>Point of Contact: <%= person.FirstName %> <%= person.LastName %> </h3>
+					<div class="ui-grid-a">
+					<div class="ui-block-a">
+						<ul>
+						<li>Position : <b><%= person.Position %></b></li>
+						<li>eMail Address : <b><%= person.eMail %></b></li>
+						</ul>
+					</div>
+					
+					<div class="ui-block-b">
+						<ul>
+						<li>Phone Number: <b><%= person.Phone %></b></li>
+						</ul>
+					</div>
+					</div>
+				<% }); %>
+
+			<div class="ui-grid-a">
+			<div class="ui-block-a">
+				<button id="merchantChoose<%= Number %>" merchantName="<%= Name %>">Select</button>
+			</div>
+			<div class="ui-block-b">
+				<button id="merchantEdit<%= Number %>" merchantName="<%= Name %>">Edit</button>
+			</div>
+			</div>
+			</div>
+		</li>
+	</script>
+
+	<div data-role="page" id="createNewMerchant">
+	
+		<div data-role="header" data-position="fixed" data-tap-toggle="false">
+			<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
+    			<a href="#home" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
+    		</div>
+    		<h1 id="editMerchantHead">Create Merchant</h1>
+    		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
+    			<a href="#createNewMerchantNotePopup" data-rel="popup" data-icon="plus" data-role="button">Add Note</a>
+    			<button data-icon="check" id="createNewMerchantSave">Save</button>
+  			</div>
+		</div>
+
+		<div data-role="content" id="createNewMerchantContent">
+	
+    	</div>
+    	
+    	<div data-role="popup" id="createNewMerchantNotePopup">
+    		<label for="createNewMerchantNoteTextArea">Enter Your Note Here:</label>
+			<textarea cols="40" rows="10" id="createNewMerchantNoteTextArea"></textarea>
+			
+			<div class="ui-grid-b">
+				<div class="ui-block-a">
+					<button id="createNewMerchantNoteSave" data-icon="check">Save</button>
+				</div>
+				<div class="ui-block-b">
+					<button id="createNewMerchantNoteCancel" data-icon="delete">Cancel</button>
+				</div>
+			</div>
+    	</div>
+    	
+    	<div data-role="popup" id="createNewMerchantRequiredPopup" class="ui-content">
+    	</div>
+
+	</div>
+	
+	<div data-role="page" id="merchantDisplay">
+	
+		<div data-role="header" data-position="fixed" data-tap-toggle="false">
+			<a href="#merchantDisplay_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+			<h1 id="merchantDisplayHead"></h1>
+		</div>
+		
+		<div data-role="content" id="merchantDisplayContent">
+		
+		</div>
+		
+		<div id="merchantDisplayNotePopup" data-role="popup">
+			<label for="merchantDisplayNoteTextArea">Enter Your Note Here:</label>
+			<textarea cols="40" rows="10" id="merchantDisplayNoteTextArea"></textarea>
+			<div class="ui-grid-b">
+				<div class="ui-block-a">
+					<button id="merchantDisplayNoteSave" data-icon="check">Save</button>
+				</div>
+				<div class="ui-block-b">
+					<button id="merchantDisplayNoteCancel" data-icon="delete">Cancel</button>
+				</div>
+			</div>
+		</div>
+	
+	</div>
+	
+	<script type="script/template" id="merchantDisplayContentTemplate">
+
+	<div class="ui-grid-b">
+
+	<div class="ui-block-a">
+		<a href="#home" data-role="button">Change Merchant</a>
+	</div>
+
+	<div class="ui-block-b">
+		<button id="merchantDisplayEdit">Edit</button>
+	</div>
+
+	<div class="ui-block-c">
+		<a href="#configure" data-role="button">Configure</a>
+	</div>
+
+	</div>
+
+	<ul data-role="listview" data-inset="true">
+		<li>
+			<!--<img src="default"></img>-->
+			<h3>Name: <%= Name%></h3>
+			<h3>Address: <%= Street %> <%= City %>, <%= State %> <%= ZipCode%></h3>
+			<h3>Status: <%= Status %></h3>
+		</li>
+
+		<li data-role="list-divider">Activity Feed</li>
+		</ul>
+		
+		<ul data-role="listview" data-inset="true" id="merchantDisplayActivityFeed">
+		<li><% for(var i = Activities.length-1; i >= 0 ; i--){ %>
+			<% var act = Activities[i]; %>
+			<li><%= (MERCHANT.activityFeed[act.Type])(act) %></li>
+			<% } %>
+		<li data-role="list-divider">Contact</li>
+
+		<li>
+			<h3>Email Address: <%= eMail %></h3>
+			<h3>Twitter Handle: <%= TwitterHandler%></h3>
+			<h3>Facebook Page: <%= FacebookHandler%></h3>
+			<h3>Website: <%= Website %></h3>
+		</li>
+		<li data-role="list-divider">Financial</li>
+		<li>
+			<h3>Price Level: <%= PriceLevel%></h3>
+			<h3>Number of Tables: <%= NumTables %></h3>
+			<h3>Number of Seats: <%= NumSeats%></h3>
+			<h3>Point of Sale Device: <%= POS %></h3>
+		</li>
+		<li data-role="list-divider">Points of Contact</li>
+			<% _.each(DecisionMakers, function(poc) { %>
+				<li>
+					<h1><%=poc.FirstName%> <%=poc.LastName%></h1>
+					<h3>Phone Number: <%=poc.Phone%></h3>
+					<h3>Position: <%=poc.Position%></h3>
+					<h3>Email Address: <%= poc.eMail%></h3>
+				</li>
+				<li data-role="list-divider"></li>
+			<% }); %>
+		<li data-role="list-divider">Notes</li>
+		<a data-role="button" data-icon="plus" href="#merchantDisplayNotePopup" data-rel="popup">Add Note</a>
+	</ul>
+	<ul id="merchantDisplayNotesDisplay" data-role="listview" data-inset="true">
+
+		<% for(var i = Notes.length-1; i >= 0; i--){  %>
+			<% var t = _.template($('#NoteDisplayTemplate').html()); %>
+			<%= t(Notes[i]) %>
+		<% } %>
+	</ul>
+
+	</script>
+	
+	<script type="text/template" id="NoteDisplayTemplate">
+		<li>
+			<h3><%=UserName%> at <%=LastUpdated.toLocaleTimeString()%> <%=LastUpdated.toLocaleDateString()%> wrote:</h3>
+			<p><%=Note%></p>
+		</li>
+	</script>
+>>>>>>> master
 
     <div data-role="page" id="configure">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
