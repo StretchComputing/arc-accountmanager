@@ -72,12 +72,12 @@
     <div data-role="page" id="editMerchant">
     	<div data-role="header" data-position="fixed" data-tap-toggle="false" >
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
-    			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
+    			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button" data-iconpos="notext"></a>
     		</div>
     		<h1 id="editMerchantHead">Editing </h1>
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
-    			<a href="#editMerchantNotePopup" data-icon="plus" data-rel="popup" data-role="button">Add Note</a>
-    			<button data-icon="check" id="editMerchantSave">Save</button>
+    			<a href="#editMerchantNotePopup" data-icon="plus" data-rel="popup" data-role="button">Note</a>
+    			<button data-icon="check" id="editMerchantSave" data-iconpos="notext"></button>
   			</div>
     	</div>
     	
@@ -102,12 +102,12 @@
     	</div>
     </div>
     
-    <script type="text/template" id="editMerchantForm">
-		<ul data-role="listview" id="<%=pageIdPrefix%>List" data-inset="true">
-
-		<div class="ui-grid-a">
+<script type="text/template" id="editMerchantForm">
 		
-		<div class="ui-block-a">
+	<div class="ui-grid-a">
+		
+	<div class="ui-block-a">
+		<ul data-role="listview" id="<%=pageIdPrefix%>List" data-inset="true">
 			<li><label for="<%=pageIdPrefix%>Name"> Name* </label>
 			<input type="text" name="Name" id="<%=pageIdPrefix%>Name" value="<%= Name %>" required="true"></li>
 
@@ -144,11 +144,13 @@
 
 			<li><label for="<%=pageIdPrefix%>Longitude">Longitude</label>
 				<input type="text" name="Longitude" id="<%=pageIdPrefix%>Longitude" value="<%= Longitude %>"></li>
-		</div>
+		</ul>
+	</div>
 
 
-		<div class="ui-block-b" style="text-align: left">
+	<div class="ui-block-b" style="text-align: left">
 
+		<ul data-role="listview" id="<%=pageIdPrefix%>ListRight" data-inset="true">
 			<li><label for="<%=pageIdPrefix%>TypeOfFood"> Type of Food </label>
 			<input type="text" name="TypeOfFood" id="<%=pageIdPrefix%>TypeOfFood" value="<%= TypeOfFood %>"></li>
 
@@ -185,31 +187,35 @@
 			<li><label for="<%=pageIdPrefix%>CurrentCreditFee"> Current Credit Fee </label>
 			<input type="text" name="CurrentCreditFee" id="<%=pageIdPrefix%>CurrentCreditFee" value="<%= CurrentCreditFee %>" ></li>
 
-			<li><label for="<%= pageIdPrefix%>Latitude">Latitude</label>
-			<input type="text" name="Latitude" id="<%= pageIdPrefix%>Latitude" value="<%=Latitude%>"></li>
-
-		</div><!-- ui-block-b -->
-		</div><!-- ui-grid-a -->
-
-		<button id="<%=pageIdPrefix%>GetLngLat" data-icon="grid">Fetch Longitude and Latitude</button>
-
-		<li data-role="list-divider">Points of Contact</li>
-		<div id="<%=pageIdPrefix%>PocList">
-
-			<% _.each(DecisionMakers, function(Poc) { %>
-				<% template = _.template($('#decisionMakerForm').html()); %>
-				<% Poc.index = index; %>
-				<% Poc.pageIdPrefix = pageIdPrefix %>
-				<%=template(Poc)%>
-				<% delete Poc.index %>
-				<% delete Poc.pageIdPrefix %>
-				<li data-role="list-divider"></li>
-				
-			<%  }); %>
-
-		</div>
-		<li><button id="pocAddNew" data-icon="plus">Add New Point of Contact</button></li>
+			<li><label for="<%= pageIdPrefix%>Latitude">Latitude 
+					<button id="<%=pageIdPrefix%>GetLngLat" data-iconpos="notext" data-icon="grid" data-inline="true"></button>
+				</label>
+			<input type="text" name="Latitude" id="<%= pageIdPrefix%>Latitude" value="<%=Latitude%>">
+			
+			</li>
 		</ul>
+
+	</div><!-- ui-block-b -->
+	</div><!-- ui-grid-a -->
+
+	<ul data-role="listview" data-inset="true">
+		<li data-icon="plus"><a href="#addNewPOC" id="pocAddNew">Points of Contact</a></li>
+
+	<div id="<%=pageIdPrefix%>PocList">
+
+		<% _.each(DecisionMakers, function(Poc) { %>
+			<% template = _.template($('#decisionMakerForm').html()); %>
+			<% Poc.index = index; %>
+			<% Poc.pageIdPrefix = pageIdPrefix %>
+			<%=template(Poc)%>
+			<% delete Poc.index %>
+			<% delete Poc.pageIdPrefix %>
+			<li data-role="list-divider"></li>
+				
+		<%  }); %>
+
+	</div>
+	</ul>
 
 	</script>
 
@@ -218,7 +224,8 @@
 		<div class="ui-grid-a">
 
 		<div class="ui-block-a">
-
+			
+			<ul data-role="listview" data-inset="true">
 			<li><label for="<%=pageIdPrefix%>PocFirstName<%=index%>" >First Name</label>
 				<input type="text" PocProp="FirstName" index="<%=index%>" id="pageIdPrefix%>PocFirstName<%=index%>" value="<%=FirstName%>" ></li>
 
@@ -228,17 +235,20 @@
 			<li><label for="<%=pageIdPrefix%>PoceMail<%=index %>" >eMail Address</label>
 				<input type="email" PocProp="eMail" index="<%=index%>" id="<%=pageIdPrefix%>PoceMail<%=index %>" value="<%=eMail%>" ></li>
 
+			</ul>
 		</div>
 
 		<div class="ui-block-b" style="text-align: left">
+
+			<ul data-role="listview" data-inset="true">
 			<li><label for="<%=pageIdPrefix%>PocLastName<%=index %>" >Last Name</label>
 			<input type="text" PocProp="LastName" index="<%=index%>" id="<%=pageIdPrefix%>PocLastName<%=index %>" value="<%=LastName%>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>PocPosition<%=index %>" >Position</label>
 			<input type="text" PocProp="Position" index="<%=index%>" id="<%=pageIdPrefix%>PocPosition<%=index %>" value="<%=Position%>" ></li>
 
-			<br>
-			<li><button id="<%=pageIdPrefix%>Delete<%=index%>" data-icon="delete">Delete</button></li>
+			<li style="padding:19px"><button id="<%=pageIdPrefix%>Delete<%=index%>" data-icon="delete">Delete</button></li>
+			</ul>
 		</div>
 		</div>
 		</div>
@@ -297,12 +307,12 @@
 	
 		<div data-role="header" data-position="fixed" data-tap-toggle="false">
 			<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
-    			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
+    			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button" data-iconpos="notext"></a>
     		</div>
-    		<h1 id="editMerchantHead">Create Merchant</h1>
+    		<h1 id="createNewMerchantHead">Create Merchant</h1>
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
-    			<a href="#createNewMerchantNotePopup" data-rel="popup" data-icon="plus" data-role="button">Add Note</a>
-    			<button data-icon="check" id="createNewMerchantSave">Save</button>
+    			<a href="#createNewMerchantNotePopup" data-rel="popup" data-icon="plus" data-role="button">Note</a>
+    			<button data-icon="check" id="createNewMerchantSave" data-iconpos="notext"></button>
   			</div>
 		</div>
 

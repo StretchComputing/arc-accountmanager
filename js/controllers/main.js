@@ -122,7 +122,18 @@ var EXELON = (function (r, $) {
     	}
     },
     
-    
+    editMerchantBeforeCreate : function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.editMerchantBeforeCreate');
+    		
+    		$('#editMerchantContent').bind("swiperight", function(e){
+    			$.mobile.back();
+    		});
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.editMerchantBeforeCreate');
+    	}
+    },
     
     editMerchantShow: function(){
     	try{
@@ -148,6 +159,19 @@ var EXELON = (function (r, $) {
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.editMerchantHide');
+    	}
+    },
+    
+    createNewMerchantBeforeCreate : function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.createNewMerchantBeforeCreate');
+    		
+    		$('#createNewMerchantContent').bind("swiperight", function(e){
+    			$.mobile.back();
+    		});
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.createNewMerchantBeforeCreate');
     	}
     },
 
@@ -597,7 +621,7 @@ var EXELON = (function (r, $) {
 
 	  addNewPoc.bind('click', function(e){
 		  var pocTemplate = _.template($('#decisionMakerForm').html());
-		  $('#'+pageId+'PocList').append(pocTemplate({FirstName : "", LastName : "", 
+		  $('#'+pageId+'PocList').prepend(pocTemplate({FirstName : "", LastName : "", 
 			  Phone : "", Position : "", eMail : "", index : merchant.index,
 			  pageIdPrefix : merchant.pageIdPrefix}));
 		  $('#'+pageId+'PocList').trigger('create');
@@ -724,7 +748,13 @@ var EXELON = (function (r, $) {
 		  }
 		  merchant.Activities.push(activity);
 
-		  $.mobile.back();
+		  if(newMerchant){//If its new, take to merchant info screen
+			  r.activeMerchant = merchant;
+			  $.mobile.changepage("#merchantDisplay", {transition:"slide"});
+		  }
+		  else{//If not, take back to where ever the editing was triggered
+			  $.mobile.back();
+		  }
 
 	  });
 
@@ -823,10 +853,12 @@ var EXELON = (function (r, $) {
       { '#selectMerchant':                 { handler: 'selectMerchantInit',    events: 'i'  } },
       { '#selectMerchant':                 { handler: 'selectMerchantShow',    events: 's'   } },
       { '#selectMerchant':                 { handler: 'selectMerchantHide',    events: 'h'   } },
-      { '#editMerchant':         { handler: 'editMerchantShow',     events: 's'} },
-      { '#editMerchant':         { handler: 'editMerchantHide',     events: 'h'} },
-      { '#createNewMerchant':    { handler: 'createNewMerchantShow', events: 's' } },
-      { '#createNewMerchant':    { handler: 'createNewMerchantHide', events: 'h' } },
+      { '#editMerchant':         { handler: 'editMerchantBeforeCreate',  events: 'bc' } },
+      { '#editMerchant':         { handler: 'editMerchantShow',          events: 's'  } },
+      { '#editMerchant':         { handler: 'editMerchantHide',          events: 'h'  } },
+      { '#createNewMerchant':    { handler: 'createNewMerchantBeforeCreate', events: 'bc'} },
+      { '#createNewMerchant':    { handler: 'createNewMerchantShow',         events: 's' } },
+      { '#createNewMerchant':    { handler: 'createNewMerchantHide',         events: 'h' } },
       { '#merchantDisplay':		 { handler: 'merchantDisplayBeforeCreate',  events: 'bc'} },
       { '#merchantDisplay':      { handler: 'merchantDisplayShow',			events: 's' } },
       { '#merchantDisplay':      { handler: 'merchantDisplayHide',			events: 'h' } },
