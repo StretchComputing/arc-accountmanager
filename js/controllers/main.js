@@ -320,6 +320,25 @@ var EXELON = (function (r, $) {
       RSKYBOX.log.error(e, 'main.js.click.logOut');
     }
   });
+  
+  $(document).on('click', '.geoLocation', function(){
+		try {
+			navigator.geolocation.getCurrentPosition(r.displayGeoLocation);
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.logOut');
+    }
+  });
+
+  r.displayGeoLocation = function(position) {
+    try {
+      RSKYBOX.log.info('entering', 'main.js.displayGeoLocation');
+		  var message = "latitude: " + position.coords.latitude + ", longitude: " + position.coords.longitude;
+			alert(message);
+    } catch (e) {
+      RSKYBOX.log.error(e, 'displayMerchants');
+    }
+  };
 
   $(document).on('click', '.home', function(e){
 		try {
