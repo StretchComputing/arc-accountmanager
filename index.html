@@ -72,7 +72,7 @@
     <div data-role="page" id="editMerchant">
     	<div data-role="header" data-position="fixed" data-tap-toggle="false" >
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
-    			<a href="#home" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
+    			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
     		</div>
     		<h1 id="editMerchantHead">Editing </h1>
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
@@ -245,17 +245,25 @@
 		
 	</script>
 
-    <div data-role="page" id="home">
+    <div data-role="page" id="selectMerchant">
     
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
-       <a href="#home_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+       <a href="#selectMerchant_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
        <h1>Select Merchant</h1>
-       <a href="#createNewMerchant" data-icon="plus" data-role="button">Add</a>
+       <button id="selectMerchantSearch" data-icon="search" data-role="button" data-iconpos="notext" data-theme="f"></button>
        
       </div>
 
-      <div data-role="content" id="homeContent">
-      	<ul data-role="listview" data-filter="true" id="merchantListCollapsible"></ul>      
+      <div data-role="content" id="selectMerchantContent">
+      	<ul data-role="listview" data-inset="true">
+      		<li data-icon="plus" data-theme="b">
+      			<a href="#createNewMerchant" data-transition="slide"><h1>Merchants</h1></a>
+      		</li>
+      	</ul>
+      	
+      	<ul data-role="listview" data-filter="true" id="selectMerchantList" data-inset="true">
+      		
+      	</ul>
       </div>
       
       <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
@@ -269,66 +277,19 @@
       </div>
     </div><!-- /page -->
 
-<script type="script/template" id="collapsibleMercahntList">
-		<li>
-			<div data-role="collapsible" data-theme="<%=r.getStatusTheme(Status)%>">
-				<h3><%= Name %></h3>
-				<div class="ui-grid-a" id="merchantList<%=Number%>" >
+<script type="script/template" id="selectMerchantTemplate">
+		<li id="selectMerchantListElm<%=index%>">
+			<a href="#selectMerchantList<%=index%>" index="<%=index%>" id="selectMerchantList<%=index%>">
+				<h1><%=Name%></h1>
+				<h2>Status: <%=Status%></h2>
+				<h3><%=Street%> <%=City%>, <%=State%> <%=ZipCode%></h3>
+			</a>
+		</li>
 
-				<div class="ui-block-a"><!-- Left hand side -->
-				<ul style="list-style-type: square">
-					<li>Status: <b><%= Status %></b></li>
-					<li>Accepted Terms and Conditions:<b><%= AcceptTerms %></b></li>
-					<li>Street: <b><%= Street %></b></li>
-					<li>State: <b><%= State %></b></li>
-					<li>Point of Sale Device: <b><%= POS %></b></li>
-					<li>Twitter Handle: <b><%= TwitterHandler %></b></li>
-					<li>Website : <b><%= Website %></b></li>
-					<li>Number of Tables: <b><%= NumTables %></b></li>
-					<li>Type of Service : <b><%= TypeOfService %></b></li>
-					<li>Current Credit Fee : <b><%= CurrentCreditFee%></b></li>
-				</ul></div>
-
-				<div class="ui-block-b" style="text-align: left"><!-- Right hand side -->
-				<ul style="list-style-type: square">
-					<li>Employer ID Number: <b><%= EIN %></b></li>
-					<li>City: <b><%= City %></b></li>
-					<li>ZipCode: <b><%= ZipCode %></b></li>
-					<li>Payment Accepted: <b><%= PaymentAccepted %></b></li>
-					<li>eMail Address: <b><%= eMail %></b></li>
-					<li>Facebook Handle: <b><%= FacebookHandler %></b></li>
-					<li>Price Level: <b><%= PriceLevel %></b></li>
-					<li>Number of Seats: <b><%= NumSeats %></b></li>
-					<li>Current Credit Card Rate: <b><%=CurrentCreditRate %></b></li>
-				</ul></div>
-				</div><!-- End Grid -->
-				<% _.each(DecisionMakers, function(person) { %>
-					<h3>Point of Contact: <%= person.FirstName %> <%= person.LastName %> </h3>
-					<div class="ui-grid-a">
-					<div class="ui-block-a">
-						<ul>
-						<li>Position : <b><%= person.Position %></b></li>
-						<li>eMail Address : <b><%= person.eMail %></b></li>
-						</ul>
-					</div>
-					
-					<div class="ui-block-b">
-						<ul>
-						<li>Phone Number: <b><%= person.Phone %></b></li>
-						</ul>
-					</div>
-					</div>
-				<% }); %>
-
-			<div class="ui-grid-a">
-			<div class="ui-block-a">
-				<button id="merchantChoose<%= Number %>" merchantName="<%= Name %>">Select</button>
-			</div>
-			<div class="ui-block-b">
-				<button id="merchantEdit<%= Number %>" merchantName="<%= Name %>">Edit</button>
-			</div>
-			</div>
-			</div>
+		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:40px">
+				<button data-icon="info" data-iconpos="notext" data-inline="true" class="selectButton" index="<%=index%>"></button>
+				<button data-icon="gear" data-iconpos="notext" data-inline="true" class="editButton" index="<%=index%>"></button>
+				<button data-icon="back" data-iconpos="notext" data-inline="true" class="backButton" index="<%=index%>"></button>
 		</li>
 	</script>
 
@@ -336,7 +297,7 @@
 	
 		<div data-role="header" data-position="fixed" data-tap-toggle="false">
 			<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
-    			<a href="#home" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
+    			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
     		</div>
     		<h1 id="editMerchantHead">Create Merchant</h1>
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
@@ -399,7 +360,7 @@
 	<div class="ui-grid-b">
 
 	<div class="ui-block-a">
-		<a href="#home" data-role="button">Change Merchant</a>
+		<a href="#selectMerchant" data-role="button">Change Merchant</a>
 	</div>
 
 	<div class="ui-block-b">
@@ -514,8 +475,8 @@
             </li>
           </ul>
           <ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:15px;">
-            <li data-icon="home">
-              <a class="home">Home</a>
+            <li data-icon="selectMerchant">
+              <a class="selectMerchant">selectMerchant</a>
             </li>
             <li>
               <a class="configure">Configure</a>

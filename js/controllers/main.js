@@ -14,8 +14,8 @@ var EXELON = (function (r, $) {
 
         var authHeader = r.getAuthorizationHeader();
         if(authHeader.length > 0) {
-          // token is valid, no need to log in, re-route to the home screen
-          ui.toPage = $('#home');
+          // token is valid, no need to log in, re-route to the selectMerchant screen
+          ui.toPage = $('#selectMerchant');
         }
 
         // MUST be called when e.preventDefault() is called.
@@ -55,45 +55,70 @@ var EXELON = (function (r, $) {
       }
     },
     
-    // Home Screen
-    homeBeforeCreate: function () {
+    // selectMerchant Screen
+    selectMerchantBeforeCreate: function () {
       try {
-        RSKYBOX.log.info('entering', 'main.js.homeBeforeCreate');
-        r.attachPanel("home");
+        RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
+        r.attachPanel("selectMerchant");
+        
+        $("#selectMerchantSearch").bind('click', function(e){
+        	$("#selectMerchantList").prev("form.ui-listview-filter").toggle();
+        });
+        
+        var content =  $("#selectMerchantContent");
+        
+       content.on("tap", ".editButton", function(e){
+        	var index = $(this).attr("index");
+        	r.merchantToEdit = r.merchantList[index];
+        	$.mobile.changePage("#editMerchant", {transition : "slide"});
+        });
+        
+        content.on("tap", ".selectButton", function(e){
+        	var index = $(this).attr("index");
+        	r.activeMerchant = r.merchantList[index];
+        	$.mobile.changePage("#merchantDisplay", {transition:"slide"});
+        });
+        
+        content.on("tap", ".backButton", function(e){
+        	var index = $(this).attr("index");
+      	    $("#selectMerchantListSwipeMenuElm"+index).hide();
+        	$("#selectMerchantListElm"+index).show();
+        });
         /*put in the elements from the 'current customer' object*/
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.homeBeforeCreate');
+        RSKYBOX.log.error(e, 'main.js.selectMerchantBeforeCreate');
       }
     },
 
-    homeInit: function () {
+    selectMerchantInit: function () {
       try {
-        RSKYBOX.log.info('entering', 'main.js.homeInit');
+        RSKYBOX.log.info('entering', 'main.js.selectMerchantInit');
+        $("#selectMerchantList").prev("form.ui-listview-filter").hide();
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.homeInit');
+        RSKYBOX.log.error(e, 'main.js.selectMerchantInit');
       }
     },
 
-    homeShow: function () {
+    selectMerchantShow: function () {
       try {
-        RSKYBOX.log.info('entering', 'main.js.homeShow');
+        RSKYBOX.log.info('entering', 'main.js.selectMerchantShow');
+        
         if(!r.merchantList)
         	r.getMerchants();
         else
-        	r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
+        	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.homeShow');
+        RSKYBOX.log.error(e, 'main.js.selectMerchantShow');
       }
     },
     
-    homeHide: function(){
+    selectMerchantHide: function(){
     	try{
-    		RSKYBOX.log.info('entering', 'main.js.homeHide');
-    		var toClear = $('#merchantListCollapsible');
-    		toClear.empty(); /*Remove all old html in the list*/
+    		RSKYBOX.log.info('entering', 'main.js.selectMerchantHide');
+    		$('#selectMerchantList').empty();
     	}
     	catch(e){
-    		RSKYBOX.log.error(e, 'main.js.homeHide');
+    		RSKYBOX.log.error(e, 'main.js.selectMerchantHide');
     	}
     },
     
@@ -264,13 +289,13 @@ var EXELON = (function (r, $) {
 
   };
 
-  r.refreshHome = function() {
+  r.refreshselectMerchant = function() {
       try {
-        RSKYBOX.log.info('entering', 'main.js.refreshHome');
+        RSKYBOX.log.info('entering', 'main.js.refreshselectMerchant');
 
         $.mobile.showPageLoadingMsg();
       } catch (e) {
-        RSKYBOX.log.error(e, 'main.js.refreshHome');
+        RSKYBOX.log.error(e, 'main.js.refreshselectMerchant');
       }
   };
 
@@ -321,16 +346,16 @@ var EXELON = (function (r, $) {
     }
   });
 
-  $(document).on('click', '.home', function(e){
+  $(document).on('click', '.selectMerchant', function(e){
 		try {
-			if($.mobile.activePage.is('#home')) {
-				$('#home_leftPanel').panel("close");
+			if($.mobile.activePage.is('#selectMerchant')) {
+				$('#selectMerchant_leftPanel').panel("close");
 			} else {
-				$.mobile.changePage( "#home", { transition: "slideup", changeHash: true });
+				$.mobile.changePage( "#selectMerchant", { transition: "slideup", changeHash: true });
 			}
 			return false;
     } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.click.home');
+      RSKYBOX.log.error(e, 'main.js.click.selectMerchant');
     }
   });
 
@@ -367,7 +392,7 @@ var EXELON = (function (r, $) {
                     try {
                     	r.merchantList = data.Results;
                     	r.fixMerchants(r.merchantList);
-                    	r.writeMerchantList($('#merchantListCollapsible'), r.merchantList);
+                    	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
                     	var jtest = 5;
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
@@ -454,31 +479,31 @@ var EXELON = (function (r, $) {
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
 		  
-		  var merchantTemplate = _.template($('#collapsibleMercahntList').html());
+		  var merchantTemplate = _.template($('#selectMerchantTemplate').html());
+		  
+		  var templateData = {};
 		  
 		  for(var i = 0; i < merchantList.length; i++){
-			  merchantList[i].Number = i.toString();
-			  merchantList[i].r = r; //Reference to other functions
-			  location.append(merchantTemplate(merchantList[i]));
-			  delete merchantList[i].Number;
-			  delete merchantList[i].r;
-			  
-			  var choose = $('#merchantChoose'+i,location);
-			  choose.bind('click', function(e){
-				  var name = $(this).attr('merchantName');
-				  r.activeMerchant = r.getMerchantByName(name);
-				  $.mobile.changePage("#merchantDisplay");
-			  });
-			  
-			  var edit = $('#merchantEdit' + i, location);
-			  edit.bind('click', function(e){
-				  var name = $(this).attr('merchantName');
-				  r.merchantToEdit = r.getMerchantByName(name);
-				  $.mobile.changePage( "#editMerchant", { transition: "slideup", changeHash: true });
-			  });
+			  var m = merchantList[i];
+			  templateData.Name = m.Name;
+			  templateData.Status = m.Status;
+			  templateData.Street = m.Street;
+			  templateData.City = m.City;
+			  templateData.State = m.State;
+			  templateData.ZipCode = m.ZipCode;
+			  templateData.index = i.toString();
+			
+			  location.append(merchantTemplate(templateData));
+			
+			  var merchantSelect = $('#selectMerchantList' + i);
+			  //merchantSelect.bind('tap', r.merchantSelectTap);
+			  merchantSelect.bind("tap", r.merchantSelectHorizontalSwipe);
+			  merchantSelect.bind("swipeleft", r.merchantSelectHorizontalSwipe);
+			  merchantSelect.bind("swiperight", r.merchantSelectHorizontalSwipe);	
 		  }
 		  
-		  $('#homeContent').trigger('create');
+		  $('#selectMerchantContent').trigger('create');
+		  location.listview('refresh');
 	  }
 	  catch(e){
 		  RSKYBOX.log.error(e,'main.js.writeMerchantList');
@@ -760,6 +785,19 @@ var EXELON = (function (r, $) {
 		$('#'+idPrefix + 'PocList').trigger('create');
   };
   
+  /*The event handler for selecting a merchant on the merchant select screen*/
+  r.merchantSelectTap = function(){
+	  var index = $(this).attr('index');
+	  r.activeMerchant = r.merchantList[index];
+	  $.mobile.changePage('#merchantDisplay', {changeHash:false, transition:"slide" } )
+  };
+
+  r.merchantSelectHorizontalSwipe = function(){
+	  var index = $(this).attr('index');
+	  $("#selectMerchantListElm"+index).hide();
+	  $("#selectMerchantListSwipeMenuElm"+index).show();
+  };
+  
   /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
   r.getStatusTheme = function(Status){
 	  var key = MERCHANT.merchantDisplay[0].options;
@@ -781,10 +819,10 @@ var EXELON = (function (r, $) {
       { '#login':                { handler: 'isLoggedIn',        events: 'bC', step: 'page' } },
       { '#login':                { handler: 'loginBeforeShow',   events: 'bs'  } },
       { '#login':                { handler: 'loginShow',         events: 's'   } },
-      { '#home':                 { handler: 'homeBeforeCreate',  events: 'bc'  } },
-      { '#home':                 { handler: 'homeInit',    events: 'i'  } },
-      { '#home':                 { handler: 'homeShow',    events: 's'   } },
-      { '#home':                 { handler: 'homeHide',    events: 'h'   } },
+      { '#selectMerchant':                 { handler: 'selectMerchantBeforeCreate',  events: 'bc'  } },
+      { '#selectMerchant':                 { handler: 'selectMerchantInit',    events: 'i'  } },
+      { '#selectMerchant':                 { handler: 'selectMerchantShow',    events: 's'   } },
+      { '#selectMerchant':                 { handler: 'selectMerchantHide',    events: 'h'   } },
       { '#editMerchant':         { handler: 'editMerchantShow',     events: 's'} },
       { '#editMerchant':         { handler: 'editMerchantHide',     events: 'h'} },
       { '#createNewMerchant':    { handler: 'createNewMerchantShow', events: 's' } },
