@@ -401,6 +401,25 @@ var EXELON = (function (r, $) {
       RSKYBOX.log.error(e, 'main.js.click.logOut');
     }
   });
+  
+  $(document).on('click', '.geoLocation', function(){
+		try {
+			navigator.geolocation.getCurrentPosition(r.displayGeoLocation, function(){alert("geo error")});
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.logOut');
+    }
+  });
+
+  r.displayGeoLocation = function(position) {
+    try {
+      RSKYBOX.log.info('entering', 'main.js.displayGeoLocation');
+		  var message = "latitude: " + position.coords.latitude + ", longitude: " + position.coords.longitude;
+			alert(message);
+    } catch (e) {
+      RSKYBOX.log.error(e, 'displayGeoLocation');
+    }
+  };
 
   $(document).on('click', '.selectMerchant', function(e){
 		try {
