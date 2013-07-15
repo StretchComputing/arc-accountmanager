@@ -202,38 +202,6 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
     		r.attachPanel("merchantDisplay");
     		
-    		  $('#merchantDisplayNoteSave').bind('click', function(e){
-    				var textArea = $('#merchantDisplayNoteTextArea');
-    				var newNote = {  UserName : r.getUserName(),
-    						 		 LastUpdated : new Date(),
-    						 		 Note : textArea.prop('value') };
-    				r.activeMerchant.Notes.push(newNote);
-    				textArea.prop('value', "");
-    				$('#merchantDisplayNotePopup').popup('close');
-    				
-    				var act = { 'Type' : 'Note',
-							  'UserName' : r.getUserName(),
-							  'Date' : newNote.LastUpdated,
-							  'Note' : newNote.Note};
-    				r.activeMerchant.Activities.push(act);
-    				
-    				/*Update the displays on this page*/
-    				var NoteTemplate = _.template($('#NoteDisplayTemplate').html())
-    				var notesDisplay = $('#merchantDisplayNotesDisplay');
-    				notesDisplay.prepend(NoteTemplate(newNote));
-    				notesDisplay.listview('refresh');
-    				
-    				var activityDisplay = $('#merchantDisplayActivityFeed');
-    				activityDisplay.prepend($('<li />', {
-    					text : (MERCHANT.activityFeed[act.Type])(act) }));
-    				activityDisplay.listview('refresh');
-
-    			});
-    			
-    			$('#merchantDisplayNoteCancel').bind('click', function(e){
-    				$('#merchantDisplayNoteTextArea').prop('value', "");
-    				$('#merchantDisplayNotePopup').popup('close');
-    			});
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.merchantDisplayBeforeCreate');
@@ -250,12 +218,63 @@ var EXELON = (function (r, $) {
     		var template = _.template($('#merchantDisplayContentTemplate').html());
     		
     		content.append(template(r.activeMerchant));
-    		
-    		$('#merchantDisplayEdit').bind('click', function(e){
-    			r.merchantToEdit = r.activeMerchant;
-    			$.mobile.changePage("#editMerchant", { transition: "slideup", changeHash: true });
+    		$(".collapsedListItem").each(function(){
+    			$(this).hide();
     		});
     		
+    		$("#displayMerchantInfoCollapse").bind("tap", function(e){
+    			$(".collapsedListItem").each(function(){
+    				$(this).toggle();
+    			});
+    			
+    			var li = $('#merchantDisplayBasicInfo')
+    			if($(this).attr("status") === "up"){
+    				$(this).attr("status", "down");
+    				li.buttonMarkup({icon:"arrow-d"})
+    			}
+    			else{
+    				$(this).attr("status", "up");
+    				li.buttonMarkup({icon:"arrow-u"});
+    			}
+
+    		});
+
+    		$('#merchantDisplayAddNote').bind("click", function(e){
+    			$('#merchantDisplayAddNoteBox').toggle();
+    		});
+
+    		$('#merchantDisplayAddNoteSave').bind('click', function(e){
+    			var textArea = $('#merchantDisplayNoteText');
+    			
+    			if(textArea.prop('value') === ""){
+    				return; //No need to save empty notes
+    			}
+    			
+    			var newNote = {  Type : "SALES_NOTE",
+    							 LastUpdatedBy : r.getUserName(),
+    							 LastUpdated : new Date(),
+    							 Note : textArea.prop('value') };
+    			r.activeMerchant.Notes.push(newNote);
+    			textArea.prop('value', "");
+    			$('#merchantDisplayAddNoteBox').hide();
+
+    			/*Update the displays on this page*/
+    			var NoteTemplate = _.template($('#NoteDisplayTemplate').html())
+    			var notesDisplay = $('#merchantDisplayNotesDisplay');
+    			notesDisplay.prepend(NoteTemplate(newNote));
+    			notesDisplay.listview('refresh');
+
+    		});
+
+    		$('#merchantDisplayAddNoteCancel').bind('click', function(e){
+    			$('#merchantDisplayNoteText').prop('value', "");
+    			$('#merchantDisplayAddNoteBox').hide();
+    		});
+
+    		$("#merchantDisplayStatusSpecific").bind('swiperight', function(){
+    			/*A long if/elif chain based on the different statuses*/
+    			$.mobile.changePage("#configure", {transition:"slide"});
+    		});
     		
     		content.trigger('create');
     		
@@ -656,7 +675,8 @@ var EXELON = (function (r, $) {
 	  
 	  $('#'+pageId+'NoteSave').bind('click', function(e){
 			var textArea = $('#'+pageId+'NoteTextArea');
-			var newNote = {  UserName : r.getUserName(),
+			var newNote = {  Type : "NOTE_SALES",
+							 LastUpdatedBy : r.getUserName(),
 					 		 LastUpdated : new Date(),
 					 		 Note : textArea.prop('value') };
 			notesToAdd.push(newNote);
