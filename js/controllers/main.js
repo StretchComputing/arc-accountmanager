@@ -204,6 +204,26 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
     		var content = $('#merchantDisplayContent');
     		
+    		$('#merchantDisplay').on('swipeleft', '.noteSwipe', function(){
+    			var index = $(this).attr('index');
+    			$(this).hide();
+    			$('#noteMenu'+index).show();
+    		});
+    		
+    		$('#merchantDisplay').on('tap', '.noteDelete', function(){
+    			return; //TODO
+    		})
+    		
+    		$('#merchantDisplay').on('tap', '.noteEdit', function(){
+    			return; //TODO
+    		})
+    		
+    		$('#merchantDisplay').on('tap', '.noteBack', function(){
+    			var index = $(this).attr('index')
+    			$('#noteMenu'+index).hide();
+    			$('#noteShow'+index).show();
+    		});
+    		
     		content.bind('swiperight', function(){
     			$.mobile.changePage("#selectMerchant", {transition:"slide",
     													reverse : true});
@@ -293,8 +313,10 @@ var EXELON = (function (r, $) {
     			/*Update the displays on this page*/
     			var NoteTemplate = _.template($('#NoteDisplayTemplate').html())
     			var notesDisplay = $('#merchantDisplayNotesDisplay');
-    			notesDisplay.prepend(NoteTemplate(newNote));
+    			notesDisplay.prepend(NoteTemplate({n:newNote, 
+    											   index:r.activeMerchant.Notes.length-1}));
     			notesDisplay.listview('refresh');
+    			notesDisplay.trigger('create');
 
     		});
 
@@ -581,8 +603,8 @@ var EXELON = (function (r, $) {
 			  location.append(merchantTemplate(templateData));
 			
 			  var merchantSelect = $('#selectMerchantList' + i);
-			  //merchantSelect.bind('tap', r.merchantSelectTap);
-			  merchantSelect.bind("tap", r.merchantSelectHorizontalSwipe);
+			  merchantSelect.bind('tap', r.merchantSelectTap);
+			  //merchantSelect.bind("tap", r.merchantSelectHorizontalSwipe);
 			  merchantSelect.bind("swipeleft", r.merchantSelectHorizontalSwipe);
 			  merchantSelect.bind("swiperight", r.merchantSelectHorizontalSwipe);	
 		  }

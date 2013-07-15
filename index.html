@@ -70,7 +70,7 @@
     </script>
     
     <div data-role="page" id="editMerchant">
-    	<div data-role="header" data-position="fixed" data-tap-toggle="false" >
+    	<div data-role="header" data-position="fixed" data-tap-toggle="false" id="editMerchantHeader">
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
     			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button" data-iconpos="notext"></a>
     		</div>
@@ -98,7 +98,7 @@
 			</div>
     	</div>
     	
-    	 <div data-role="popup" id="editMerchantRequiredPopup" class="ui-content">
+    	 <div data-role="popup" id="editMerchantRequiredPopup" data-position-to="#editMerchantHeader">
     	</div>
     </div>
     
@@ -313,7 +313,7 @@
           </ul>
           <ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:15px;">
 			<li data-icon="gear">
-				<a href="#settings">Settings</a>
+				<a>Settings</a>
 			</li>
             <li data-icon="alert">
               <a href="#" class="logOut">Log Out</a>
@@ -324,7 +324,7 @@
 
 	<div data-role="page" id="createNewMerchant">
 	
-		<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<div data-role="header" data-position="fixed" data-tap-toggle="false" id="createNewMerchantHeader">
 			<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
     			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button" data-iconpos="notext"></a>
     		</div>
@@ -336,10 +336,10 @@
 		</div>
 
 		<div data-role="content" id="createNewMerchantContent">
-	
+			
     	</div>
     	
-    	<div data-role="popup" id="createNewMerchantNotePopup">
+    	<div data-role="popup" id="createNewMerchantNotePopup" >
     		<label for="createNewMerchantNoteTextArea">Enter Your Note Here:</label>
 			<textarea cols="40" rows="10" id="createNewMerchantNoteTextArea"></textarea>
 			
@@ -353,7 +353,7 @@
 			</div>
     	</div>
     	
-    	<div data-role="popup" id="createNewMerchantRequiredPopup" class="ui-content">
+    	<div data-role="popup" id="createNewMerchantRequiredPopup" data-position-to="#createNewMerchantHeader">
     	</div>
 
 	</div>
@@ -369,7 +369,7 @@
 		
 		</div>
 		
-		<div data-role="popup" id="merchantDisplayConfirmDelete">
+		<div data-role="popup" id="merchantDisplayConfirmDelete" class="ui-content" data-position-to="window">
 			<h1>Are you sure you want to delete this merchant? 
 				Once it has been deleted it cannot be recovered.</h1>
 			<div class="ui-grid-a">
@@ -474,7 +474,7 @@
 				<% break; %>
 			<% } %>
 			<% var t = _.template($('#NoteDisplayTemplate').html()); %>
-			<%= t(Notes[i]) %>
+			<%= t({n:Notes[i], index:i}) %>
 		<% } %>
 		
 	</ul>
@@ -482,13 +482,18 @@
 	</script>
 	
 	<script type="text/template" id="NoteDisplayTemplate">
-		<li>
-			<h3><%=LastUpdatedBy%> at <%=LastUpdated.toLocaleTimeString()%> 
-				<%=LastUpdated.toLocaleDateString()%> wrote a <%=Type %>: </h3>
-				<% if(Type === "NOTE_CONFIG") { %>
-					<p>Step <%=ConfigurationStepId%></p>
+		<li class="noteSwipe" id="noteShow<%=index%>" index="<%=index%>">
+			<h3><%=n.LastUpdatedBy%> at <%=n.LastUpdated.toLocaleTimeString()%> 
+				<%=n.LastUpdated.toLocaleDateString()%> wrote a <%=n.Type %>: </h3>
+				<% if(n.Type === "NOTE_CONFIG") { %>
+					<p>Step <%=n.ConfigurationStepId%></p>
 				<% } %>
-			<p><%=Note%></p>
+			<p><%=n.Note%></p>
+		</li>
+		<li id="noteMenu<%=index%>" style="display:none">
+			<button data-icon="delete" data-iconpos="notext" class="noteDelete" index="<%=index%>" data-inline="true"></button>
+			<button data-icon="gear" data-iconpos="notext" class="noteEdit" index="<%=index%>" data-inline="true"></button>
+			<button data-icon="back" data-iconpos="notext" class="noteBack" index="<%=index%>" data-inline="true"></button>
 		</li>
 	</script>
 	
