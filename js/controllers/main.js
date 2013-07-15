@@ -323,7 +323,7 @@ var EXELON = (function (r, $) {
   
   $(document).on('click', '.geoLocation', function(){
 		try {
-			navigator.geolocation.getCurrentPosition(r.displayGeoLocation);
+			navigator.geolocation.getCurrentPosition(r.displayGeoLocation, function(){alert("geo error")});
 			return false;
     } catch (e) {
       RSKYBOX.log.error(e, 'main.js.click.logOut');
@@ -336,7 +336,7 @@ var EXELON = (function (r, $) {
 		  var message = "latitude: " + position.coords.latitude + ", longitude: " + position.coords.longitude;
 			alert(message);
     } catch (e) {
-      RSKYBOX.log.error(e, 'displayMerchants');
+      RSKYBOX.log.error(e, 'displayGeoLocation');
     }
   };
 
