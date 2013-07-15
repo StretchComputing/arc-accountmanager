@@ -753,7 +753,7 @@ var EXELON = (function (r, $) {
 			  $.mobile.changepage("#merchantDisplay", {transition:"slide"});
 		  }
 		  else{//If not, take back to where ever the editing was triggered
-			  $.mobile.back();
+			  $.mobile.back({transition:"slide"});
 		  }
 
 	  });
@@ -812,7 +812,6 @@ var EXELON = (function (r, $) {
 		del.bind('click', function(e){
 			$('#pocForm'+i).remove();
 		});
-		$('#'+idPrefix + 'PocList').trigger('create');
   };
   
   /*The event handler for selecting a merchant on the merchant select screen*/

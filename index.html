@@ -199,7 +199,7 @@
 	</div><!-- ui-grid-a -->
 
 	<ul data-role="listview" data-inset="true">
-		<li data-icon="plus"><a href="#addNewPOC" id="pocAddNew">Points of Contact</a></li>
+		<li data-icon="plus" id="pocAddNew"><a>Points of Contact</a></li>
 
 	<div id="<%=pageIdPrefix%>PocList">
 
@@ -227,7 +227,7 @@
 			
 			<ul data-role="listview" data-inset="true">
 			<li><label for="<%=pageIdPrefix%>PocFirstName<%=index%>" >First Name</label>
-				<input type="text" PocProp="FirstName" index="<%=index%>" id="pageIdPrefix%>PocFirstName<%=index%>" value="<%=FirstName%>" ></li>
+				<input type="text" PocProp="FirstName" index="<%=index%>" id="<%=pageIdPrefix%>PocFirstName<%=index%>" value="<%=FirstName%>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>PocPhone<%=index %>" >Phone Number</label>
 				<input type="text" PocProp="Phone" index="<%=index%>" id="<%=pageIdPrefix%>PocPhone<%=index %>" value="<%=Phone%>" ></li>
@@ -240,7 +240,7 @@
 
 		<div class="ui-block-b" style="text-align: left">
 
-			<ul data-role="listview" data-inset="true">
+		<ul data-role="listview" data-inset="true">
 			<li><label for="<%=pageIdPrefix%>PocLastName<%=index %>" >Last Name</label>
 			<input type="text" PocProp="LastName" index="<%=index%>" id="<%=pageIdPrefix%>PocLastName<%=index %>" value="<%=LastName%>" ></li>
 
@@ -248,7 +248,7 @@
 			<input type="text" PocProp="Position" index="<%=index%>" id="<%=pageIdPrefix%>PocPosition<%=index %>" value="<%=Position%>" ></li>
 
 			<li style="padding:19px"><button id="<%=pageIdPrefix%>Delete<%=index%>" data-icon="delete">Delete</button></li>
-			</ul>
+		</ul>
 		</div>
 		</div>
 		</div>
@@ -289,7 +289,7 @@
 
 <script type="script/template" id="selectMerchantTemplate">
 		<li id="selectMerchantListElm<%=index%>">
-			<a href="#selectMerchantList<%=index%>" index="<%=index%>" id="selectMerchantList<%=index%>">
+			<a index="<%=index%>" id="selectMerchantList<%=index%>">
 				<h1><%=Name%></h1>
 				<h2>Status: <%=Status%></h2>
 				<h3><%=Street%> <%=City%>, <%=State%> <%=ZipCode%></h3>
