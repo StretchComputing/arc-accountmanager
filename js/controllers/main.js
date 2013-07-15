@@ -59,7 +59,9 @@ var EXELON = (function (r, $) {
     selectMerchantBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
-        r.attachPanel("selectMerchant");
+        var template = _.template($('#selectMerchantSidebarTemplate').html());
+        
+        $('#selectMerchant').append(template({UserName: r.getUserName()}));
         
         $("#selectMerchantSearch").bind('click', function(e){
         	$("#selectMerchantList").prev("form.ui-listview-filter").toggle();
@@ -200,7 +202,37 @@ var EXELON = (function (r, $) {
     merchantDisplayBeforeCreate: function (){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
-    		r.attachPanel("merchantDisplay");
+    		var content = $('#merchantDisplayContent');
+    		
+    		content.bind('swiperight', function(){
+    			$.mobile.changePage("#selectMerchant", {transition:"slide",
+    													reverse : true});
+    		});
+    		
+    		var template = _.template($('#merchantDisplaySidebarTemplate').html());
+    		$('#merchantDisplay').append(template({UserName:r.getUserName() }));
+    		
+    		$('#merchantDisplaySidebarEdit').bind('tap', function(){
+    			r.merchantToEdit = r.activeMerchant;
+    			$.mobile.changePage('#editMerchant', {transition:'slide'});
+    		});
+    		
+    		$('#merchantDisplayDeleteYes').bind('tap', function(){
+    			r.deleteMerchant(r.activeMerchant); //API Call
+    			
+    			for(var i = 0; i < r.merchantList.length; i++){
+    				if(r.merchantList[i] === r.activeMerchant){
+    					r.merchantList.splice(i,1);
+    					break;
+    				}
+    			}
+    			
+    			$.mobile.changePage('#selectMerchant');
+    		});
+    		
+    		$('#merchantDisplayDeleteNo').bind('tap', function(){
+    			$('#merchantDisplayConfirmDelete').popup('close');
+    		});
     		
     	}
     	catch(e){
@@ -271,7 +303,7 @@ var EXELON = (function (r, $) {
     			$('#merchantDisplayAddNoteBox').hide();
     		});
 
-    		$("#merchantDisplayStatusSpecific").bind('swiperight', function(){
+    		$("#merchantDisplayStatusSpecific").bind('swipeleft', function(){
     			/*A long if/elif chain based on the different statuses*/
     			$.mobile.changePage("#configure", {transition:"slide"});
     		});
@@ -299,7 +331,7 @@ var EXELON = (function (r, $) {
     configureBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.configureBeforeCreate');
-        r.attachPanel("configure");
+        //r.attachPanel("configure");
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.configureBeforeCreate');
       }
@@ -357,25 +389,6 @@ var EXELON = (function (r, $) {
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.unauthorized');
       }
-  };
-
-  r.attachPanel = function(pageName) {
-    try {
-      RSKYBOX.log.info('entering', 'main.js.attachPanel');
-      // attach panel -- built via template
-      var template = _.template($('#leftPanelTemplate').html());
-      var content = template({});
-      
-      // need to make panel ID unique for each JQM page
-      content = content.replace("page_leftPanel", pageName+"_leftPanel");
-      $('#'+pageName).append(content);
-
-      // set the user name field on the panel
-      $('.userName').html(r.getUserName());
-
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.attachPanel');
-    }
   };
   
   // Define event handlers for panel. Done here so it only happens one time -- when HTML page is loaded
@@ -502,6 +515,16 @@ var EXELON = (function (r, $) {
 		  RSKYBOX.log.error(e, 'main.js.updateMerchant');
 	  }
   };
+  
+  r.deleteMerchant = function(merchant){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.deleteMerchant');
+		  RSKYBOX.log.info('Currently stubbed off:', 'main.js.deleteMerchant');
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.deleteMerchant');
+	  }
+  }
   
   /*Remove all forms equal to "" */
   r.cleanMerchant = function(merchant){
@@ -770,7 +793,7 @@ var EXELON = (function (r, $) {
 
 		  if(newMerchant){//If its new, take to merchant info screen
 			  r.activeMerchant = merchant;
-			  $.mobile.changepage("#merchantDisplay", {transition:"slide"});
+			  $.mobile.changePage("#merchantDisplay", {transition:"slide"});
 		  }
 		  else{//If not, take back to where ever the editing was triggered
 			  $.mobile.back({transition:"slide"});

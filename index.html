@@ -302,6 +302,24 @@
 				<button data-icon="back" data-iconpos="notext" data-inline="true" class="backButton" index="<%=index%>"></button>
 		</li>
 	</script>
+	
+	<script type="script/template" id="selectMerchantSidebarTemplate">
+		<div data-role="panel" id="selectMerchant_leftPanel" data-theme="c" data-position-fixed="true">
+         <ul data-role="listview" data-theme="b" data-divider-theme="b" style="margin-top:-16px;" class="nav-search">
+            <li data-icon="delete" style="background-color:#111;">
+              <a href="#" data-rel="close"><%=UserName %></a>
+            </li>
+          </ul>
+          <ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:15px;">
+			<li data-icon="gear">
+				<a href="#settings">Settings</a>
+			</li>
+            <li data-icon="alert">
+              <a href="#" class="logOut">Log Out</a>
+            </li>
+          </ul>
+      </div><!-- /panel -->
+	</script>
 
 	<div data-role="page" id="createNewMerchant">
 	
@@ -348,6 +366,19 @@
 		
 		<div data-role="content" id="merchantDisplayContent">
 		
+		</div>
+		
+		<div data-role="popup" id="merchantDisplayConfirmDelete">
+			<h1>Are you sure you want to delete this merchant? 
+				Once it has been deleted it cannot be recovered.</h1>
+			<div class="ui-grid-a">
+				<div class="ui-block-a">
+					<button id="merchantDisplayDeleteYes" data-icon="check">Yes</button>
+				</div>
+				<div class="ui-block-b">
+					<button id="merchantDisplayDeleteNo" data-icon="back">No</button>
+				</div>
+			</div>
 		</div>
 	
 	</div>
@@ -458,6 +489,39 @@
 				<% } %>
 			<p><%=Note%></p>
 		</li>
+	</script>
+	
+	<script type="script/template" id="merchantDisplaySidebarTemplate">
+		<div data-role="panel" id="merchantDisplay_leftPanel" data-theme="c" data-position-fixed="true">
+         <ul data-role="listview" data-theme="b" data-divider-theme="b" style="margin-top:-16px;" class="nav-search">
+            <li data-icon="delete" style="background-color:#111;">
+              <a href="#" data-rel="close"><%=UserName %></a>
+            </li>
+          </ul>
+          <ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:15px;">
+			<li data-icon="arrow-l">
+				<a href="#selectMerchant" data-transition="slide" data-direction="reverse" >Back</a>
+			</li>
+			<li data-icon="gear">
+				<a id="merchantDisplaySidebarEdit">Edit</a>
+			</li>
+			<li data-icon="gear">
+				<a href="#configure" data-transition="slide">Configure</a>
+			</li>
+			<li data-icon="gear">
+				<a href="#configureTest" data-transtion="slide">ConfigureTest</a>
+			</li>
+			<li data-icon="info">
+				<a href="#reports">Reports</a>
+			</li>
+			<li data-icon="delete">
+				<a href="#merchantDisplayConfirmDelete" data-rel="popup">Delete</a>
+			</li>
+            <li data-icon="alert">
+              <a href="#" class="logOut">Log Out</a>
+            </li>
+          </ul>
+      </div><!-- /panel -->
 	</script>
 
     <div data-role="page" id="configure">
