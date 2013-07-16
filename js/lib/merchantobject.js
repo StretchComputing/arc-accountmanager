@@ -21,14 +21,14 @@ var MERCHANT = (function($){
 		  { propName: "PriceLevel",            displayText: "Price Level",                        inputType: "option",   required:false, options: ["LOW", "MEDIUM", "HIGH"]},
 		  { propName: "NumTables",             displayText: "Number of Tables",                   inputType: "text",     required:false},
 		  { propName: "NumSeats",              displayText: "Number of Seats",                    inputType: "text",     required:false},
-		  { propName: "DecisionMakers",        displayText: "Decision Maker",                     inputType: "special",  required:false},
+		  //{ propName: "DecisionMakers",        displayText: "Decision Maker",                     inputType: "special",  required:false},
 		  { propName: "TypeOfService",         displayText: "Type of Service",                    inputType: "option",   required:false, options: ["Sit Down", "Take Out"]},
 		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text",     required:false},
 		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text",     required:false},
 		  { propName: "AvgNumServers",         displayText: "Average Number of Servers",          inputType: "text",     required:false},
 		  { propName: "NumPOSTerminals",       displayText: "Number of Point of Sale Terminals",  inputType: "text",     required:false},
-		  { propName: "TypeOfFood",            displayText: "Type of Food",                       inputType: "text",     required:false},
-		  { propName: "Notes",			       displayText: "Notes",							  inputType: "text",	 required:false}
+		  { propName: "Cuisine",               displayText: "Type of Food",                       inputType: "text",     required:false},
+		  //{ propName: "Notes",			       displayText: "Notes",							  inputType: "text",	 required:false}
                             ],
                             
 			decisionMaker : [

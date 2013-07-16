@@ -151,8 +151,8 @@
 	<div class="ui-block-b" style="text-align: left">
 
 		<ul data-role="listview" id="<%=pageIdPrefix%>ListRight" data-inset="true">
-			<li><label for="<%=pageIdPrefix%>TypeOfFood"> Type of Food </label>
-			<input type="text" name="TypeOfFood" id="<%=pageIdPrefix%>TypeOfFood" value="<%= TypeOfFood %>"></li>
+			<li><label for="<%=pageIdPrefix%>Cuisine"> Type of Food </label>
+			<input type="text" name="Cuisine" id="<%=pageIdPrefix%>Cuisine" value="<%= Cuisine %>"></li>
 
 			<li><label for="<%=pageIdPrefix%>Status"> Status </label>
 			<select name="Status" id="<%=pageIdPrefix%>Status">
@@ -398,7 +398,7 @@
 
 		<li data-role="list-divider" class="collapsedListItem">General</li>
 		<li class="collapsedListItem">
-			<h3>Type of Food: <%= TypeOfFood%></h3>
+			<h3>Type of Food: <%= Cuisine%></h3>
 			<h3>Point of Sale Device: <%= POS %></h3>
 			<h3>Number of Terminals: <%= NumPOSTerminals%></h3>
 		</li>

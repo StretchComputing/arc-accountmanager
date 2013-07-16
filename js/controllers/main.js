@@ -484,7 +484,7 @@ var EXELON = (function (r, $) {
         contenttype: 'application/json',
         url: closeurl,
         statuscode: r.statusCodeHandlers(),
-				headers: {'Authorization' : r.getAuthorizationHeader()},
+		headers: {'Authorization' : r.getAuthorizationHeader()},
         success: function(data, status, jqXHR) {
                     try {
                     	r.merchantList = data.Results;
@@ -506,21 +506,23 @@ var EXELON = (function (r, $) {
 	try {
 		RSKYBOX.log.info('entering', 'main.js.createMerchant');
 		RSKYBOX.log.info('Currently stubbed off:', 'main.js.createMerchant');
-		/*
-		var closeurl = devUrl + 'merchants/new';
-		var jsonobj = cleanMerchant(merchant);
+		merchant.AcceptTerms = "True";
+		var closeurl = devUrl + 'merchants/create';
+		var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		
 		$.ajax({
 			type: 'post',
-			data: JSON.stringify(jsonobj),
 			datatype: 'json',
-			contenttype: 'application/json',
+			data : jsonobj,
+			contentType: 'application/json',
 			url: closeurl,
-			statuscode : r.statusCodeHandlers(),
-			success: function(){
+			statuscode: r.statusCodeHandlers(),
+			headers: {'Authorization' : r.getAuthorizationHeader()},
+			success: function(data){
 				RSKYBOX.log.info('finished', 'main.js.createMerchant');
+				merchant.Id = data.Results.Id;
 			}
-		});*/
+		});
 	}  
 	catch(e){
 		RSKYBOX.log.error(e,'main.js.createMerchant');
