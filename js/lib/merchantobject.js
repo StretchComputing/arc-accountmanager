@@ -1,16 +1,16 @@
 var MERCHANT = (function($){
 	/*propNames correspond with the merchant object returned by calls to Merchant Create API*/
 	return {merchantDisplay : [
-	      { propName: "Status",                displayText: "Merchant Status",                    inputType: "option",   required:true, options: ["Potential", "In Talks", "Configuration", "Ready", "Active"]},
-		  { propName: "AcceptTerms",           displayText: "Accepted the terms and conditions?", inputType: "checkbox", required:true},
-		  { propName: "EIN",                   displayText: "Company Employer ID Number",         inputType: "text",     required:true},
-		  { propName: "Street",                displayText: "Street Address",                     inputType: "text",     required:true},
-		  { propName: "City",                  displayText: "City",                               inputType: "text",     required:true},
+	      { propName: "Name",                  displayText: "Company Name",                       inputType: "text",     required:true},
+	      { propName: "Street",                displayText: "Street Address",                     inputType: "text",     required:true},
+	      { propName: "City",                  displayText: "City",                               inputType: "text",     required:true},
 		  { propName: "State",                 displayText: "State",                              inputType: "text",     required:true},
 		  { propName: "ZipCode",               displayText: "Zip Code",                           inputType: "text",     required:true},
+		  { propName: "AcceptTerms",           displayText: "Accepted the terms and conditions?", inputType: "checkbox", required:true},
+	      { propName: "Status",                displayText: "Merchant Status",                    inputType: "option",   required:true, options: ["Potential", "In Talks", "Configuration", "Ready", "Active"]},
+		  { propName: "EIN",                   displayText: "Company Employer ID Number",         inputType: "text",     required:true},
 		  { propName: "Longitude",             displayText: "Longitude",                          inputType: "text",     required:false},
 		  { propName: "Latitude",              displayText: "Latitude",                           inputType: "text",     required:false},
-		  { propName: "Name",                  displayText: "Company Name",                       inputType: "text",     required:true},
 		  { propName: "PaymentAccepted",       displayText: "Credit Card Types Accepted",         inputType: "text",     required:true},
 		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text",     required:true},
 		  { propName: "POS",                   displayText: "POS Type",                           inputType: "select",   required:false, options: ["POS_MICROS", "POS_ISIS", "POS_ALOHA"]},

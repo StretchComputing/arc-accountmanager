@@ -505,11 +505,10 @@ var EXELON = (function (r, $) {
   r.createMerchant = function(merchant){
 	try {
 		RSKYBOX.log.info('entering', 'main.js.createMerchant');
-		RSKYBOX.log.info('Currently stubbed off:', 'main.js.createMerchant');
-		merchant.AcceptTerms = "True";
+		if(merchant.AcceptTerms === "")
+			merchant.AcceptTerms = true;
 		var closeurl = devUrl + 'merchants/create';
 		var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
-		
 		$.ajax({
 			type: 'post',
 			datatype: 'json',
@@ -534,25 +533,27 @@ var EXELON = (function (r, $) {
 		  RSKYBOX.log.info('entering', 'main.js.updateMerchant');
 		  RSKYBOX.log.info('Currently stubbed off:', 'main.js.updateMerchant');
 		  
-		  /*
-		  if(merchant.EIN)
-			  var closeurl = devUrl + merchants/update/ + merchant.EIN;
-		  else
-			  return; fail
 		  
-		  var jsonobj = cleanMerchant(merchant);
+		  if(!merchant.Id)
+			  return;
+		  
+		  var closeurl = devUrl + 'merchants/update/' + merchant.Id;
+		  
+		  var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
+		  alert('need');
 		  
 		  $.ajax({
-			  type : 'put',
-			  data : JSON.stringify(jsonobj),
+			  type : 'POST',
+			  data : jsonobj,
 			  contenttype : 'application/json',
 			  url : closeurl,
-			  statuscode : r.statusCodeHandlers(),
+			  statuscode: r.statusCodeHandlers(),
+		      headers: {'Authorization' : r.getAuthorizationHeader()},
 			  success : function(){
 				  RSKYBOX.log.info('finished', 'main.js.updateMerchant');
 			  }
 		  });
-		  */
+		  
 	  }
 	  catch(e){
 		  RSKYBOX.log.error(e, 'main.js.updateMerchant');
@@ -562,7 +563,25 @@ var EXELON = (function (r, $) {
   r.deleteMerchant = function(merchant){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.deleteMerchant');
-		  RSKYBOX.log.info('Currently stubbed off:', 'main.js.deleteMerchant');
+		  	if(!merchant.Id){
+		  		return; //Can't delete if we don't know the id
+		  	}
+		  	
+			var closeurl = devUrl + 'merchants/delete/' + merchant.Id;
+			var jsonobj = JSON.stringify({});
+			$.ajax({
+				type: 'DELETE',
+				datatype: 'json',
+				data : jsonobj,
+				contentType: 'application/json',
+				url: closeurl,
+				statuscode: r.statusCodeHandlers(),
+				headers: {'Authorization' : r.getAuthorizationHeader()},
+				success: function(data){
+					RSKYBOX.log.info('finished', 'main.js.createMerchant');
+					alert('merchant deleted');
+				}
+			});
 	  }
 	  catch(e){
 		  RSKYBOX.log.error(e,'main.js.deleteMerchant');
@@ -581,6 +600,8 @@ var EXELON = (function (r, $) {
 			  newMerchant[prop] = merchant[prop];
 		  }
 	  }
+	  if(newMerchant.Status)
+		  delete newMerchant.Status;
 	  return newMerchant;
   };
   
