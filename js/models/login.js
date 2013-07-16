@@ -4,7 +4,7 @@ var EXELON = (function (r, $) {
 
   r.Login = r.BaseModel.extend({
     // TODO: for now, the 'inst' is hard coded into the URL -- base class has a setInstUrl() method for setting inst when needed ...
-    apiUrl: '/eed/users',
+    apiUrl: '/customers/token',
 
     initialize: function () {
       try {
@@ -22,8 +22,8 @@ var EXELON = (function (r, $) {
     getQueryObject: function () {
       try {
         return {
-          aduser: this.get('aduser') || '',
-          password: this.get('password')
+          Login: this.get('Login') || '',
+          Password: this.get('Password')
         };
       } catch (e) {
         RSKYBOX.log.error(e, 'Login.getQueryObject');

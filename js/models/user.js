@@ -5,15 +5,9 @@ var EXELON = (function (r, $) {
   r.User = r.BaseModel.extend({
     apiUrl: '/users',
     fields: {
-      id: null,
-      firstname: null,
-      lastname: null,
-      aduser: null,
-      employenumber: null,
-      passport: null,
-      approvalprofiles: null,
-      regionpref: null,
-      token: null
+      Id: null,
+      eMail: null,
+      ArcNumber: null
     },
 
     initialize: function () {

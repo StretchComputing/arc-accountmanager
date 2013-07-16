@@ -22,35 +22,38 @@ var EXELON = (function (r, $) {
       try {
         var valid;
       
-        var stubbedOff = true;
-        if(stubbedOff) {
-          RSKYBOX.log.info('THE LOGIN PROCESS IS CURRENTLY STUBBED OFF!!!', 'Login.submit');
+        $.mobile.showPageLoadingMsg();
+
+//        var stubbedOff = true;
+//        if(stubbedOff) {
+//          RSKYBOX.log.info('THE LOGIN PROCESS IS CURRENTLY STUBBED OFF!!!', 'Login.submit');
           
-          $.mobile.changePage( "#home", { transition: "slideup", changeHash: false });
+//          $.mobile.changePage( "#home", { transition: "slideup", changeHash: false });
           
-          evt.preventDefault();
-          return false;
-        }
+//          evt.preventDefault();
+//          return false;
+//        }
 
         valid = this.model.set({
-          aduser: this.$("input[name='login']").val(),
-          password: this.$("input[name='password']").val()
+          Login: this.$("input[name='login']").val(),
+          Password: this.$("input[name='password']").val()
         });
 
         if (valid) {
           this.model.prepareNewModel();
 
-          // using a direct ajax call instead of a model.save because we don't want to sent the entire User model to the server
+					var loginUrl = devUrl + "customers/token";
+          // using a direct ajax call instead of a model.save because we don't want to send the entire User model to the server
           $.ajax({
             dataType: 'json',
             contentType: 'application/json',
             type: 'POST',
-            url: this.model.url,
+            url: loginUrl,
             data: JSON.stringify(this.model.getQueryObject()),
             success: this.success,
             statusCode: r.statusCodeHandlers(this.apiError)
           });
-} evt.preventDefault();
+				} evt.preventDefault();
         return false;
       } catch (e) {
         RSKYBOX.log.error(e, 'LoginView.submit');
@@ -62,14 +65,12 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'Login.success');
         EXELON.logIn(model);
 
-        $.mobile.showPageLoadingMsg();
-
         // refresh the home page if it already exists. If it doesn't exist yet, it will be created and populated when first displayed
         if(r.homeInitComplete) { 
           RSKYBOX.log.info('refershing home sreen after successful login', 'Login.success');
           r.refreshHome();
         }
-        $.mobile.changePage( "#home", { transition: "slideup", changeHash: false });
+        $.mobile.changePage( "#home", { transition: "slideup", changeHash: true});
       } catch (e) {
         RSKYBOX.log.error(e, 'LoginView.success');
       }
