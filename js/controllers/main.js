@@ -826,7 +826,8 @@ var EXELON = (function (r, $) {
 	  
 	  
 	  var closeurl = devUrl + 'merchants/list';
-	  var jsonobj = {};
+	  var jsonobj = {"Config":true,
+	                 "Id": merchantID};
 	  
 	  $.ajax({
 		  type: 'search',
@@ -836,13 +837,12 @@ var EXELON = (function (r, $) {
 		      url: closeurl,
 		      statuscode: r.statusCodeHandlers(),
 		      headers: {'Authorization' : r.getAuthorizationHeader()},
-		      Config:true,
 		      success: function(data, status, jqXHR) {
 		      try {
 			  var merIndex = 0;
 			  while(data.Results[merIndex].Id != merchantID)
 			      merIndex++;
-			  r.merchantBeingConfigured = data.Results[merIndex];
+			  r.merchantBeingConfigured = data.Results;
 			  r.setConfigureStepsPages();
 			  $.mobile.changePage($('#ConfigureStep_' + r.merchantBeingConfigured.Configuration.CurrentStep));
 			  var jtest = 5;
