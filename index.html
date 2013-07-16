@@ -205,20 +205,15 @@
 	</div><!-- ui-grid-a -->
 
 	<ul data-role="listview" data-inset="true">
-		<li data-icon="plus" id="pocAddNew"><a>Points of Contact</a></li>
+		<li data-role="list-divider">Decision Maker</li>
 
-	<div id="<%=pageIdPrefix%>PocList">
-
-		<% _.each(DecisionMakers, function(Poc) { %>
-			<% template = _.template($('#decisionMakerForm').html()); %>
-			<% Poc.index = index; %>
-			<% Poc.pageIdPrefix = pageIdPrefix %>
-			<%=template(Poc)%>
-			<% delete Poc.index %>
-			<% delete Poc.pageIdPrefix %>
-			<li data-role="list-divider"></li>
-				
-		<%  }); %>
+		<% template = _.template($('#decisionMakerForm').html()); %>
+		<%=template({FirstName : DMFirstName,
+					 LastName : DMLastName,
+					 Phone : DMPhone,
+					 Position : DMPosition,
+					 eMail : DMeMail,
+					 'pageIdPrefix' : pageIdPrefix }) %>
 
 	</div>
 	</ul>
@@ -226,20 +221,21 @@
 	</script>
 
 	<script type="text/template" id="decisionMakerForm">
-		<div formType="Poc" id="pocForm<%=index%>">
+	<li>
+		<div formType="Poc" id="pocForm">
 		<div class="ui-grid-a">
 
 		<div class="ui-block-a">
 			
 			<ul data-role="listview" data-inset="true">
-			<li><label for="<%=pageIdPrefix%>PocFirstName<%=index%>" >First Name</label>
-				<input type="text" PocProp="FirstName" index="<%=index%>" id="<%=pageIdPrefix%>PocFirstName<%=index%>" value="<%=FirstName%>" ></li>
+			<li><label for="<%=pageIdPrefix%>PocFirstName" >First Name</label>
+				<input type="text" name="DMFirstName" id="<%=pageIdPrefix%>PocFirstName" value="<%=FirstName%>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>PocPhone<%=index %>" >Phone Number</label>
-				<input type="text" PocProp="Phone" index="<%=index%>" id="<%=pageIdPrefix%>PocPhone<%=index %>" value="<%=Phone%>" ></li>
+			<li><label for="<%=pageIdPrefix%>PocPhone" >Phone Number</label>
+				<input type="text" name="DMPhone" id="<%=pageIdPrefix%>PocPhone" value="<%=Phone%>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>PoceMail<%=index %>" >eMail Address</label>
-				<input type="email" PocProp="eMail" index="<%=index%>" id="<%=pageIdPrefix%>PoceMail<%=index %>" value="<%=eMail%>" ></li>
+			<li><label for="<%=pageIdPrefix%>PoceMail" >eMail Address</label>
+				<input type="email" name="DMeMail" id="<%=pageIdPrefix%>PoceMail" value="<%=eMail%>" ></li>
 
 			</ul>
 		</div>
@@ -247,17 +243,17 @@
 		<div class="ui-block-b" style="text-align: left">
 
 		<ul data-role="listview" data-inset="true">
-			<li><label for="<%=pageIdPrefix%>PocLastName<%=index %>" >Last Name</label>
-			<input type="text" PocProp="LastName" index="<%=index%>" id="<%=pageIdPrefix%>PocLastName<%=index %>" value="<%=LastName%>" ></li>
+			<li><label for="<%=pageIdPrefix%>PocLastName" >Last Name</label>
+			<input type="text" name="DMLastName" id="<%=pageIdPrefix%>PocLastName" value="<%=LastName%>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>PocPosition<%=index %>" >Position</label>
-			<input type="text" PocProp="Position" index="<%=index%>" id="<%=pageIdPrefix%>PocPosition<%=index %>" value="<%=Position%>" ></li>
+			<li><label for="<%=pageIdPrefix%>PocPosition" >Position</label>
+			<input type="text" name="DMPosition" id="<%=pageIdPrefix%>PocPosition" value="<%=Position%>" ></li>
 
-			<li style="padding:19px"><button id="<%=pageIdPrefix%>Delete<%=index%>" data-icon="delete">Delete</button></li>
 		</ul>
 		</div>
 		</div>
 		</div>
+	</li>
 		
 	</script>
 
@@ -427,25 +423,14 @@
 			<h3>Website: <%= Website %></h3>
 		</li>
 
-		<li data-role="list-divider" class="collapsedListItem">Points of Contact</li>
+		<li data-role="list-divider" class="collapsedListItem">Decision Maker</li>
 
-		<% if(DecisionMakers.length > 0) { %>
-			<li class="collapsedListItem">
-				<div class="ui-grid-b">
-				<% var alpha = "abcdefghijklmnopqrstuvwxyz"; %>
-				<% var i = 0; %>
-				<% _.each(DecisionMakers, function(poc) { %>
-					<div class="ui-block-<%= alpha[i]%>">
-						<h1><%=poc.FirstName%> <%=poc.LastName%></h1>
-						<h3><%=poc.Phone%></h3>
-						<h3><%=poc.Position%></h3>
-						<h3><%= poc.eMail%></h3>
-					</div>
-					<% i++; %>
-				<% }); %>
-				</div>
-			</li>
-		<% } %><!-- End if -->
+		<li class="collapsedListItem">
+			<h1><%=DMFirstName%> <%=DMLastName%></h1>
+			<h3>Phone: <%=DMPhone%></h3>
+			<h3>Postion: <%=DMPosition%></h3>
+			<h3>Email Address: <%=DMeMail%></h3>
+		</li>
 		</ul>
 
 		<ul data-role="listview" data-inset="true" id="merchantDisplayStatusSpecific">

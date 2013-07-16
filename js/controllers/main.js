@@ -531,11 +531,11 @@ var EXELON = (function (r, $) {
   r.updateMerchant = function(merchant){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.updateMerchant');
-		  RSKYBOX.log.info('Currently stubbed off:', 'main.js.updateMerchant');
 		  
-		  
-		  if(!merchant.Id)
-			  return;
+		  if(!merchant.Id){
+			RSKYBOX.log.info('failed due to no user id', 'main.js.updateMerchant');
+			 return;
+		  }
 		  
 		  var closeurl = devUrl + 'merchants/update/' + merchant.Id;
 		  
@@ -658,8 +658,6 @@ var EXELON = (function (r, $) {
 			  }
 		  }
 		  var elm;
-		  if( !(merchantList[merchIndex].DecisionMakers))
-			  merchantList[merchIndex].DecisionMakers = [];
 		  if( !(merchantList[merchIndex].Notes))
 			  merchantList[merchIndex].Notes = [];
 		  if( !(merchantList[merchIndex].Activities))
@@ -718,24 +716,6 @@ var EXELON = (function (r, $) {
 
 	  content.append(editMerchantTemplate(merchant));
 
-	  var addNewPoc = $('#pocAddNew');
-
-	  /*Register all the delete button handlers*/
-	  for(var i = 0; i < merchant.index; i++){
-		  r.registerDelete(pageId,i);
-	  };
-
-	  addNewPoc.bind('click', function(e){
-		  var pocTemplate = _.template($('#decisionMakerForm').html());
-		  $('#'+pageId+'PocList').prepend(pocTemplate({FirstName : "", LastName : "", 
-			  Phone : "", Position : "", eMail : "", index : merchant.index,
-			  pageIdPrefix : merchant.pageIdPrefix}));
-		  $('#'+pageId+'PocList').trigger('create');
-
-		  r.registerDelete(pageId,merchant.index);
-		  merchant.index++;
-	  });
-
 	  $('#'+pageId+'GetLngLat').bind('click', function(e){
 		  var lngObj = $('#'+pageId+'Longitude');
 		  var latObj = $('#'+pageId+'Latitude');
@@ -783,13 +763,13 @@ var EXELON = (function (r, $) {
 		});
 	  
 	  $('#'+pageId+'Save').bind('click', function(e){
-		  var form = $('#'+pageId+'List :input');
+		  var form = $('#'+pageId+'Content :input');
 		  var formsFilled = [];
+		  
+		  if(!newMerchant)
+			  var updateObj = {};//fed to the updateMerchant API Call
+		  
 		  for(var i = 0; i < form.length; i++){
-			  if(form[i].getAttribute('pocProp') !== null){
-				  continue;//Skip these, do them below
-			  }
-
 			  if(form[i].required && form[i].value === ""){
 				  var pop = $('#'+pageId+'RequiredPopup');
 				  pop.empty();
@@ -802,24 +782,20 @@ var EXELON = (function (r, $) {
 				  merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
 			  }
 			  else{
-				  merchant[form[i].name] = form[i].value;
+				  
+				  if(!newMerchant){
+					  if(form[i].value !== merchant[form[i].name]){
+						  updateObj[form[i].name] = form[i].value;
+					  }
+				  }
+				  
+				  merchant[form[i].name] = form[i].value;//Update local copy
+				  
 				  if(form[i].value !== ""){//This field was actually filled out
 					  formsFilled.push(form[i].name);
 				  }
 			  }
 		  }
-
-		  var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
-		  var pocList = [];
-		  for(var i = 0; i < pocForm.length; i++){
-			  var inputs = $(':input',pocForm[i]);
-			  var poc = {};
-			  for(var j = 0; j < inputs.length; j++){
-				  poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
-			  }
-			  pocList.push(poc);
-		  }
-		  merchant.DecisionMakers = pocList;
 
 		  merchant.Notes = merchant.Notes.concat(notesToAdd);
 		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
@@ -829,7 +805,8 @@ var EXELON = (function (r, $) {
 			  r.merchantList.push(merchant);
 		  }
 		  else{
-			  r.updateMerchant(merchant);
+			  updateObj.Id = merchant.Id;
+			  r.updateMerchant(updateObj);
 		  }
 
 		  /*Create the activity*/
