@@ -437,7 +437,7 @@
 			<li><h1>Status Specific Content</h1></li>
 		</ul>
 		
-		<!--
+		<!-- Not implemented for now
 		<ul data-role="listview" data-inset="true" id="merchantDisplayActivityFeed">
 		<li><% for(var i = Activities.length-1; i >= 0 ; i--){ %>
 			<% var act = Activities[i]; %>
@@ -457,7 +457,6 @@
 	</ul>
 
 	<ul id="merchantDisplayNotesDisplay" data-role="listview" data-inset="true">
-		
 		<% for(var i = Notes.length-1; i >= 0; i--){  %>
 			<% if(Notes.length-1 - i >= 10) { %>
 				<% Notes.position = i; %>
@@ -474,18 +473,34 @@
 	
 	<script type="text/template" id="NoteDisplayTemplate">
 		<li class="noteSwipe" id="noteShow<%=index%>" index="<%=index%>">
-			<h3><%=n.LastUpdatedBy%> at <%=n.LastUpdated.toLocaleTimeString()%> 
-				<%=n.LastUpdated.toLocaleDateString()%> wrote a <%=n.Type %>: </h3>
-				<% if(n.Type === "NOTE_CONFIG") { %>
-					<p>Step <%=n.ConfigurationStepId%></p>
-				<% } %>
-			<p><%=n.Note%></p>
+			<% t= _.template($('#NoteShowInnerTemplate').html()); %>
+			<%= t({'n' : n}) %>
 		</li>
-		<li id="noteMenu<%=index%>" style="display:none">
+		<li id="noteMenu<%=index%>" style="display:none" class="noteMenu" index="<%=index%>" >
 			<button data-icon="delete" data-iconpos="notext" class="noteDelete" index="<%=index%>" data-inline="true"></button>
 			<button data-icon="gear" data-iconpos="notext" class="noteEdit" index="<%=index%>" data-inline="true"></button>
 			<button data-icon="back" data-iconpos="notext" class="noteBack" index="<%=index%>" data-inline="true"></button>
 		</li>
+		<li id="noteEditField<%=index%>" style="display:none" index="<%=index%>">
+			<div data-role="fieldcontain">
+				<input type="text" id="noteEditForm<%=index%>" value="<%=n.Note%>" index="<%=index%>"></input>
+				<button data-icon="check" data-iconpos="notext" class="editNoteSave" index="<%=index%>" data-inline="true"></button>
+				<button data-icon="back" data-iconpos="notext" class="editNoteBack" index="<%=index %>" data-inline="true"></button>
+			</div>
+		</li>
+	</script>
+	
+	<script type="text/template" id="NoteShowInnerTemplate">
+		<h3> <%=n.LastUpdatedBy%> at <%=n.LastUpdated.toLocaleTimeString()%> 
+				<%=n.LastUpdated.toLocaleDateString()%> wrote a <%=n.Type %>: </h3>
+				<% if(n.Type === "NOTE_CONFIG") { %>
+					<p>Step <%=n.ConfigurationStepId%></p>
+				<% } %>
+		<p><%=n.Note%></p>
+	</script>
+	
+	<script type="script/template" id="merchantDisplayNoteEditTemplate">
+
 	</script>
 	
 	<script type="script/template" id="merchantDisplaySidebarTemplate">
