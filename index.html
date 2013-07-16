@@ -315,39 +315,39 @@
 	<div class="ui-block-b">
 	  <ul>
 	    <li>Phone Number: <b><%= person.Phone %></b></li>
-	    </ul>
-	  </div>
+	  </ul>
 	</div>
+      </div>
       <% }); %>
-
+      
       <div class="ui-grid-a">
 	<div class="ui-block-a">
 	  <button id="merchantChoose<%= Number %>" merchantName="<%= Name %>">Select</button>
-	  </div>
+	</div>
 	<div class="ui-block-b">
 	  <button id="merchantEdit<%= Number %>" merchantName="<%= Name %>">Edit</button>
-	  </div>
 	</div>
       </div>
-    </li>
-  </script>
+    </div>
+  </li>
+</script>
 
 <div data-role="page" id="createNewMerchant">
   
   <div data-role="header" data-position="fixed" data-tap-toggle="false">
     <div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
       <a href="#home" data-rel="back" data-icon="arrow-l" data-role="button">Back</a>
-      </div>
+    </div>
     <h1 id="editMerchantHead">Create Merchant</h1>
     <div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
       <a href="#createNewMerchantNotePopup" data-rel="popup" data-icon="plus" data-role="button">Add Note</a>
       <button data-icon="check" id="createNewMerchantSave">Save</button>
-      </div>
     </div>
-
+  </div>
+  
   <div data-role="content" id="createNewMerchantContent">
     
-    </div>
+  </div>
   
   <div data-role="popup" id="createNewMerchantNotePopup">
     <label for="createNewMerchantNoteTextArea">Enter Your Note Here:</label>
@@ -356,28 +356,28 @@
     <div class="ui-grid-b">
       <div class="ui-block-a">
 	<button id="createNewMerchantNoteSave" data-icon="check">Save</button>
-	</div>
+      </div>
       <div class="ui-block-b">
 	<button id="createNewMerchantNoteCancel" data-icon="delete">Cancel</button>
-	</div>
       </div>
     </div>
+  </div>
   
   <div data-role="popup" id="createNewMerchantRequiredPopup" class="ui-content">
-    </div>
-
   </div>
+  
+</div>
 
 <div data-role="page" id="merchantDisplay">
   
   <div data-role="header" data-position="fixed" data-tap-toggle="false">
     <a href="#merchantDisplay_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
     <h1 id="merchantDisplayHead"></h1>
-    </div>
+  </div>
   
   <div data-role="content" id="merchantDisplayContent">
     
-    </div>
+  </div>
   
   <div id="merchantDisplayNotePopup" data-role="popup">
     <label for="merchantDisplayNoteTextArea">Enter Your Note Here:</label>
@@ -385,43 +385,43 @@
     <div class="ui-grid-b">
       <div class="ui-block-a">
 	<button id="merchantDisplayNoteSave" data-icon="check">Save</button>
-	</div>
+      </div>
       <div class="ui-block-b">
 	<button id="merchantDisplayNoteCancel" data-icon="delete">Cancel</button>
-	</div>
       </div>
     </div>
-  
   </div>
+  
+</div>
 
 <script type="script/template" id="merchantDisplayContentTemplate">
-
+  
   <div class="ui-grid-b">
-
+    
     <div class="ui-block-a">
       <a href="#home" data-role="button">Change Merchant</a>
-      </div>
-
+    </div>
+    
     <div class="ui-block-b">
       <button id="merchantDisplayEdit">Edit</button>
-      </div>
-
+    </div>
+    
     <div class="ui-block-c">
       <a href="#configure" data-role="button">Configure</a>
-      </div>
-
     </div>
-
+    
+  </div>
+  
   <ul data-role="listview" data-inset="true">
     <li>
       <!--<img src="default"></img>-->
       <h3>Name: <%= Name%></h3>
       <h3>Address: <%= Street %> <%= City %>, <%= State %> <%= ZipCode%></h3>
       <h3>Status: <%= Status %></h3>
-      </li>
-
+    </li>
+    
     <li data-role="list-divider">Activity Feed</li>
-    </ul>
+  </ul>
   
   <ul data-role="listview" data-inset="true" id="merchantDisplayActivityFeed">
     <li><% for(var i = Activities.length-1; i >= 0 ; i--){ %>
@@ -462,27 +462,94 @@
     <% var t = _.template($('#NoteDisplayTemplate').html()); %>
     <%= t(Notes[i]) %>
     <% } %>
-    </ul>
-
-  </script>
+  </ul>
+  
+</script>
 
 <script type="text/template" id="NoteDisplayTemplate">
   <li>
     <h3><%=UserName%> at <%=LastUpdated.toLocaleTimeString()%> <%=LastUpdated.toLocaleDateString()%> wrote:</h3>
     <p><%=Note%></p>
-    </li>
-  </script>
+  </li>
+</script>
 
     <div data-role="page" id="configure">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
         <h1>Account Manager</h1>
         <a href="#configure_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+	<a href="#configureList" data-role="button" data-icon="check">List</a>
       </div>
 
       <div data-role="content">
-        <div>This is the Configure page</div>
+        <div class="ui-grid-a">
+	  <div class="ui-block-a">
+	    <ul data-role="listview" data-filter="true" data-inset="true" id="ConfigureMerchantSelect"></ul>
+	  </div>
+	  <div class="ui-block-b">
+	    <a data-role="button" id="StartConfigure" merchantId="">Configure</a>
+	  </div>
+	</div>
       </div>
     </div><!-- /page -->
+
+    <script type="text/template" id="ConfigureMerchantListTemplate">
+      <li>
+	<a merNum="" id="merchant_configSelect">
+	  <h3><%= Name %></h3>
+	  <p><%= Street %></p>
+	  <p><%= City %></p>
+	</a>
+      </li>
+    </script>
+    
+    <script type="text/template" id="ConfigureStepsTemplate">
+      <div data-role="page" id="ConfigureStep_Number">
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+	  <h1>Configure: <%= r.MerchantBeingConfigured.Name  %></h1>
+	  <a data-icon="arrow-l" data-iconpos="notext" id="ConfigureStepBack_Number"></a>
+	  <a data-icon="arrow-r" data-iconpos="notext" id="ConfigureStepForward_Number"></a>
+	</div>
+	
+	<div data-role="content">
+	  <h1><%= Number %>. <%= Title %></h1>
+	  <ul data-role="listview" id="ConfigureSubSteps_Step">SUBSTEPS</ul>
+	  <div data-role="collapsible">
+	    <h2>Instructions</h2>
+	    <p><%= Instructions %></p>
+	  </div>
+	  <% if(ScreenShots.length  > 0) {  %>
+	  <ul data-role="listview">
+	    <li data-role="list-divider">ScreenShots</li>
+	    <% for(var imgIndex = 0; imgIndex < ScreenShots.length; imgIndex++) { %>
+	       <li>
+		 <div data-role="fieldcontain">
+		   <h3><%= ScreenShots[imgIndex].Name %></h3>
+		   <img src=<%= ScreenShots[imgIndex].URL %> />
+		 </div>
+	       </li>
+	       <% } %>
+	  </ul>
+	  <% } %>
+	  <ul data-role="listview">
+	    <li data-role="listdivider">Notes</li>
+	  </ul>
+	</div>
+      </div>
+    </script>
+
+    <script type="text/template" id="ConfigureSubStepsTemplate">
+      <li>
+	<div data-role="fieldcontain">
+	  <div data-role="fieldcontain">
+	    <input type="checkbox" id="ConfigureCheck_Step_SubStep" />
+	    <label for="ConfigureCheck_Step_SubStep"><%= Description %></label>
+	  </div>
+	  <% if(Input != undefined) { %>
+	  <input type="text" id="ConfigureInput_Step_SubStep" placeholder="Default: "></input>
+	  <% } %>
+	</div>
+      </li>
+    </script>
 
     <div data-role="page" id="configureTest">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">

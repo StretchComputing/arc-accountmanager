@@ -248,6 +248,7 @@ var EXELON = (function (r, $) {
     configureShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.configureShow');
+	r.setConfigurePage(r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.configureShow');
       }
@@ -772,7 +773,159 @@ var EXELON = (function (r, $) {
 	  if(Status === key[4])
 		  return 'a';
 	  return 'd';
-  };  
+  };
+
+  r.setConfigurePage = function(merchants) {
+      try{
+	  RSKYBOX.log.info('entering','main.js.setConfigurePage');
+	  
+	  var configureMerchantListTemplate = _.template($('#ConfigureMerchantListTemplate').html());
+	  var configureMerchantListHtml = "";
+	  var nextMerchant;
+
+	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+	      nextMerchant = configureMerchantListTemplate(merchants[merIndex]);
+	      nextMerchant = nextMerchant.replace("merchant_configSelect", "ConfigSelect" + merIndex);
+	      configureMerchantListHtml += nextMerchant;
+	  }
+
+	  $('#ConfigureMerchantSelect').html(configureMerchantListHtml);
+
+	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+	      $('#' + 'ConfigSelect' + merIndex).attr('merNum',merIndex);
+	      $('#' + 'ConfigSelect' + merIndex).click(function() {
+		      var merIndex = $(this).attr('merNum');
+		      $('#StartConfigure').attr("merchantId",merchants[merIndex].Id);
+		      $('#StartConfigure>span').empty();
+		      $('#StartConfigure>span').text("Start Configure: " + merchants[merIndex].Name);
+		  });
+	  }
+	  
+	  $('#StartConfigure').click(function() {
+		  var merchantId = $(this).attr('merchantId'); 
+		  if(merchantId) {
+		      //if(r.merchantBeingConfigured && r.merchantBeingConfigured.Id != merchantID){
+		      r.getMerchantConfigurationInfo(merchantId);
+			  //}
+		      //r.setConfigureStepsPages();
+		      //$.mobile.changePage($('#ConfigureStep_' + r.merchantBeingConfigured.Configuration.CurrentStep));
+		      //$.mobile.changePage($('#COnfigureStep_0');
+		  }
+	      });
+	      
+	  $('#ConfigureMerchantSelect').listview('refresh');
+	  
+      } catch (e) {
+	  RSKYBOX.log.error(e, 'setConfigurePage');
+      }
+  };
+
+  r.getMerchantConfigurationInfo = function(merchantID) {
+      try{
+	  RSKYBOX.log.info('entering','js.main.getMerchantConfigurationInfo');
+	  
+	  
+	  var closeurl = devUrl + 'merchants/list';
+	  var jsonobj = {};
+	  
+	  $.ajax({
+		  type: 'search',
+		      data: JSON.stringify(jsonobj),
+		      datatype: 'json',
+		      contenttype: 'application/json',
+		      url: closeurl,
+		      statuscode: r.statusCodeHandlers(),
+		      headers: {'Authorization' : r.getAuthorizationHeader()},
+		      Config:true,
+		      success: function(data, status, jqXHR) {
+		      try {
+			  var merIndex = 0;
+			  while(data.Results[merIndex].Id != merchantID)
+			      merIndex++;
+			  r.merchantBeingConfigured = data.Results[merIndex];
+			  r.setConfigureStepsPages();
+			  $.mobile.changePage($('#ConfigureStep_' + r.merchantBeingConfigured.Configuration.CurrentStep));
+			  var jtest = 5;
+		      } catch (e) {
+			  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo.success');
+		      }
+		  }
+	      });
+      } catch (e) {
+	  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo');
+      }
+  };
+  
+  r.setConfigureStepsPages = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.setConfigureStepsPages');
+	  
+	  var configureSubStepsTemplate = _.template($('#ConfigureSubStepsTemplate').html());
+	  var configureStepsTemplate = _.template($('#ConfigureStepsTemplate').html());
+
+	  var stepsHtml = "";
+	  var nextSubStepAdded;
+	  var nextStepAdded;
+
+	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration.Steps.length; stepIndex++) {
+	      
+	      var subStepsHtml = "";
+	      var cStep = r.merchantBeingConfigured.Configuration.Steps[stepIndex];
+	      
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
+		  
+		  var cSubStep = cStep.SubSteps[subStepsIndex];
+		  nextSubStepAdded = configureSubStepsTemplate(cSubStep);
+		  nextSubStepAdded = nextSubStepAdded.replace("ConfigureCheck_Step_SubStep", "ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number);
+		  if(cSubStep.Input != undefined){
+		      nextSubStepAdded = nextSubStepAdded.replace("ConfigureInput_Step_SubStep", "ConfigureInput_" + cStep.Number + "_" + cSubStep.Number);
+		  }
+		  subStepsHtml += nextSubStepAdded;
+	      }
+	      
+	      nextStepAdded = configureSubStepsTemplate(cStep);
+	      nextStepAdded = nextStepAdded.replace("ConfigureStep_Number", "ConfifureStep_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("SUBSTEPS", subStepsHtml);
+	      nextStepAdded = nextStepAdded.replace("ConfigureSubSteps_Step","ConfigureSubSteps_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureStepBack_Number","ConfigureStepBack_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureStepForward_Number","ConfigureStepForward_" + cStep.Number);
+
+	      stepsHtml += nextStepAdded;
+	  }
+	  
+	  $("#ConfigureMerchantListTemplate").after(stepsHtml);
+
+	  for(var stepsIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration.Steps.length; stepIndex++){
+	      
+	      cStep = r.merchantBeingConfigured.Configuration.Steps[stepIndex];
+	      if(stepIndex = 0){
+		  $("#ConfigureStepBack_" + cStep.Number).click(function() {
+			  $.mobile.changePage($('#configure'));
+		      });  
+	      } else {
+		  $("#ConfigureStepBack_" + cStep.Number).click(function() {
+			  $.mobile.changePage($('#ConfigureStep_' + (cStep.Number - 1)));
+		      });
+	      }
+
+	      if(stepIndex = r.merchantBeingConfigured.Configuration.Steps.length - 1){
+		  $("#ConfigureStepForward_" + cStep.Number).click(function() {
+			  $.mobile.changePage($('#configure'));
+		      });
+	      } else {
+		  $("#ConfigureStepForward_" + cStep.Number).click(function() {
+			  $.mobile.changePage($('#ConfigureStep_' + (cStep.Number + 1)));
+		      });
+	      }
+
+	      $('#ConfigureStep_' + cStep.Number).trigger('create');
+	  }
+	  
+      } catch (e) {
+	  RSKYBOX.log.error(e, 'setConfigureStepsPages');
+      }
+  };
+	      
 
   try {
     r.router = new $.mobile.Router([
