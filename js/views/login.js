@@ -28,7 +28,7 @@ var EXELON = (function (r, $) {
 //        if(stubbedOff) {
 //          RSKYBOX.log.info('THE LOGIN PROCESS IS CURRENTLY STUBBED OFF!!!', 'Login.submit');
           
-//          $.mobile.changePage( "#home", { transition: "slideup", changeHash: false });
+//          $.mobile.changePage( "#selectMerchant", { transition: "slideup", changeHash: false });
           
 //          evt.preventDefault();
 //          return false;
@@ -42,7 +42,9 @@ var EXELON = (function (r, $) {
         if (valid) {
           this.model.prepareNewModel();
 
-					var loginUrl = devUrl + "customers/token";
+					// Access a global URL variable
+					var baseUrl = 'http://dev.dagher.mobi/rest/v1/';
+					var loginUrl = baseUrl + "customers/token";
           // using a direct ajax call instead of a model.save because we don't want to send the entire User model to the server
           $.ajax({
             dataType: 'json',
@@ -63,14 +65,8 @@ var EXELON = (function (r, $) {
     success: function (model, response) {
       try {
         RSKYBOX.log.info('entering', 'Login.success');
-        EXELON.logIn(model);
-
-        // refresh the home page if it already exists. If it doesn't exist yet, it will be created and populated when first displayed
-        if(r.homeInitComplete) { 
-          RSKYBOX.log.info('refershing home sreen after successful login', 'Login.success');
-          r.refreshHome();
-        }
-        $.mobile.changePage( "#home", { transition: "slideup", changeHash: true});
+        r.logIn(model.Results);
+        $.mobile.changePage( "#selectMerchant", { transition: "slideup", changeHash: true});
       } catch (e) {
         RSKYBOX.log.error(e, 'LoginView.success');
       }
@@ -116,7 +112,7 @@ var EXELON = (function (r, $) {
     },
 
     apiCodes: {
-      // no application level errors for this API. If authentication fails, an HTTP 401 is returned
+			106: "Username and/or Password incorrect, please try again"
     }
   });
 

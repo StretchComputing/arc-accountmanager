@@ -216,18 +216,24 @@ var EXELON = (function(r, $) {
     }
   };
 
-  var APPROVER_USER = 'approverUser';
+  var CUSTOMER = 'customer';
 
   // returns the complete, partially Base64 encoded authorization header ready to be inserted in the HTTP Authorication header
   r.getAuthorizationHeader = function() {
 		// hard code token to one for joepwro@gmail.com
-    var authHeader = 'Basic VEU5SFNVNWZWRmxRUlY5RFZWTlVUMDFGVWpwcWIyVndkM0p2UUdkdFlXbHNMbU52YlRwMWRHOHhNak09';
+    //var authHeader = 'Basic VEU5SFNVNWZWRmxRUlY5RFZWTlVUMDFGVWpwcWIyVndkM0p2UUdkdFlXbHNMbU52YlRwMWRHOHhNak09';
+
+    var authHeader = '';
+		var customer = r.store.getItem(CUSTOMER);
+		if(customer) {
+    	authHeader = 'Basic ' + customer.Token;
+		}
     return authHeader;
   };
 
   r.getUserName = function() {
     var userName = '';
-    var user = r.store.getItem(APPROVER_USER);
+    var user = r.store.getItem(CUSTOMER);
 
     if(user) {
       if(user.firstname) {
@@ -254,11 +260,11 @@ var EXELON = (function(r, $) {
   }
 
   // Handle logging in
-  // param user: a JavaScript object with the user attributes, not a Backbone model.
-  r.logIn = function (user) {
+  // param customer: a JavaScript object with the customer attributes, not a Backbone model.
+  r.logIn = function (customer) {
     try {
       RSKYBOX.log.info('entering', 'EXELON.logIn');
-      r.store.setItem(APPROVER_USER, user);
+      r.store.setItem(CUSTOMER, customer);
     } catch (e) {
       RSKYBOX.log.error(e, 'EXELON.logIn');
     }
@@ -267,7 +273,7 @@ var EXELON = (function(r, $) {
   r.logOut = function () {
     try {
       RSKYBOX.log.info('entering', 'EXELON.logOut');
-      r.store.removeItem(APPROVER_USER);
+      r.store.removeItem(CUSTOMER);
     } catch (e) {
       RSKYBOX.log.error(e, 'EXELON.logOut');
     }
@@ -276,7 +282,7 @@ var EXELON = (function(r, $) {
   // Pull the apiStatus value out of an application error return
   r.getApiStatus = function(responseText) {
     try {
-      return JSON.parse(responseText).apiStatus;
+      return JSON.parse(responseText).ErrorCodes[0].Code;
     } catch (e) {
       RSKYBOX.log.error(e, 'getApiStatus');
     }
