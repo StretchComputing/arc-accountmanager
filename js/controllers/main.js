@@ -59,7 +59,9 @@ var EXELON = (function (r, $) {
     selectMerchantBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
-        r.attachPanel("selectMerchant");
+        var template = _.template($('#selectMerchantSidebarTemplate').html());
+        
+        $('#selectMerchant').append(template({UserName: r.getUserName()}));
         
         $("#selectMerchantSearch").bind('click', function(e){
         	$("#selectMerchantList").prev("form.ui-listview-filter").toggle();
@@ -200,7 +202,90 @@ var EXELON = (function (r, $) {
     merchantDisplayBeforeCreate: function (){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
-    		r.attachPanel("merchantDisplay");
+    		var page = $('#merchantDisplay');
+    		
+    		page.on('swipeleft', '.noteSwipe', function(){
+    			var index = $(this).attr('index');
+    			$('#noteShow'+index).hide();
+    			$('#noteMenu'+index).show();
+    		});
+    		
+    		page.on('tap', '.noteDelete', function(){
+    			return; //No backend functionality yet?
+    		});
+    		
+    		page.on('tap', '.noteEdit', function(){
+    			var index = $(this).attr('index');
+    			var note = r.activeMerchant.Notes[index]
+    			$('#noteMenu'+index).hide()
+    			var disp = $('#noteEditField'+index);
+    			disp.show();
+    		});
+    		
+    		page.on('tap', '.noteBack', function(){
+    			var index = $(this).attr('index')
+    			$('#noteMenu'+index).hide();
+    			$('#noteShow'+index).show();
+    		});
+    		
+    		page.on('swiperight', '.noteMenu', function(){
+    			var index = $(this).attr('index');
+    			$('#noteMenu'+index).hide();
+    			$('#noteShow'+index).show();
+    		});
+    		
+    		page.on('tap', '.editNoteSave', function(){
+    			var index = $(this).attr('index');
+    			var note = r.activeMerchant.Notes[index]
+    			note.Note = $('#noteEditForm'+index).val();
+    			note.LastUpdated = new Date();
+    			note.LastUpdatedBy = r.getUserName();
+    			
+    			$('#noteEditField'+index).hide();
+    			
+    			r.updateNote(note.Id, {Note : note.Note});
+    			
+    			var disp = $('#noteShow'+index);
+    			disp.empty();
+    			var t = _.template($('#NoteShowInnerTemplate').html());
+    			disp.append(t({n : note}));
+    			
+    			$('#merchantDisplayNotesDisplay').listview('refresh');
+    			
+    			disp.show();
+    			
+    		});
+    		
+    		page.on('tap', '.editNoteBack', function(){
+    			var index = $(this).attr('index');
+    			$('#noteEditField'+index).hide();
+    			$('#noteMenu'+index).show();
+    		});
+    		
+    		var template = _.template($('#merchantDisplaySidebarTemplate').html());
+    		$('#merchantDisplay').append(template({UserName:r.getUserName() }));
+    		
+    		$('#merchantDisplaySidebarEdit').bind('tap', function(){
+    			r.merchantToEdit = r.activeMerchant;
+    			$.mobile.changePage('#editMerchant', {transition:'slide'});
+    		});
+    		
+    		$('#merchantDisplayDeleteYes').bind('tap', function(){
+    			r.deleteMerchant(r.activeMerchant); //API Call
+    			
+    			for(var i = 0; i < r.merchantList.length; i++){
+    				if(r.merchantList[i] === r.activeMerchant){
+    					r.merchantList.splice(i,1);
+    					break;
+    				}
+    			}
+    			
+    			$.mobile.changePage('#selectMerchant');
+    		});
+    		
+    		$('#merchantDisplayDeleteNo').bind('tap', function(){
+    			$('#merchantDisplayConfirmDelete').popup('close');
+    		});
     		
     	}
     	catch(e){
@@ -211,6 +296,10 @@ var EXELON = (function (r, $) {
     merchantDisplayShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayShow');
+    		
+    		if(!r.activeMerchant.Notes){
+    			r.getNotes(r.activeMerchant, false);//Synchronous call
+    		}
     		
     		$('#merchantDisplayHead').text(r.activeMerchant.Name);
     		
@@ -250,19 +339,23 @@ var EXELON = (function (r, $) {
     				return; //No need to save empty notes
     			}
     			
-    			var newNote = {  Type : "SALES_NOTE",
+    			var newNote = {  Type : "NOTE_SALES",
     							 LastUpdatedBy : r.getUserName(),
     							 LastUpdated : new Date(),
     							 Note : textArea.prop('value') };
     			r.activeMerchant.Notes.push(newNote);
+    			r.createNote(r.activeMerchant.Id, newNote);
+    			
     			textArea.prop('value', "");
     			$('#merchantDisplayAddNoteBox').hide();
-
     			/*Update the displays on this page*/
+    			
     			var NoteTemplate = _.template($('#NoteDisplayTemplate').html())
     			var notesDisplay = $('#merchantDisplayNotesDisplay');
-    			notesDisplay.prepend(NoteTemplate(newNote));
+    			notesDisplay.prepend(NoteTemplate({n:newNote, 
+    											   index:r.activeMerchant.Notes.length-1}));
     			notesDisplay.listview('refresh');
+    			notesDisplay.trigger('create');
 
     		});
 
@@ -271,10 +364,17 @@ var EXELON = (function (r, $) {
     			$('#merchantDisplayAddNoteBox').hide();
     		});
 
-    		$("#merchantDisplayStatusSpecific").bind('swiperight', function(){
+    		var spec = $("#merchantDisplayStatusSpecific");
+    		spec.bind('swipeleft', function(){
     			/*A long if/elif chain based on the different statuses*/
     			$.mobile.changePage("#configure", {transition:"slide"});
     		});
+    		
+    		spec.bind('swiperight', function(){
+    			$.mobile.changePage('#selectMerchant', {transition:"slide",
+    													reverse:true });
+    		});
+    	
     		
     		content.trigger('create');
     		
@@ -299,7 +399,7 @@ var EXELON = (function (r, $) {
     configureBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.configureBeforeCreate');
-        r.attachPanel("configure");
+        //r.attachPanel("configure");
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.configureBeforeCreate');
       }
@@ -357,25 +457,6 @@ var EXELON = (function (r, $) {
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.unauthorized');
       }
-  };
-
-  r.attachPanel = function(pageName) {
-    try {
-      RSKYBOX.log.info('entering', 'main.js.attachPanel');
-      // attach panel -- built via template
-      var template = _.template($('#leftPanelTemplate').html());
-      var content = template({});
-      
-      // need to make panel ID unique for each JQM page
-      content = content.replace("page_leftPanel", pageName+"_leftPanel");
-      $('#'+pageName).append(content);
-
-      // set the user name field on the panel
-      $('.userName').html(r.getUserName());
-
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.attachPanel');
-    }
   };
   
   // Define event handlers for panel. Done here so it only happens one time -- when HTML page is loaded
@@ -449,7 +530,7 @@ var EXELON = (function (r, $) {
         contenttype: 'application/json',
         url: closeurl,
         statuscode: r.statusCodeHandlers(),
-				headers: {'Authorization' : r.getAuthorizationHeader()},
+		headers: {'Authorization' : r.getAuthorizationHeader()},
         success: function(data, status, jqXHR) {
                     try {
                     	r.merchantList = data.Results;
@@ -470,22 +551,23 @@ var EXELON = (function (r, $) {
   r.createMerchant = function(merchant){
 	try {
 		RSKYBOX.log.info('entering', 'main.js.createMerchant');
-		RSKYBOX.log.info('Currently stubbed off:', 'main.js.createMerchant');
-		/*
-		var closeurl = devUrl + 'merchants/new';
-		var jsonobj = cleanMerchant(merchant);
-		
+		if(merchant.AcceptTerms === "")
+			merchant.AcceptTerms = true;
+		var closeurl = devUrl + 'merchants/create';
+		var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		$.ajax({
 			type: 'post',
-			data: JSON.stringify(jsonobj),
 			datatype: 'json',
-			contenttype: 'application/json',
+			data : jsonobj,
+			contentType: 'application/json',
 			url: closeurl,
-			statuscode : r.statusCodeHandlers(),
-			success: function(){
+			statuscode: r.statusCodeHandlers(),
+			headers: {'Authorization' : r.getAuthorizationHeader()},
+			success: function(data){
 				RSKYBOX.log.info('finished', 'main.js.createMerchant');
+				merchant.Id = data.Results.Id;
 			}
-		});*/
+		});
 	}  
 	catch(e){
 		RSKYBOX.log.error(e,'main.js.createMerchant');
@@ -495,30 +577,146 @@ var EXELON = (function (r, $) {
   r.updateMerchant = function(merchant){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.updateMerchant');
-		  RSKYBOX.log.info('Currently stubbed off:', 'main.js.updateMerchant');
 		  
-		  /*
-		  if(merchant.EIN)
-			  var closeurl = devUrl + merchants/update/ + merchant.EIN;
-		  else
-			  return; fail
+		  if(!merchant.Id){
+			RSKYBOX.log.info('failed due to no user id', 'main.js.updateMerchant');
+			 return;
+		  }
 		  
-		  var jsonobj = cleanMerchant(merchant);
+		  var closeurl = devUrl + 'merchants/update/' + merchant.Id;
+		  
+		  var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		  
 		  $.ajax({
-			  type : 'put',
-			  data : JSON.stringify(jsonobj),
+			  type : 'POST',
+			  data : jsonobj,
 			  contenttype : 'application/json',
 			  url : closeurl,
-			  statuscode : r.statusCodeHandlers(),
+			  statuscode: r.statusCodeHandlers(),
+		      headers: {'Authorization' : r.getAuthorizationHeader()},
 			  success : function(){
 				  RSKYBOX.log.info('finished', 'main.js.updateMerchant');
 			  }
 		  });
-		  */
+		  
 	  }
 	  catch(e){
 		  RSKYBOX.log.error(e, 'main.js.updateMerchant');
+	  }
+  };
+  
+  r.deleteMerchant = function(merchant){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.deleteMerchant');
+		  	if(!merchant.Id){
+		  		return; //Can't delete if we don't know the id
+		  	}
+		  	
+			var closeurl = devUrl + 'merchants/delete/' + merchant.Id;
+			var jsonobj = JSON.stringify({});
+			$.ajax({
+				type: 'DELETE',
+				datatype: 'json',
+				data : jsonobj,
+				contentType: 'application/json',
+				url: closeurl,
+				statuscode: r.statusCodeHandlers(),
+				headers: {'Authorization' : r.getAuthorizationHeader()},
+				success: function(data){
+					RSKYBOX.log.info('finished', 'main.js.createMerchant');
+				}
+			});
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.deleteMerchant');
+	  }
+  };
+  
+  r.getNotes = function(merchant, async){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.getNotes');
+
+		  var closeurl = devUrl + 'merchants/notes/list';
+		  var jsonobj = JSON.stringify({MerchantId : merchant.Id });
+		  
+		  $.ajax({
+			  type: 'SEARCH',
+			  datatype: 'json',
+			  data : jsonobj,
+			  contentType: 'application/json',
+			  url: closeurl,
+			  statuscode: r.statusCodeHandlers(),
+			  headers: {'Authorization' : r.getAuthorizationHeader()},
+			  'async' : async,
+			  success: function(data){
+				  var res = data.Results;
+				  for(var i = 0; i < res.length; i++){//Change date format for easier use
+					  res[i].LastUpdated = new Date(res[i].LastUpdated);
+				  }
+				  merchant.Notes = res;
+			  },
+			  error : function(error, textStatus, errorThrown){
+				  if(error.status === 422){
+					  var codes = JSON.parse(error.responseText);
+					  if(codes.ErrorCodes[0].Code === 101)//no notes server side
+						  merchant.Notes = [];
+				  }
+			  }
+		  });
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.getNotes');
+	  }
+  };
+  
+  r.createNote = function(Id, Note){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.createNote');
+		  var closeurl = devUrl + 'merchants/notes/create';
+		  var jsonobj = JSON.stringify({MerchantId : Id,
+			  							'Note' : Note.Note,
+			  							'Type' : Note.Type,
+			  							'ConfigurationStepId' : Note.ConfigurationStepId});
+		  
+		  $.ajax({
+			  type: 'POST',
+			  datatype: 'json',
+			  data : jsonobj,
+			  contentType: 'application/json',
+			  url: closeurl,
+			  statuscode: r.statusCodeHandlers(),
+			  headers: {'Authorization' : r.getAuthorizationHeader()},
+			  success: function(){
+				  RSKYBOX.log.info('success', 'main.js.createNote');
+			  },
+		  });
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.createNote');
+	  }
+  };
+
+  r.updateNote = function(noteId,noteUpdate){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.updateNote');
+		  var closeurl = devUrl + 'merchants/notes/update/'+noteId;
+		  var jsonobj = JSON.stringify(noteUpdate);
+		  
+		  $.ajax({
+			  type: 'POST',
+			  datatype: 'json',
+			  data : jsonobj,
+			  contentType: 'application/json',
+			  url: closeurl,
+			  statuscode: r.statusCodeHandlers(),
+			  headers: {'Authorization' : r.getAuthorizationHeader()},
+			  success: function(){
+				  RSKYBOX.log.info('success', 'main.js.createNote');
+			  },
+		  });
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.createNote');
 	  }
   };
   
@@ -534,6 +732,8 @@ var EXELON = (function (r, $) {
 			  newMerchant[prop] = merchant[prop];
 		  }
 	  }
+	  if(newMerchant.Status)
+		  delete newMerchant.Status;
 	  return newMerchant;
   };
   
@@ -558,8 +758,8 @@ var EXELON = (function (r, $) {
 			  location.append(merchantTemplate(templateData));
 			
 			  var merchantSelect = $('#selectMerchantList' + i);
-			  //merchantSelect.bind('tap', r.merchantSelectTap);
-			  merchantSelect.bind("tap", r.merchantSelectHorizontalSwipe);
+			  merchantSelect.bind('tap', r.merchantSelectTap);
+			  //merchantSelect.bind("tap", r.merchantSelectHorizontalSwipe);
 			  merchantSelect.bind("swipeleft", r.merchantSelectHorizontalSwipe);
 			  merchantSelect.bind("swiperight", r.merchantSelectHorizontalSwipe);	
 		  }
@@ -590,10 +790,6 @@ var EXELON = (function (r, $) {
 			  }
 		  }
 		  var elm;
-		  if( !(merchantList[merchIndex].DecisionMakers))
-			  merchantList[merchIndex].DecisionMakers = [];
-		  if( !(merchantList[merchIndex].Notes))
-			  merchantList[merchIndex].Notes = [];
 		  if( !(merchantList[merchIndex].Activities))
 			  merchantList[merchIndex].Activities = [];
 	  }
@@ -650,24 +846,6 @@ var EXELON = (function (r, $) {
 
 	  content.append(editMerchantTemplate(merchant));
 
-	  var addNewPoc = $('#pocAddNew');
-
-	  /*Register all the delete button handlers*/
-	  for(var i = 0; i < merchant.index; i++){
-		  r.registerDelete(pageId,i);
-	  };
-
-	  addNewPoc.bind('click', function(e){
-		  var pocTemplate = _.template($('#decisionMakerForm').html());
-		  $('#'+pageId+'PocList').prepend(pocTemplate({FirstName : "", LastName : "", 
-			  Phone : "", Position : "", eMail : "", index : merchant.index,
-			  pageIdPrefix : merchant.pageIdPrefix}));
-		  $('#'+pageId+'PocList').trigger('create');
-
-		  r.registerDelete(pageId,merchant.index);
-		  merchant.index++;
-	  });
-
 	  $('#'+pageId+'GetLngLat').bind('click', function(e){
 		  var lngObj = $('#'+pageId+'Longitude');
 		  var latObj = $('#'+pageId+'Latitude');
@@ -715,13 +893,13 @@ var EXELON = (function (r, $) {
 		});
 	  
 	  $('#'+pageId+'Save').bind('click', function(e){
-		  var form = $('#'+pageId+'List :input');
+		  var form = $('#'+pageId+'Content :input');
 		  var formsFilled = [];
+		  
+		  if(!newMerchant)
+			  var updateObj = {};//fed to the updateMerchant API Call
+		  
 		  for(var i = 0; i < form.length; i++){
-			  if(form[i].getAttribute('pocProp') !== null){
-				  continue;//Skip these, do them below
-			  }
-
 			  if(form[i].required && form[i].value === ""){
 				  var pop = $('#'+pageId+'RequiredPopup');
 				  pop.empty();
@@ -734,26 +912,32 @@ var EXELON = (function (r, $) {
 				  merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
 			  }
 			  else{
-				  merchant[form[i].name] = form[i].value;
+				  
+				  if(!newMerchant){
+					  if(form[i].value !== merchant[form[i].name]){
+						  updateObj[form[i].name] = form[i].value;
+					  }
+				  }
+				  
+				  merchant[form[i].name] = form[i].value;//Update local copy
+				  
 				  if(form[i].value !== ""){//This field was actually filled out
 					  formsFilled.push(form[i].name);
 				  }
 			  }
 		  }
 
-		  var pocForm = $('div[formType]');//Select all with a custom attribute defined in the template
-		  var pocList = [];
-		  for(var i = 0; i < pocForm.length; i++){
-			  var inputs = $(':input',pocForm[i]);
-			  var poc = {};
-			  for(var j = 0; j < inputs.length; j++){
-				  poc[inputs[j].getAttribute('pocProp')] = inputs[j].value;
-			  }
-			  pocList.push(poc);
+		  if(merchant.Notes !== undefined){
+			  merchant.Notes = merchant.Notes.concat(notesToAdd);
 		  }
-		  merchant.DecisionMakers = pocList;
+		  
+		  if(merchant.Id !== "" || merchant.Id !== undefined){
+			  for(var i = 0; i < notesToAdd.length; i++){
+				  r.createNote(merchant.Id, notesToAdd[i])
+			  }
 
-		  merchant.Notes = merchant.Notes.concat(notesToAdd);
+		  }
+		  
 		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
 		  
 		  if(newMerchant){
@@ -761,7 +945,8 @@ var EXELON = (function (r, $) {
 			  r.merchantList.push(merchant);
 		  }
 		  else{
-			  r.updateMerchant(merchant);
+			  updateObj.Id = merchant.Id;
+			  r.updateMerchant(updateObj);
 		  }
 
 		  /*Create the activity*/
@@ -789,7 +974,7 @@ var EXELON = (function (r, $) {
 
 		  if(newMerchant){//If its new, take to merchant info screen
 			  r.activeMerchant = merchant;
-			  $.mobile.changepage("#merchantDisplay", {transition:"slide"});
+			  $.mobile.changePage("#merchantDisplay", {transition:"slide"});
 		  }
 		  else{//If not, take back to where ever the editing was triggered
 			  $.mobile.back({transition:"slide"});
