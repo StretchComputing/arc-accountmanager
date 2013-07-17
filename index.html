@@ -109,44 +109,50 @@
 		<ul data-role="listview" id="<%=pageIdPrefix%>ListLeft" data-inset="true">
 			<li><label for="<%=pageIdPrefix%>Name"> Name* </label>
 			<input type="text" name="Name" id="<%=pageIdPrefix%>Name" value="<%= Name %>" required="true"></li>
-
 			<li><label for="<%=pageIdPrefix%>POS"> POS Type </label>
 				<select id="<%=pageIdPrefix%>POS" name="POS">
-					<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> >POS_MICROS</option>
-					<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> >POS_ISIS</option>
-					<option <%if(POS == 'POS_ALOHA'){ %>selected<% } %> >POS_ALOHA</option>
+					<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> selVal="POS_MICROS" >POS_MICROS</option>
+					<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> selVal="POS_ISIS">POS_ISIS</option>
+					<option <%if(POS == 'POS_ALOHA'){ %>selected<% } %> selVal="POS_ALOHA">POS_ALOHA</option>
+					<option <%if(POS == 'POS_OTHER'){ %>selected<% } %> selVal="POS_OTHER">POS_OTHER</option>
 				</select></li>
 
-			<li><label for="<%=pageIdPrefix%>Street"> Street </label>
-			<input type="text" name="Street" id="<%=pageIdPrefix%>Street" value="<%= Street %>" required="true"></li>
-
-			<li><label for="<%=pageIdPrefix%>City"> City </label>
-			<input type="text" name="City" id="<%=pageIdPrefix%>City" 
-			<% if(City === ""){ %> value="Chicago" <% } else { %> value="<%=City%>" <%} %>
-		     required="true"></li>
-
-			<li><label for="<%=pageIdPrefix%>ZipCode"> Zipcode </label>
-			<input type="text" name="ZipCode" id="<%=pageIdPrefix%>ZipCode" 
-			<% if(ZipCode === ""){ %> value="60654" <% } else{ %> value="<%=ZipCode%>" <% } %>
-		     required="true"></li>
-
-			<li><label for="<%=pageIdPrefix%>TypeOfService"> Type of Service </label>
-			<input type="text" name="TypeOfService" id="<%=pageIdPrefix%>TypeOfService" value="<%= TypeOfService %>" ></li>
+			<li><label for="<%=pageIdPrefix%>OtherPOS"> Other POS (if applicable)</label>
+			<input type="text" name="OtherPOS" id="<%=pageIdPrefix%>OtherPOS" value="<%=OtherPOS %>"</li>
 
 			<li><label for="<%=pageIdPrefix%>NumPOSTerminals"> Number of Point of Sale Terminals </label>
 			<input type="number" name="NumPOSTerminals" id="<%=pageIdPrefix%>NumPOSTerminals" value="<%= NumPOSTerminals %>" ></li>
 
+			<li><label for="<%=pageIdPrefix%>Street"> Street* </label>
+			<input type="text" name="Street" id="<%=pageIdPrefix%>Street" value="<%= Street %>" required="true"></li>
+
+			<li><label for="<%=pageIdPrefix%>City"> City* </label>
+			<input type="text" name="City" id="<%=pageIdPrefix%>City" 
+			<% if(City === ""){ %> value="Chicago" <% } else { %> value="<%=City%>" <%} %>
+		     required="true"></li>
+
+			<li><label for="<%=pageIdPrefix%>State"> State* </label>
+			<input type="text" name="State" id="<%=pageIdPrefix%>State"
+			  <% if(State === ""){ %> value="IL" <% } else { %> value="<%=State%>" <%} %> 
+			  required="true"></li>
+
+			<li><label for="<%=pageIdPrefix%>ZipCode"> Zipcode* </label>
+			<input type="text" name="ZipCode" id="<%=pageIdPrefix%>ZipCode" 
+			<% if(ZipCode === ""){ %> value="60654" <% } else{ %> value="<%=ZipCode%>" <% } %>
+		     required="true"></li>
+
+			<li><label for="<%=pageIdPrefix%>NumSeats"> Number of Seats </label>
+			<input type="number" name="NumSeats" id="<%=pageIdPrefix%>NumSeats" value="<%= NumSeats %>" ></li>
+
 			<li><label for="<%=pageIdPrefix%>AvgNumServers"> Average Number of Servers </label>
 			<input type="number" name="AvgNumServers" id="<%=pageIdPrefix%>AvgNumServers" value="<%= AvgNumServers %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>TwitterHandler"> Twitter Handle </label>
+			<input type="email" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>FacebookHandler"> Facebook Handle </label>
 			<input type="email" name="FacebookHandler" id="<%=pageIdPrefix%>FacebookHandler" value="<%= FacebookHandler %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>CurrentCreditRate"> Current Credit Rate </label>
-			<input type="text" name="CurrentCreditRate" id="<%=pageIdPrefix%>CurrentCreditRate" value="<%= CurrentCreditRate %>" ></li>
-
-			<li><label for="<%=pageIdPrefix%>Longitude">Longitude</label>
-				<input type="text" name="Longitude" id="<%=pageIdPrefix%>Longitude" value="<%= Longitude %>"></li>
 		</ul>
 	</div>
 
@@ -159,19 +165,14 @@
 
 			<li><label for="<%=pageIdPrefix%>Status"> Status </label>
 			<select name="Status" id="<%=pageIdPrefix%>Status">
-				<option <%if(Status === 'Potential'){ %>selected<% } %> >Potential</option>
-				<option <%if(Status === 'In Talks'){ %>selected<% } %> >In Talks</option>
-				<option <%if(Status === 'Configuration'){ %>selected<% } %> >Configuration</option>
-				<option <%if(Status === 'Ready'){ %>selected<% } %> >Ready</option>
-				<option <%if(Status === 'Active'){ %>selected<% } %> >Active</option>
+				<option <%if(Status === 'P'){ %>selected<% } %> selVal='P'>Potential</option>
+				<option <%if(Status === 'I'){ %>selected<% } %> selVal='I'>Interested</option>
+				<option <%if(Status === 'C'){ %>selected<% } %> selVal='C'>Configuration</option>
+				<option <%if(Status === 'R'){ %>selected<% } %> selVal='R'>Ready</option>
+				<option <%if(Status === 'A'){ %>selected<% } %> selVal='A'>Active</option>
 			</select></li>
 
-			<li><label for="<%=pageIdPrefix%>State"> State </label>
-			<input type="text" name="State" id="<%=pageIdPrefix%>State"
-			  <% if(State === ""){ %> value="IL" <% } else { %> value="<%=State%>" <%} %> 
-			  required="true"></li>
-
-			<li><label for="<%=pageIdPrefix%>PaymentAccepted"> Payment Accepted </label>
+			<li><label for="<%=pageIdPrefix%>PaymentAccepted"> Payments Accepted </label>
 			<input type="text" name="PaymentAccepted" id="<%=pageIdPrefix%>PaymentAccepted" value="<%= PaymentAccepted %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>eMail"> eMail </label>
@@ -180,20 +181,24 @@
 			<li><label for="<%=pageIdPrefix%>Website"> Website </label>
 			<input type="url" name="Website" id="<%=pageIdPrefix%>Website" value="<%= Website %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>NumSeats"> Number of Seats </label>
-			<input type="number" name="NumSeats" id="<%=pageIdPrefix%>NumSeats" value="<%= NumSeats %>" ></li>
+			<li><label for="<%=pageIdPrefix%>TypeOfService"> Type of Service </label>
+			<input type="text" name="TypeOfService" id="<%=pageIdPrefix%>TypeOfService" value="<%= TypeOfService %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>PriceLevel"> Average Price of a Menu Item </label>
 			<input type="text" name="PriceLevel" id="<%=pageIdPrefix%>PriceLevel" value="<%= PriceLevel %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>TwitterHandler"> Twitter Handle </label>
-			<input type="email" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
-
 			<li><label for="<%=pageIdPrefix%>CurrentCreditFee"> Current Credit Fee </label>
 			<input type="text" name="CurrentCreditFee" id="<%=pageIdPrefix%>CurrentCreditFee" value="<%= CurrentCreditFee %>" ></li>
 
+			<li><label for="<%=pageIdPrefix%>CurrentCreditRate"> Current Credit Rate </label>
+			<input type="text" name="CurrentCreditRate" id="<%=pageIdPrefix%>CurrentCreditRate" value="<%= CurrentCreditRate %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>Longitude">Longitude</label>
+				<input type="text" name="Longitude" id="<%=pageIdPrefix%>Longitude" value="<%= Longitude %>"></li>
+
 			<li><label for="<%= pageIdPrefix%>Latitude">Latitude 
 					<button id="<%=pageIdPrefix%>GetLngLat" data-iconpos="notext" data-icon="grid" data-inline="true"></button>
+					<button id="<%=pageIdPrefix%>GetLoc" data-iconpos="notext" data-icon="info" data-inline="true"></button>
 				</label>
 			<input type="text" name="Latitude" id="<%= pageIdPrefix%>Latitude" value="<%=Latitude%>">
 			
@@ -266,7 +271,6 @@
       </div>
 
       <div data-role="content" id="selectMerchantContent">
-				<a href="#" class="geoLocation" data-role="button" data-inline="true" data-theme="b">Show Location</a><br>
       	<ul data-role="listview" data-inset="true">
       		<li data-icon="plus" data-theme="b">
       			<a href="#createNewMerchant" data-transition="slide"><h1>Merchants</h1></a>
@@ -400,7 +404,11 @@
 		<li data-role="list-divider" class="collapsedListItem">General</li>
 		<li class="collapsedListItem">
 			<h3>Type of Food: <%= Cuisine%></h3>
+			<% if(POS !== "POS_OTHER") { %>
 			<h3>Point of Sale Device: <%= POS %></h3>
+			<% } else { %>
+			<h3>Point of Sale Device: <%= OtherPOS%></h3>
+			<% } %>
 			<h3>Number of Terminals: <%= NumPOSTerminals%></h3>
 		</li>
 

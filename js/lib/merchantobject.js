@@ -28,6 +28,7 @@ var MERCHANT = (function($){
 		  { propName: "AvgNumServers",         displayText: "Average Number of Servers",          inputType: "text",     required:false},
 		  { propName: "NumPOSTerminals",       displayText: "Number of Point of Sale Terminals",  inputType: "text",     required:false},
 		  { propName: "Cuisine",               displayText: "Type of Food",                       inputType: "text",     required:false},
+		  { propName: "OtherPOS"},
 		  { propName: "DMFirstName"},
 		  { propName: "DMLastName"},
 		  { propName: "DMPosition"},

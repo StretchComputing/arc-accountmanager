@@ -1,5 +1,5 @@
-//var baseUrl = 'http://dev.dagher.mobi/rest/v1/';  // dev environment
-var baseUrl = 'https://arc.dagher.mobi/rest/v1/';   // prod environment
+var baseUrl = 'http://dev.dagher.mobi/rest/v1/';  // dev environment
+//var baseUrl = 'https://arc.dagher.mobi/rest/v1/';   // prod environment
 var EXELON = (function (r, $) {
   'use strict';
 
@@ -490,6 +490,8 @@ var EXELON = (function (r, $) {
       RSKYBOX.log.error(e, 'displayGeoLocation');
     }
   };
+  
+  
 
   $(document).on('click', '.selectMerchant', function(e){
 		try {
@@ -540,7 +542,10 @@ var EXELON = (function (r, $) {
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
                     }
-                  }
+                  },
+        error : function(error){
+        	alert('Could not get merchants, error code: ' + error.status)
+        }
       });
     } catch (e) {
       RSKYBOX.log.error(e, 'getMerchants');
@@ -566,6 +571,9 @@ var EXELON = (function (r, $) {
 			success: function(data){
 				RSKYBOX.log.info('finished', 'main.js.createMerchant');
 				merchant.Id = data.Results.Id;
+			},
+			error: function(error){
+				alert('Could not create merchant error code: ' + error.status);
 			}
 		});
 	}  
@@ -596,6 +604,9 @@ var EXELON = (function (r, $) {
 		      headers: {'Authorization' : r.getAuthorizationHeader()},
 			  success : function(){
 				  RSKYBOX.log.info('finished', 'main.js.updateMerchant');
+			  },
+			  error : function(error){
+				  alert('could not update merchant error code:' + error.status);
 			  }
 		  });
 		  
@@ -624,6 +635,9 @@ var EXELON = (function (r, $) {
 				headers: {'Authorization' : r.getAuthorizationHeader()},
 				success: function(data){
 					RSKYBOX.log.info('finished', 'main.js.createMerchant');
+				},
+				error: function(error){
+					alert('could note delete merchant, error code ' + error.status);
 				}
 			});
 	  }
@@ -656,11 +670,15 @@ var EXELON = (function (r, $) {
 				  merchant.Notes = res;
 			  },
 			  error : function(error, textStatus, errorThrown){
+				  merchant.Notes = []; //No notes returned
 				  if(error.status === 422){
 					  var codes = JSON.parse(error.responseText);
 					  if(codes.ErrorCodes[0].Code === 101)//no notes server side
-						  merchant.Notes = [];
+						  return;
+					  else
+						  alert('Could not fetch notes, error code' + codes.ErrorCodes[0].Code);
 				  }
+				  alert('Could not fetch notes, error code' + error.status);
 			  }
 		  });
 	  }
@@ -713,6 +731,9 @@ var EXELON = (function (r, $) {
 			  success: function(){
 				  RSKYBOX.log.info('success', 'main.js.createNote');
 			  },
+			  error : function(){
+				  alert('error could not updateNote, error code ' + error.status);
+			  }
 		  });
 	  }
 	  catch(e){
@@ -866,6 +887,21 @@ var EXELON = (function (r, $) {
 
 		  r.fetchLngLat(lngObj,latObj,address);
 	  });
+	  
+	  $('#'+pageId+'GetLoc').bind('click', function(){
+		  var success = function(position){
+			  var lng = position.coords.longitude;
+			  var lat = position.coords.latitude;
+			  $('#'+pageId+'Longitude').val(lng);
+			  $('#'+pageId+'Latitude').val(lat);
+		  };
+		  
+		  var failure = function(){
+			  alert('geolocation failed to fetch coordinates');
+		  };
+		  
+		  navigator.geolocation.getCurrentPosition(success,failure);
+	  });
 
 	  var notesToAdd = [];
 	  var activitiesToAdd = [];
@@ -907,23 +943,24 @@ var EXELON = (function (r, $) {
 				  pop.popup("open");
 				  return;
 			  }
-
-			  if(form[i].type === 'checkbox'){
-				  merchant[form[i].name] = ( (form[i].value === 'on') ? true : false);
+			  
+			  var fieldVal;
+			  if(form[i].name === "Status"){
+				  fieldVal = r.getStatusAbriev(form[i].value);
 			  }
-			  else{
-				  
-				  if(!newMerchant){
-					  if(form[i].value !== merchant[form[i].name]){
-						  updateObj[form[i].name] = form[i].value;
-					  }
+			  else
+				  fieldVal = form[i].value;
+
+			  if(!newMerchant){
+				  if(fieldVal !== merchant[form[i].name]){
+					  updateObj[form[i].name] = fieldVal;
 				  }
-				  
-				  merchant[form[i].name] = form[i].value;//Update local copy
-				  
-				  if(form[i].value !== ""){//This field was actually filled out
-					  formsFilled.push(form[i].name);
-				  }
+			  }
+
+			  merchant[form[i].name] = fieldVal;//Update local copy
+
+			  if(fieldVal !== ""){//This field was actually filled out
+				  formsFilled.push(form[i].name);
 			  }
 		  }
 
@@ -1050,6 +1087,21 @@ var EXELON = (function (r, $) {
 	  $("#selectMerchantListElm"+index).hide();
 	  $("#selectMerchantListSwipeMenuElm"+index).show();
   };
+  
+  r.getStatusAbriev = function(statusName){
+	  if(statusName === "Potential")
+		  return "P";
+	  if(statusName === "Interested")
+		  return "I";
+	  if(statusName === "Configure")
+		  return "C";
+	  if(statusName === "Ready")
+		  return "R";
+	  if(statusName === "Active")
+		  return "A";
+	  else
+		  return "";
+  }
   
   /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
   r.getStatusTheme = function(Status){
