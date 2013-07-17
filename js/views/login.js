@@ -42,8 +42,6 @@ var EXELON = (function (r, $) {
         if (valid) {
           this.model.prepareNewModel();
 
-					// Access a global URL variable
-					var baseUrl = 'http://dev.dagher.mobi/rest/v1/';
 					var loginUrl = baseUrl + "customers/token";
           // using a direct ajax call instead of a model.save because we don't want to send the entire User model to the server
           $.ajax({

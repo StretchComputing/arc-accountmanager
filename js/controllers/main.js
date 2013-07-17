@@ -1,3 +1,5 @@
+//var baseUrl = 'http://dev.dagher.mobi/rest/v1/';  // dev environment
+var baseUrl = 'https://arc.dagher.mobi/rest/v1/';   // prod environment
 var EXELON = (function (r, $) {
   'use strict';
 
@@ -515,12 +517,10 @@ var EXELON = (function (r, $) {
     }
   });
 
-  var devUrl = 'http://dev.dagher.mobi/rest/v1/';
-	var prdUrl = 'https://arc.dagher.mobi/rest/v1/';
   r.getMerchants = function() {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
-      var closeurl = devUrl + 'merchants/list';
+      var closeurl = baseUrl + 'merchants/list';
       var jsonobj = {};
 
       $.ajax({
@@ -553,7 +553,7 @@ var EXELON = (function (r, $) {
 		RSKYBOX.log.info('entering', 'main.js.createMerchant');
 		if(merchant.AcceptTerms === "")
 			merchant.AcceptTerms = true;
-		var closeurl = devUrl + 'merchants/create';
+		var closeurl = baseUrl + 'merchants/create';
 		var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		$.ajax({
 			type: 'post',
@@ -583,7 +583,7 @@ var EXELON = (function (r, $) {
 			 return;
 		  }
 		  
-		  var closeurl = devUrl + 'merchants/update/' + merchant.Id;
+		  var closeurl = baseUrl + 'merchants/update/' + merchant.Id;
 		  
 		  var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		  
@@ -612,7 +612,7 @@ var EXELON = (function (r, $) {
 		  		return; //Can't delete if we don't know the id
 		  	}
 		  	
-			var closeurl = devUrl + 'merchants/delete/' + merchant.Id;
+			var closeurl = baseUrl + 'merchants/delete/' + merchant.Id;
 			var jsonobj = JSON.stringify({});
 			$.ajax({
 				type: 'DELETE',
@@ -636,7 +636,7 @@ var EXELON = (function (r, $) {
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.getNotes');
 
-		  var closeurl = devUrl + 'merchants/notes/list';
+		  var closeurl = baseUrl + 'merchants/notes/list';
 		  var jsonobj = JSON.stringify({MerchantId : merchant.Id });
 		  
 		  $.ajax({
@@ -672,7 +672,7 @@ var EXELON = (function (r, $) {
   r.createNote = function(Id, Note){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.createNote');
-		  var closeurl = devUrl + 'merchants/notes/create';
+		  var closeurl = baseUrl + 'merchants/notes/create';
 		  var jsonobj = JSON.stringify({MerchantId : Id,
 			  							'Note' : Note.Note,
 			  							'Type' : Note.Type,
@@ -699,7 +699,7 @@ var EXELON = (function (r, $) {
   r.updateNote = function(noteId,noteUpdate){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.updateNote');
-		  var closeurl = devUrl + 'merchants/notes/update/'+noteId;
+		  var closeurl = baseUrl + 'merchants/notes/update/'+noteId;
 		  var jsonobj = JSON.stringify(noteUpdate);
 		  
 		  $.ajax({
