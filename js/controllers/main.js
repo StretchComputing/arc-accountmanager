@@ -71,6 +71,10 @@ var EXELON = (function (r, $) {
         
         var content =  $("#selectMerchantContent");
         
+        content.on('tap', '.selectMerchantLI', r.merchantSelectTap);
+        content.on("swipeleft", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
+        content.on("swiperight", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
+
        content.on("tap", ".editButton", function(e){
         	var index = $(this).attr("index");
         	r.merchantToEdit = r.merchantList[index];
@@ -82,6 +86,16 @@ var EXELON = (function (r, $) {
         	r.activeMerchant = r.merchantList[index];
         	$.mobile.changePage("#merchantDisplay", {transition:"slide"});
         });
+        
+        content.on("tap", ".deleteButton", function(e){	
+        	var index = $(this).attr("index");
+        	var merchant = r.merchantList[index];
+        	r.deleteMerchant(merchant);
+        	var loc = $('#selectMerchantList');
+        	loc.empty();
+        	r.writeMerchantList(loc, r.merchantList);
+        	
+        	});
         
         content.on("tap", ".backButton", function(e){
         	var index = $(this).attr("index");
@@ -108,7 +122,7 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantShow');
         
         if(!r.merchantList)
-        	r.getMerchants();
+        	r.getMerchantsLoc();
         else
         	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
       } catch (e) {
@@ -274,13 +288,6 @@ var EXELON = (function (r, $) {
     		
     		$('#merchantDisplayDeleteYes').bind('tap', function(){
     			r.deleteMerchant(r.activeMerchant); //API Call
-    			
-    			for(var i = 0; i < r.merchantList.length; i++){
-    				if(r.merchantList[i] === r.activeMerchant){
-    					r.merchantList.splice(i,1);
-    					break;
-    				}
-    			}
     			
     			$.mobile.changePage('#selectMerchant');
     		});
@@ -519,11 +526,27 @@ var EXELON = (function (r, $) {
     }
   });
 
+  /*Attempts to get the current location and then calls getMerchants*/
+  r.getMerchantsLoc = function(){
+	  var success = function(location){
+		  r.currLoc = { Longitude : location.coords.longitude,
+				        Latitude : location.coords.latitude };
+		  r.getMerchants();
+	  }
+	  var failure = function(){ alert('nope'); r.getMerchants();};
+	  navigator.geolocation.getCurrentPosition(success,failure);
+  };
+  
   r.getMerchants = function() {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
       var jsonobj = {};
+      if(r.currLoc){
+    	  jsonobj.Latitude = r.currLoc.Latitude;
+    	  jsonobj.Longitude = r.currLoc.Longitude;
+    	  jsonobj.UseMaxGeoDistance = true;
+      }
 
       $.ajax({
         type: 'search',
@@ -593,7 +616,10 @@ var EXELON = (function (r, $) {
 		  
 		  var closeurl = baseUrl + 'merchants/update/' + merchant.Id;
 		  
-		  var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
+		  //var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
+		  var jsonobj = JSON.stringify({DMFirstName : "test Name"});
+		  //var jsonobj = "{'DMFirstName' : 'test name' }";
+		  var n;
 		  
 		  $.ajax({
 			  type : 'POST',
@@ -633,8 +659,15 @@ var EXELON = (function (r, $) {
 				url: closeurl,
 				statuscode: r.statusCodeHandlers(),
 				headers: {'Authorization' : r.getAuthorizationHeader()},
+				async: false,
 				success: function(data){
 					RSKYBOX.log.info('finished', 'main.js.createMerchant');
+	    			for(var i = 0; i < r.merchantList.length; i++){
+	    				if(r.merchantList[i] === merchant){
+	    					r.merchantList.splice(i,1);
+	    					break;
+	    				}
+	    			}
 				},
 				error: function(error){
 					alert('could note delete merchant, error code ' + error.status);
@@ -777,12 +810,6 @@ var EXELON = (function (r, $) {
 			  templateData.index = i.toString();
 			
 			  location.append(merchantTemplate(templateData));
-			
-			  var merchantSelect = $('#selectMerchantList' + i);
-			  merchantSelect.bind('tap', r.merchantSelectTap);
-			  //merchantSelect.bind("tap", r.merchantSelectHorizontalSwipe);
-			  merchantSelect.bind("swipeleft", r.merchantSelectHorizontalSwipe);
-			  merchantSelect.bind("swiperight", r.merchantSelectHorizontalSwipe);	
 		  }
 		  
 		  $('#selectMerchantContent').trigger('create');
@@ -1115,7 +1142,7 @@ var EXELON = (function (r, $) {
 	  if(Status === key[4])
 		  return 'a';
 	  return 'd';
-  };  
+  };
 
   try {
     r.router = new $.mobile.Router([

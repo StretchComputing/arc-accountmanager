@@ -295,7 +295,7 @@
 
 <script type="script/template" id="selectMerchantTemplate">
 		<li id="selectMerchantListElm<%=index%>">
-			<a index="<%=index%>" id="selectMerchantList<%=index%>">
+			<a index="<%=index%>" id="selectMerchantList<%=index%>" class="selectMerchantLI">
 				<h1><%=Name%></h1>
 				<h2>Status: <%=Status%></h2>
 				<h3><%=Street%> <%=City%>, <%=State%> <%=ZipCode%></h3>
@@ -305,6 +305,7 @@
 		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:40px">
 				<button data-icon="info" data-iconpos="notext" data-inline="true" class="selectButton" index="<%=index%>"></button>
 				<button data-icon="gear" data-iconpos="notext" data-inline="true" class="editButton" index="<%=index%>"></button>
+				<button data-icon="delete" data-iconpos="notext" data-inline="true" class="deleteButton" index="<%=index%>"></button>
 				<button data-icon="back" data-iconpos="notext" data-inline="true" class="backButton" index="<%=index%>"></button>
 		</li>
 	</script>
