@@ -111,10 +111,10 @@
 			<input type="text" name="Name" id="<%=pageIdPrefix%>Name" value="<%= Name %>" required="true"></li>
 			<li><label for="<%=pageIdPrefix%>POS"> POS Type </label>
 				<select id="<%=pageIdPrefix%>POS" name="POS">
-					<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> selVal="POS_MICROS" >POS_MICROS</option>
-					<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> selVal="POS_ISIS">POS_ISIS</option>
-					<option <%if(POS == 'POS_ALOHA'){ %>selected<% } %> selVal="POS_ALOHA">POS_ALOHA</option>
-					<option <%if(POS == 'POS_OTHER'){ %>selected<% } %> selVal="POS_OTHER">POS_OTHER</option>
+					<option <%if(POS == 'POS_MICROS'){ %>selected<% } %> selVal="POS_MICROS" >Micros</option>
+					<option <%if(POS == 'POS_ISIS'){ %>selected<% } %> selVal="POS_ISIS">Isis</option>
+					<option <%if(POS == 'POS_ALOHA'){ %>selected<% } %> selVal="POS_ALOHA">Aloha</option>
+					<option <%if(POS == 'POS_OTHER'){ %>selected<% } %> selVal="POS_OTHER">Other</option>
 				</select></li>
 
 			<li><label for="<%=pageIdPrefix%>OtherPOS"> Other POS (if applicable)</label>
@@ -144,14 +144,8 @@
 			<li><label for="<%=pageIdPrefix%>NumSeats"> Number of Seats </label>
 			<input type="number" name="NumSeats" id="<%=pageIdPrefix%>NumSeats" value="<%= NumSeats %>" ></li>
 
-			<li><label for="<%=pageIdPrefix%>AvgNumServers"> Average Number of Servers </label>
+			<li><label for="<%=pageIdPrefix%>AvgNumServers"> Average Number of Waiters </label>
 			<input type="number" name="AvgNumServers" id="<%=pageIdPrefix%>AvgNumServers" value="<%= AvgNumServers %>" ></li>
-
-			<li><label for="<%=pageIdPrefix%>TwitterHandler"> Twitter Handle </label>
-			<input type="email" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
-
-			<li><label for="<%=pageIdPrefix%>FacebookHandler"> Facebook Handle </label>
-			<input type="email" name="FacebookHandler" id="<%=pageIdPrefix%>FacebookHandler" value="<%= FacebookHandler %>" ></li>
 
 		</ul>
 	</div>
@@ -160,29 +154,21 @@
 	<div class="ui-block-b" style="text-align: left">
 
 		<ul data-role="listview" id="<%=pageIdPrefix%>ListRight" data-inset="true">
-			<li><label for="<%=pageIdPrefix%>Cuisine"> Type of Food </label>
+
+			<li><label for="<%=pageIdPrefix%>TwitterHandler"> Twitter Handle </label>
+			<input type="email" name="TwitterHandler" id="<%=pageIdPrefix%>TwitterHandler" value="<%= TwitterHandler %>" ></li>
+
+			<li style="padding:13px"><label for="<%=pageIdPrefix%>FacebookHandler"> Facebook Handle </label>
+			<input type="email" name="FacebookHandler" id="<%=pageIdPrefix%>FacebookHandler" value="<%= FacebookHandler %>" ></li>
+
+			<li><label for="<%=pageIdPrefix%>Cuisine"> Cuisine </label>
 			<input type="text" name="Cuisine" id="<%=pageIdPrefix%>Cuisine" value="<%= Cuisine %>"></li>
-
-			<li><label for="<%=pageIdPrefix%>Status"> Status </label>
-			<select name="Status" id="<%=pageIdPrefix%>Status">
-				<option <%if(Status === 'P'){ %>selected<% } %> selVal='P'>Potential</option>
-				<option <%if(Status === 'I'){ %>selected<% } %> selVal='I'>Interested</option>
-				<option <%if(Status === 'C'){ %>selected<% } %> selVal='C'>Configuration</option>
-				<option <%if(Status === 'R'){ %>selected<% } %> selVal='R'>Ready</option>
-				<option <%if(Status === 'A'){ %>selected<% } %> selVal='A'>Active</option>
-			</select></li>
-
-			<li><label for="<%=pageIdPrefix%>PaymentAccepted"> Payments Accepted </label>
-			<input type="text" name="PaymentAccepted" id="<%=pageIdPrefix%>PaymentAccepted" value="<%= PaymentAccepted %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>eMail"> eMail </label>
 			<input type="email" name="eMail" id="<%=pageIdPrefix%>eMail" value="<%= eMail %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>Website"> Website </label>
 			<input type="url" name="Website" id="<%=pageIdPrefix%>Website" value="<%= Website %>" ></li>
-
-			<li><label for="<%=pageIdPrefix%>TypeOfService"> Type of Service </label>
-			<input type="text" name="TypeOfService" id="<%=pageIdPrefix%>TypeOfService" value="<%= TypeOfService %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>PriceLevel"> Average Price of a Menu Item </label>
 			<input type="text" name="PriceLevel" id="<%=pageIdPrefix%>PriceLevel" value="<%= PriceLevel %>" ></li>
@@ -196,9 +182,8 @@
 			<li><label for="<%=pageIdPrefix%>Longitude">Longitude</label>
 				<input type="text" name="Longitude" id="<%=pageIdPrefix%>Longitude" value="<%= Longitude %>"></li>
 
-			<li><label for="<%= pageIdPrefix%>Latitude">Latitude 
-					<button id="<%=pageIdPrefix%>GetLngLat" data-iconpos="notext" data-icon="grid" data-inline="true"></button>
-					<button id="<%=pageIdPrefix%>GetLoc" data-iconpos="notext" data-icon="info" data-inline="true"></button>
+			<li><label for="<%= pageIdPrefix%>Latitude">Latitude
+					<button id="<%=pageIdPrefix%>GetLoc" data-iconpos="notext" data-icon="grid" data-inline="true"></button>
 				</label>
 			<input type="text" name="Latitude" id="<%= pageIdPrefix%>Latitude" value="<%=Latitude%>">
 			
@@ -406,7 +391,7 @@
 		<li class="collapsedListItem">
 			<h3>Type of Food: <%= Cuisine%></h3>
 			<% if(POS !== "POS_OTHER") { %>
-			<h3>Point of Sale Device: <%= POS %></h3>
+			<h3>Point of Sale Device: <%= MERCHANT.POSNames[POS] %></h3>
 			<% } else { %>
 			<h3>Point of Sale Device: <%= OtherPOS%></h3>
 			<% } %>
@@ -504,7 +489,7 @@
 	
 	<script type="text/template" id="NoteShowInnerTemplate">
 		<h3> <%=n.LastUpdatedBy%> at <%=n.LastUpdated.toLocaleTimeString()%> 
-				<%=n.LastUpdated.toLocaleDateString()%> wrote a <%=n.Type %>: </h3>
+				<%=n.LastUpdated.toLocaleDateString()%> wrote a <%=MERCHANT.NoteTypes[n.Type] %>: </h3>
 				<% if(n.Type === "NOTE_CONFIG") { %>
 					<p>Step <%=n.ConfigurationStepId%></p>
 				<% } %>

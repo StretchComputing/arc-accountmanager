@@ -7,33 +7,31 @@ var MERCHANT = (function($){
 		  { propName: "State",                 displayText: "State",                              inputType: "text",     required:true},
 		  { propName: "ZipCode",               displayText: "Zip Code",                           inputType: "text",     required:true},
 		  { propName: "AcceptTerms",           displayText: "Accepted the terms and conditions?", inputType: "checkbox", required:true},
-	      { propName: "Status",                displayText: "Merchant Status",                    inputType: "option",   required:true, options: ["Potential", "In Talks", "Configuration", "Ready", "Active"]},
-		  { propName: "EIN",                   displayText: "Company Employer ID Number",         inputType: "text",     required:true},
-		  { propName: "Longitude",             displayText: "Longitude",                          inputType: "text",     required:false},
-		  { propName: "Latitude",              displayText: "Latitude",                           inputType: "text",     required:false},
-		  { propName: "PaymentAccepted",       displayText: "Credit Card Types Accepted",         inputType: "text",     required:true},
-		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text",     required:true},
 		  { propName: "POS",                   displayText: "POS Type",                           inputType: "select",   required:false, options: ["POS_MICROS", "POS_ISIS", "POS_ALOHA"]},
-		  { propName: "eMail",                 displayText: "Email",                              inputType: "text",     required:true},
+		  { propName: "OtherPOS"},
+		  { propName: "EIN",                   displayText: "Company Employer ID Number",         inputType: "text",     required:true},
 		  { propName: "TwitterHandler",        displayText: "Twitter Handler",                    inputType: "text",     required:false},
 		  { propName: "FacebookHandler",       displayText: "Facebook Handler",                   inputType: "text",     required:false},
-		  { propName: "Website",               displayText: "Website",                            inputType: "text",     required:false},
-		  { propName: "PriceLevel",            displayText: "Price Level",                        inputType: "option",   required:false, options: ["LOW", "MEDIUM", "HIGH"]},
-		  { propName: "NumTables",             displayText: "Number of Tables",                   inputType: "text",     required:false},
-		  { propName: "NumSeats",              displayText: "Number of Seats",                    inputType: "text",     required:false},
-		  //{ propName: "DecisionMakers",        displayText: "Decision Maker",                     inputType: "special",  required:false},
-		  { propName: "TypeOfService",         displayText: "Type of Service",                    inputType: "option",   required:false, options: ["Sit Down", "Take Out"]},
 		  { propName: "CurrentCreditRate",     displayText: "Current Credit Rate",                inputType: "text",     required:false},
 		  { propName: "CurrentCreditFee",      displayText: "Current Credit Fee",                 inputType: "text",     required:false},
-		  { propName: "AvgNumServers",         displayText: "Average Number of Servers",          inputType: "text",     required:false},
-		  { propName: "NumPOSTerminals",       displayText: "Number of Point of Sale Terminals",  inputType: "text",     required:false},
+		  { propName: "Website",               displayText: "Website",                            inputType: "text",     required:false},
+		  { propName: "PriceLevel",            displayText: "Price Level",                        inputType: "option",   required:false, options: ["LOW", "MEDIUM", "HIGH"]},
 		  { propName: "Cuisine",               displayText: "Type of Food",                       inputType: "text",     required:false},
-		  { propName: "OtherPOS"},
+		  { propName: "NumSeats",              displayText: "Number of Seats",                    inputType: "text",     required:false},
+		  { propName: "NumPOSTerminals",       displayText: "Number of Point of Sale Terminals",  inputType: "text",     required:false},
+		  { propName: "AvgNumServers",         displayText: "Average Number of Servers",          inputType: "text",     required:false},
 		  { propName: "DMFirstName"},
 		  { propName: "DMLastName"},
 		  { propName: "DMPosition"},
 		  { propName: "DMPhone"},
-		  { propName: "DMeMail"}
+		  { propName: "DMeMail"},
+		  { propName: "Longitude",             displayText: "Longitude",                          inputType: "text",     required:false},
+		  { propName: "Latitude",              displayText: "Latitude",                           inputType: "text",     required:false},
+		  { propName: "PaymentAccepted",       displayText: "Credit Card Types Accepted",         inputType: "text",     required:true},
+		  { propName: "TypeId",                displayText: "Merchant Classification",            inputType: "text",     required:true},
+		  { propName: "eMail",                 displayText: "Email",                              inputType: "text",     required:true},
+		  //{ propName: "DecisionMakers",        displayText: "Decision Maker",                     inputType: "special",  required:false},
+		  { propName: "Status",                displayText: "Merchant Status",                    inputType: "option",   required:true, options: ["Potential", "In Talks", "Configuration", "Ready", "Active"]}
 		  //{ propName: "Notes",			       displayText: "Notes",							  inputType: "text",	 required:false}
                             ],
                             
@@ -44,6 +42,26 @@ var MERCHANT = (function($){
 		  { propName: "Position",              displayText: "Position",                           inputType: "text",     required:true },
 		  { propName: "eMail",                 displayText: "Email Address",                      inputType: "text",     required:true }
 	                        ],
+	                        
+	       POSAbreviations : {
+	    	   Micros : 'POS_MICROS',
+	    	   Isis : 'POS_ISIS',
+	    	   Aloha : 'POS_ALOHA',
+	    	   Other : 'POS_OTHER'
+	       },
+	       
+	       POSNames : {
+	    	   POS_MICROS : 'Micros',
+	    	   POS_ISIS : 'Isis',
+	    	   POS_ALOHA : 'Aloha',
+	    	   POS_OTHER : 'Other'
+	       },
+	       
+	       NoteTypes: {
+	    	   NOTE_SALES : 'sales note',
+	    	   NOTE_CONFIG : 'configuration note',
+	    	   NOTE_OTHER : "note"
+	       },
 	                        
 	       activityFeed : { 
 	    	  "MerchantCreate" : function(activity) {

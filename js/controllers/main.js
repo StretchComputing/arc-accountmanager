@@ -570,13 +570,14 @@ var EXELON = (function (r, $) {
   };
   
   /*Makes a call to Merchant Create*/
-  r.createMerchant = function(merchant){
+  r.createMerchant = function(merchant, callback){
 	try {
 		RSKYBOX.log.info('entering', 'main.js.createMerchant');
 		if(merchant.AcceptTerms === "")
 			merchant.AcceptTerms = true;
 		var closeurl = baseUrl + 'merchants/create';
 		var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
+		var n;
 		$.ajax({
 			type: 'post',
 			datatype: 'json',
@@ -588,6 +589,9 @@ var EXELON = (function (r, $) {
 			success: function(data){
 				RSKYBOX.log.info('finished', 'main.js.createMerchant');
 				merchant.Id = data.Results.Id;
+				if(callback){
+					callback();
+				}
 			},
 			error: function(error){
 				alert('Could not create merchant error code: ' + error.status);
@@ -611,7 +615,7 @@ var EXELON = (function (r, $) {
 		  var closeurl = baseUrl + 'merchants/update/' + merchant.Id;
 		  
 		  //var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
-		  var jsonobj = JSON.stringify({'DMFirstName' : "Test Name"});
+		  var jsonobj = JSON.stringify({'Street' : "123 Fake Street"});
 		  var n;
 		  
 		  $.ajax({
@@ -887,27 +891,6 @@ var EXELON = (function (r, $) {
 	  var editMerchantTemplate = _.template($('#editMerchantForm').html());
 
 	  content.append(editMerchantTemplate(merchant));
-
-	  $('#'+pageId+'GetLngLat').bind('click', function(e){
-		  var lngObj = $('#'+pageId+'Longitude');
-		  var latObj = $('#'+pageId+'Latitude');
-
-		  var street = $('#'+pageId+'Street').val();
-		  var city = $('#'+pageId+'City').val();
-		  var state = $('#'+pageId+'State').val();
-		  var zip = $('#'+pageId+'ZipCode').val();
-		  if(street === "" || city === "" || state === ""){
-			  var pop = $('#'+pageId+'RequiredPopup');
-			  pop.empty();
-			  pop.append($('<h1 />', {text : "You must fill out a fill address to find the longitude /latitude"}));
-			  pop.popup("open");
-			  return;
-		  }
-
-		  var address = r.readyAddress(street,city,state,zip);
-
-		  r.fetchLngLat(lngObj,latObj,address);
-	  });
 	  
 	  $('#'+pageId+'GetLoc').bind('click', function(){
 		  var success = function(position){
@@ -966,8 +949,8 @@ var EXELON = (function (r, $) {
 			  }
 			  
 			  var fieldVal;
-			  if(form[i].name === "Status"){
-				  fieldVal = r.getStatusAbriev(form[i].value);
+			  if(form[i].name === "POS"){
+				  fieldVal = MERCHANT.POSAbreviations[form[i].value];
 			  }
 			  else
 				  fieldVal = form[i].value;
@@ -984,28 +967,28 @@ var EXELON = (function (r, $) {
 				  formsFilled.push(form[i].name);
 			  }
 		  }
-
-		  if(merchant.Notes !== undefined){
-			  merchant.Notes = merchant.Notes.concat(notesToAdd);
-		  }
-		  
-		  if(merchant.Id !== "" || merchant.Id !== undefined){
-			  for(var i = 0; i < notesToAdd.length; i++){
-				  r.createNote(merchant.Id, notesToAdd[i])
-			  }
-
-		  }
 		  
 		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
 		  
-		  if(newMerchant){
-			  r.createMerchant(merchant);
+		  if(newMerchant){//createNewMerchant
+			  r.createMerchant(merchant, function(){
+				  for(var i = 0; i < notesToAdd.length; i++){
+					  r.createNote(merchant.Id, notesToAdd[i])
+				  }
+			  });
 			  r.merchantList.push(merchant);
 		  }
-		  else{
+		  
+		  else{//editMerchant
 			  updateObj.Id = merchant.Id;
 			  //r.updateMerchant(updateObj);
 			  r.updateMerchant(merchant);
+			  for(var i = 0; i < notesToAdd.length; i++){
+				  r.createNote(merchant.Id, notesToAdd[i])
+			  }
+			  if(merchant.Notes !== undefined){
+				  merchant.Notes = merchant.Notes.concat(notesToAdd);
+			  }
 		  }
 
 		  /*Create the activity*/
@@ -1123,37 +1106,13 @@ var EXELON = (function (r, $) {
 		$('#merchantDisplayNotesDisplay').listview('refresh');
 		$('#merchantDisplayContent').trigger('create');
 		
-
-  }
-  
-  r.getStatusAbriev = function(statusName){
-	  if(statusName === "Potential")
-		  return "P";
-	  if(statusName === "Interested")
-		  return "I";
-	  if(statusName === "Configure")
-		  return "C";
-	  if(statusName === "Ready")
-		  return "R";
-	  if(statusName === "Active")
-		  return "A";
-	  else
-		  return "";
   }
   
   /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
   r.getStatusTheme = function(Status){
-	  var key = MERCHANT.merchantDisplay[0].options;
-	  if(Status === key[1])
-		  return 'b';
-	  if(Status === key[2])
-		  return 'e';
-	  if(Status === key[3])
-		  return 'c';
-	  if(Status === key[4])
-		  return 'a';
-	  return 'd';
-  };
+	  return 'a';
+  }
+
 
   try {
     r.router = new $.mobile.Router([
