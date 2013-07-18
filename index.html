@@ -486,7 +486,7 @@
 	    <ul data-role="listview" data-filter="true" data-inset="true" id="ConfigureMerchantSelect"></ul>
 	  </div>
 	  <div class="ui-block-b">
-	    <a data-role="button" id="StartConfigure" merchantId="">Configure</a>
+	    <a data-role="button" id="StartConfigure" merchantId="" data-position="fixed">Configure</a>
 	  </div>
 	</div>
       </div>
@@ -503,51 +503,52 @@
     </script>
     
     <script type="text/template" id="ConfigureStepsTemplate">
+     
       <div data-role="page" id="ConfigureStep_Number">
+	
 	<div data-role="header" data-position="fixed" data-tap-toggle="false">
-	  <h1>Configure: <%= r.MerchantBeingConfigured.Name  %></h1>
-	  <a data-icon="arrow-l" data-iconpos="notext" id="ConfigureStepBack_Number"></a>
-	  <a data-icon="arrow-r" data-iconpos="notext" id="ConfigureStepForward_Number"></a>
+	  <h1>Configure: <%= EXELON.merchantBeingConfigured.Name  %></h1>
+	  <a href="" data-icon="arrow-l" data-iconpos="notext" id="ConfigureStepBack_Number"></a>
+	  <a href="" data-icon="arrow-r" data-iconpos="notext" id="ConfigureStepForward_Number"></a>
 	</div>
 	
 	<div data-role="content">
 	  <h1><%= Number %>. <%= Title %></h1>
-	  <ul data-role="listview" id="ConfigureSubSteps_Step">SUBSTEPS</ul>
-	  <div data-role="collapsible">
+	  <ul data-role="listview" id="ConfigureSubSteps_Step" data-inset="true">SUBSTEPS</ul>
+	  <div data-role="collapsible" data-content-theme="d">
 	    <h2>Instructions</h2>
 	    <p><%= Instructions %></p>
 	  </div>
-	  <% if(ScreenShots.length  > 0) {  %>
-	  <ul data-role="listview">
-	    <li data-role="list-divider">ScreenShots</li>
-	    <% for(var imgIndex = 0; imgIndex < ScreenShots.length; imgIndex++) { %>
+	  <ul data-role="listview" data-inset="true">
+	    <li data-role="list-divider">Screenshots</li>
+	    <% if(Screenshots.length  > 0) { %>
+	    <% for(var imgIndex = 0; imgIndex < Screenshots.length; imgIndex++) { %>
 	       <li>
 		 <div data-role="fieldcontain">
-		   <h3><%= ScreenShots[imgIndex].Name %></h3>
-		   <img src=<%= ScreenShots[imgIndex].URL %> />
+		   <h3><%= Screenshots[imgIndex].Name %></h3>
+		   <img src=<%= Screenshots[imgIndex].URL %> />
 		 </div>
 	       </li>
 	       <% } %>
+	    <% } else {%>
+	    <li>N/A</li>
+	    <% } %>
 	  </ul>
-	  <% } %>
-	  <ul data-role="listview">
+	  <!-- <ul data-role="listview" data-inset="true">
 	    <li data-role="listdivider">Notes</li>
-	  </ul>
+	  </ul> -->
 	</div>
+	
       </div>
+      
     </script>
 
     <script type="text/template" id="ConfigureSubStepsTemplate">
       <li>
-	<div data-role="fieldcontain">
-	  <div data-role="fieldcontain">
-	    <input type="checkbox" id="ConfigureCheck_Step_SubStep" />
-	    <label for="ConfigureCheck_Step_SubStep"><%= Description %></label>
-	  </div>
-	  <% if(Input != undefined) { %>
-	  <input type="text" id="ConfigureInput_Step_SubStep" placeholder="Default: "></input>
-	  <% } %>
-	</div>
+	<label><%=Description %><input type="checkbox" id="ConfigureCheck_Step_SubStep" /></label>
+	<% if(Input !== "#NA") { %>
+	<input type="text" id="ConfigureInput_Step_SubStep" placeholder="Default: "></input>
+	<% } %>
       </li>
     </script>
 

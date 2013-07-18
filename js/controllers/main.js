@@ -833,18 +833,22 @@ var EXELON = (function (r, $) {
 		  type: 'search',
 		      data: JSON.stringify(jsonobj),
 		      datatype: 'json',
-		      contenttype: 'application/json',
+		      contentType: 'application/json',
 		      url: closeurl,
 		      statuscode: r.statusCodeHandlers(),
 		      headers: {'Authorization' : r.getAuthorizationHeader()},
 		      success: function(data, status, jqXHR) {
 		      try {
-			  var merIndex = 0;
-			  while(data.Results[merIndex].Id != merchantID)
-			      merIndex++;
-			  r.merchantBeingConfigured = data.Results;
+			  r.merchantBeingConfigured = data.Results[0];
+			  r.fixMerchantBeingConfigured();
 			  r.setConfigureStepsPages();
-			  $.mobile.changePage($('#ConfigureStep_' + r.merchantBeingConfigured.Configuration.CurrentStep));
+			  var goToStep;
+			  if(r.merchantBeingConfigured.Configuration[0].CurrentStep) {
+			      goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
+			  } else {
+			      goToStep = $('#ConfigureStep_' + '0');
+			  }
+			  $.mobile.changePage(goToStep);
 			  var jtest = 5;
 		      } catch (e) {
 			  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo.success');
@@ -855,7 +859,90 @@ var EXELON = (function (r, $) {
 	  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo');
       }
   };
-  
+
+  //Check to make sure all configure fields are provided. If not, fill in with dummy or empty values
+  r.fixMerchantBeingConfigured = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.fixMerchantBeingConfigured');
+	  
+	  var confObj = r.merchantBeingConfigured.Configuration[0];
+	  var confStep;
+	  var confSubStep;
+
+	  if(confObj.DateCompleted === undefined)
+	      confObj.DateCompleted = null;
+
+	  if(confObj.CurrentStep === undefined)
+	      confObj.CurrentStep = 1;
+	  
+	  for(var stepIndex = 0; stepIndex < confObj.Steps.length; stepIndex++){
+	      confStep = confObj.Steps[stepIndex];
+	      
+	      if(confStep.Title === undefined)
+		  confStep.Title = "";
+	      
+	      if(confStep.Number === undefined)
+		  confStep.Number = stepIndex + 1;
+
+	      if(confStep.Instructions === undefined)
+                  confStep.Instructions = "NO INSTRUCTIONS";
+
+	      if(confStep.LastUpdated === undefined)
+                  confStep.LastUpdated = null;
+
+	      if(confStep.LastUpdatedBy === undefined)
+                  confStep.LastUpdatedBy = "";
+
+	      if(confStep.IsCompleted === undefined)
+                  confStep.IsCompleted = false;
+
+	      if(confStep.Screenshots === undefined)
+                  confStep.Screenshots = [];
+
+	      for(var ssIndex = 0; ssIndex < confStep.Screenshots.length; ssIndex++){
+		  
+		  if(confStep.Screenshots[ssIndex].Name === undefined)
+		      ConfStep.Screenshots[ssIndex].Name = "";
+		  
+		  if(confStep.Screenshots[ssIndex].URL === undefined)
+		      ConfStep.Screenshots[ssIndex].URL = "";
+	      }
+
+	      if(confStep.SubSteps === undefined)
+                  confStep.SubSteps = [{}];
+
+	      for(var subStepIndex = 0; subStepIndex < confStep.SubSteps.length; subStepIndex++) {
+		  confSubStep = confStep.SubSteps[subStepIndex];
+
+		  if(confSubStep.Number === undefined)
+		      confSubStep.Number = subStepIndex + 1;
+
+		  if(confSubStep.RequireInput === undefined){
+		      if(confSubStep.Input === undefined)
+			  confSubStep.RequireInput = "#NA";
+		      else
+			  confSubStep.RequireInput = false;
+		  }
+		  
+		  if(confSubStep.Description === undefined)
+                      confSubStep.Description = "NO DESCRIPTION";
+		  
+		  if(confSubStep.IsCompleted === undefined)
+                      confSubStep.IsCompleted = false;
+
+		  if(confSubStep.Input === undefined) {
+		      if(confSubStep.RequireInput != "#NA")
+			  confSubStep.Input = "";
+		      else
+			  confSubStep.Input = "#NA";
+		  }  
+	      }
+	  }
+      } catch (e) {
+	  RSKYBOX.log.error(e,'fixMerchantBeingConfigured');
+      }
+  }  
+	  
   r.setConfigureStepsPages = function() {
       try{
 	  RSKYBOX.log.info('entering','main.js.setConfigureStepsPages');
@@ -867,24 +954,24 @@ var EXELON = (function (r, $) {
 	  var nextSubStepAdded;
 	  var nextStepAdded;
 
-	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration.Steps.length; stepIndex++) {
+	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++) {
 	      
 	      var subStepsHtml = "";
-	      var cStep = r.merchantBeingConfigured.Configuration.Steps[stepIndex];
+	      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
 	      
 	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
 		  
-		  var cSubStep = cStep.SubSteps[subStepsIndex];
+		  var cSubStep = cStep.SubSteps[subStepIndex];
 		  nextSubStepAdded = configureSubStepsTemplate(cSubStep);
 		  nextSubStepAdded = nextSubStepAdded.replace("ConfigureCheck_Step_SubStep", "ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number);
-		  if(cSubStep.Input != undefined){
+		  if(cSubStep.Input != '#NA'){
 		      nextSubStepAdded = nextSubStepAdded.replace("ConfigureInput_Step_SubStep", "ConfigureInput_" + cStep.Number + "_" + cSubStep.Number);
 		  }
 		  subStepsHtml += nextSubStepAdded;
 	      }
 	      
-	      nextStepAdded = configureSubStepsTemplate(cStep);
-	      nextStepAdded = nextStepAdded.replace("ConfigureStep_Number", "ConfifureStep_" + cStep.Number);
+	      nextStepAdded = configureStepsTemplate(cStep);
+	      nextStepAdded = nextStepAdded.replace("ConfigureStep_Number", "ConfigureStep_" + cStep.Number);
 	      nextStepAdded = nextStepAdded.replace("SUBSTEPS", subStepsHtml);
 	      nextStepAdded = nextStepAdded.replace("ConfigureSubSteps_Step","ConfigureSubSteps_" + cStep.Number);
 	      nextStepAdded = nextStepAdded.replace("ConfigureStepBack_Number","ConfigureStepBack_" + cStep.Number);
@@ -895,30 +982,21 @@ var EXELON = (function (r, $) {
 	  
 	  $("#ConfigureMerchantListTemplate").after(stepsHtml);
 
-	  for(var stepsIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration.Steps.length; stepIndex++){
+	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
 	      
-	      cStep = r.merchantBeingConfigured.Configuration.Steps[stepIndex];
-	      if(stepIndex = 0){
-		  $("#ConfigureStepBack_" + cStep.Number).click(function() {
-			  $.mobile.changePage($('#configure'));
-		      });  
-	      } else {
-		  $("#ConfigureStepBack_" + cStep.Number).click(function() {
-			  $.mobile.changePage($('#ConfigureStep_' + (cStep.Number - 1)));
-		      });
-	      }
+	      cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+	      if(stepIndex == 0)
+		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#configure');  
+	      else 
+		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number - 1));
 
-	      if(stepIndex = r.merchantBeingConfigured.Configuration.Steps.length - 1){
-		  $("#ConfigureStepForward_" + cStep.Number).click(function() {
-			  $.mobile.changePage($('#configure'));
-		      });
-	      } else {
-		  $("#ConfigureStepForward_" + cStep.Number).click(function() {
-			  $.mobile.changePage($('#ConfigureStep_' + (cStep.Number + 1)));
-		      });
-	      }
+	      if(stepIndex == r.merchantBeingConfigured.Configuration[0].Steps.length - 1)
+		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#configure');
+	      else
+		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number + 1));
 
-	      $('#ConfigureStep_' + cStep.Number).trigger('create');
+	      //$('#ConfigureStep_' + cStep.Number).trigger('create');
+	      var aTest = 1;
 	  }
 	  
       } catch (e) {
