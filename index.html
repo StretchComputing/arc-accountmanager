@@ -465,6 +465,12 @@
 	</ul>
 
 	<ul id="merchantDisplayNotesDisplay" data-role="listview" data-inset="true">
+	<!--Written in asynchronously -->
+	</ul>
+	</script>
+	
+	<script type="text/template" id="merchantDisplayNotesTemplate">
+
 		<% for(var i = Notes.length-1; i >= 0; i--){  %>
 			<% if(Notes.length-1 - i >= 10) { %>
 				<% Notes.position = i; %>
@@ -474,8 +480,6 @@
 			<% var t = _.template($('#NoteDisplayTemplate').html()); %>
 			<%= t({n:Notes[i], index:i}) %>
 		<% } %>
-		
-	</ul>
 
 	</script>
 	
@@ -505,10 +509,6 @@
 					<p>Step <%=n.ConfigurationStepId%></p>
 				<% } %>
 		<p><%=n.Note%></p>
-	</script>
-	
-	<script type="script/template" id="merchantDisplayNoteEditTemplate">
-
 	</script>
 	
 	<script type="script/template" id="merchantDisplaySidebarTemplate">

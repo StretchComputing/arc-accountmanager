@@ -71,23 +71,23 @@ var EXELON = (function (r, $) {
         
         var content =  $("#selectMerchantContent");
         
-        content.on('tap', '.selectMerchantLI', r.merchantSelectTap);
+        content.on('click', '.selectMerchantLI', r.merchantSelectTap);
         content.on("swipeleft", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
         content.on("swiperight", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
 
-       content.on("tap", ".editButton", function(e){
+       content.on("click", ".editButton", function(e){
         	var index = $(this).attr("index");
         	r.merchantToEdit = r.merchantList[index];
         	$.mobile.changePage("#editMerchant", {transition : "slide"});
         });
         
-        content.on("tap", ".selectButton", function(e){
+        content.on("click", ".selectButton", function(e){
         	var index = $(this).attr("index");
         	r.activeMerchant = r.merchantList[index];
         	$.mobile.changePage("#merchantDisplay", {transition:"slide"});
         });
         
-        content.on("tap", ".deleteButton", function(e){	
+        content.on("click", ".deleteButton", function(e){	
         	var index = $(this).attr("index");
         	var merchant = r.merchantList[index];
         	r.deleteMerchant(merchant);
@@ -97,7 +97,7 @@ var EXELON = (function (r, $) {
         	
         	});
         
-        content.on("tap", ".backButton", function(e){
+        content.on("click", ".backButton", function(e){
         	var index = $(this).attr("index");
       	    $("#selectMerchantListSwipeMenuElm"+index).hide();
         	$("#selectMerchantListElm"+index).show();
@@ -226,11 +226,11 @@ var EXELON = (function (r, $) {
     			$('#noteMenu'+index).show();
     		});
     		
-    		page.on('tap', '.noteDelete', function(){
+    		page.on('click', '.noteDelete', function(){
     			return; //No backend functionality yet?
     		});
     		
-    		page.on('tap', '.noteEdit', function(){
+    		page.on('click', '.noteEdit', function(){
     			var index = $(this).attr('index');
     			var note = r.activeMerchant.Notes[index]
     			$('#noteMenu'+index).hide()
@@ -238,7 +238,7 @@ var EXELON = (function (r, $) {
     			disp.show();
     		});
     		
-    		page.on('tap', '.noteBack', function(){
+    		page.on('click', '.noteBack', function(){
     			var index = $(this).attr('index')
     			$('#noteMenu'+index).hide();
     			$('#noteShow'+index).show();
@@ -250,7 +250,7 @@ var EXELON = (function (r, $) {
     			$('#noteShow'+index).show();
     		});
     		
-    		page.on('tap', '.editNoteSave', function(){
+    		page.on('click', '.editNoteSave', function(){
     			var index = $(this).attr('index');
     			var note = r.activeMerchant.Notes[index]
     			note.Note = $('#noteEditForm'+index).val();
@@ -272,7 +272,7 @@ var EXELON = (function (r, $) {
     			
     		});
     		
-    		page.on('tap', '.editNoteBack', function(){
+    		page.on('click', '.editNoteBack', function(){
     			var index = $(this).attr('index');
     			$('#noteEditField'+index).hide();
     			$('#noteMenu'+index).show();
@@ -281,18 +281,18 @@ var EXELON = (function (r, $) {
     		var template = _.template($('#merchantDisplaySidebarTemplate').html());
     		$('#merchantDisplay').append(template({UserName:r.getUserName() }));
     		
-    		$('#merchantDisplaySidebarEdit').bind('tap', function(){
+    		$('#merchantDisplaySidebarEdit').bind('click', function(){
     			r.merchantToEdit = r.activeMerchant;
     			$.mobile.changePage('#editMerchant', {transition:'slide'});
     		});
     		
-    		$('#merchantDisplayDeleteYes').bind('tap', function(){
+    		$('#merchantDisplayDeleteYes').bind('click', function(){
     			r.deleteMerchant(r.activeMerchant); //API Call
     			
     			$.mobile.changePage('#selectMerchant');
     		});
     		
-    		$('#merchantDisplayDeleteNo').bind('tap', function(){
+    		$('#merchantDisplayDeleteNo').bind('click', function(){
     			$('#merchantDisplayConfirmDelete').popup('close');
     		});
     		
@@ -307,7 +307,7 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayShow');
     		
     		if(!r.activeMerchant.Notes){
-    			r.getNotes(r.activeMerchant, false);//Synchronous call
+    			r.getNotes(r.activeMerchant, true, r.writeNotes);
     		}
     		
     		$('#merchantDisplayHead').text(r.activeMerchant.Name);
@@ -315,16 +315,16 @@ var EXELON = (function (r, $) {
     		var content = $('#merchantDisplayContent');
     		var template = _.template($('#merchantDisplayContentTemplate').html());
     		
-    		content.append(template(r.activeMerchant));
+    		content.prepend(template(r.activeMerchant));
     		$(".collapsedListItem").each(function(){
     			$(this).hide();
     		});
-    		
-    		$("#displayMerchantInfoCollapse").bind("tap", function(e){
+
+    		$("#displayMerchantInfoCollapse").bind("click", function(e){
     			$(".collapsedListItem").each(function(){
     				$(this).toggle();
     			});
-    			
+
     			var li = $('#merchantDisplayBasicInfo')
     			if($(this).attr("status") === "up"){
     				$(this).attr("status", "down");
@@ -337,54 +337,48 @@ var EXELON = (function (r, $) {
 
     		});
 
+    		var spec = $("#merchantDisplayStatusSpecific");
+    		spec.bind('swipeleft', function(){
+    			/*A long if/elif chain based on the different statuses*/
+    			$.mobile.changePage("#configure", {transition:"slide"});
+    		});
+
+    		spec.bind('swiperight', function(){
+    			$.mobile.changePage('#selectMerchant', {transition:"slide",
+    				reverse:true });
+    		});
+
     		$('#merchantDisplayAddNote').bind("click", function(e){
     			$('#merchantDisplayAddNoteBox').toggle();
     		});
 
     		$('#merchantDisplayAddNoteSave').bind('click', function(e){
     			var textArea = $('#merchantDisplayNoteText');
-    			
+
     			if(textArea.prop('value') === ""){
     				return; //No need to save empty notes
     			}
-    			
+
     			var newNote = {  Type : "NOTE_SALES",
-    							 LastUpdatedBy : r.getUserName(),
-    							 LastUpdated : new Date(),
-    							 Note : textArea.prop('value') };
+    					LastUpdatedBy : r.getUserName(),
+    					LastUpdated : new Date(),
+    					Note : textArea.prop('value') };
     			r.activeMerchant.Notes.push(newNote);
     			r.createNote(r.activeMerchant.Id, newNote);
-    			
+
     			textArea.prop('value', "");
     			$('#merchantDisplayAddNoteBox').hide();
     			/*Update the displays on this page*/
-    			
+
     			var NoteTemplate = _.template($('#NoteDisplayTemplate').html())
     			var notesDisplay = $('#merchantDisplayNotesDisplay');
     			notesDisplay.prepend(NoteTemplate({n:newNote, 
-    											   index:r.activeMerchant.Notes.length-1}));
+    				index:r.activeMerchant.Notes.length-1}));
     			notesDisplay.listview('refresh');
     			notesDisplay.trigger('create');
 
     		});
-
-    		$('#merchantDisplayAddNoteCancel').bind('click', function(e){
-    			$('#merchantDisplayNoteText').prop('value', "");
-    			$('#merchantDisplayAddNoteBox').hide();
-    		});
-
-    		var spec = $("#merchantDisplayStatusSpecific");
-    		spec.bind('swipeleft', function(){
-    			/*A long if/elif chain based on the different statuses*/
-    			$.mobile.changePage("#configure", {transition:"slide"});
-    		});
-    		
-    		spec.bind('swiperight', function(){
-    			$.mobile.changePage('#selectMerchant', {transition:"slide",
-    													reverse:true });
-    		});
     	
-    		
     		content.trigger('create');
     		
     	}
@@ -533,7 +527,7 @@ var EXELON = (function (r, $) {
 				        Latitude : location.coords.latitude };
 		  r.getMerchants();
 	  }
-	  var failure = function(){ alert('nope'); r.getMerchants();};
+	  var failure = function(){ r.getMerchants();};
 	  navigator.geolocation.getCurrentPosition(success,failure);
   };
   
@@ -617,12 +611,11 @@ var EXELON = (function (r, $) {
 		  var closeurl = baseUrl + 'merchants/update/' + merchant.Id;
 		  
 		  //var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
-		  var jsonobj = JSON.stringify({DMFirstName : "test Name"});
-		  //var jsonobj = "{'DMFirstName' : 'test name' }";
+		  var jsonobj = JSON.stringify({'DMFirstName' : "Test Name"});
 		  var n;
 		  
 		  $.ajax({
-			  type : 'POST',
+			  type : 'PUT',
 			  data : jsonobj,
 			  contenttype : 'application/json',
 			  url : closeurl,
@@ -679,7 +672,7 @@ var EXELON = (function (r, $) {
 	  }
   };
   
-  r.getNotes = function(merchant, async){
+  r.getNotes = function(merchant, async, callback){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.getNotes');
 
@@ -701,6 +694,8 @@ var EXELON = (function (r, $) {
 					  res[i].LastUpdated = new Date(res[i].LastUpdated);
 				  }
 				  merchant.Notes = res;
+				  callback(merchant);
+				  
 			  },
 			  error : function(error, textStatus, errorThrown){
 				  merchant.Notes = []; //No notes returned
@@ -712,6 +707,7 @@ var EXELON = (function (r, $) {
 						  alert('Could not fetch notes, error code' + codes.ErrorCodes[0].Code);
 				  }
 				  alert('Could not fetch notes, error code' + error.status);
+				  callback(merchant);
 			  }
 		  });
 	  }
@@ -786,8 +782,6 @@ var EXELON = (function (r, $) {
 			  newMerchant[prop] = merchant[prop];
 		  }
 	  }
-	  if(newMerchant.Status)
-		  delete newMerchant.Status;
 	  return newMerchant;
   };
   
@@ -1010,7 +1004,8 @@ var EXELON = (function (r, $) {
 		  }
 		  else{
 			  updateObj.Id = merchant.Id;
-			  r.updateMerchant(updateObj);
+			  //r.updateMerchant(updateObj);
+			  r.updateMerchant(merchant);
 		  }
 
 		  /*Create the activity*/
@@ -1114,6 +1109,22 @@ var EXELON = (function (r, $) {
 	  $("#selectMerchantListElm"+index).hide();
 	  $("#selectMerchantListSwipeMenuElm"+index).show();
   };
+  
+  /*Writes the 'notes' protion into merchantDisplay*/
+  r.writeNotes = function(merchant){
+	  var t = _.template($('#merchantDisplayNotesTemplate').html());
+	  $('#merchantDisplayNotesDisplay').append(t(merchant));
+
+		$('#merchantDisplayAddNoteCancel').bind('click', function(e){
+			$('#merchantDisplayNoteText').prop('value', "");
+			$('#merchantDisplayAddNoteBox').hide();
+		});
+		
+		$('#merchantDisplayNotesDisplay').listview('refresh');
+		$('#merchantDisplayContent').trigger('create');
+		
+
+  }
   
   r.getStatusAbriev = function(statusName){
 	  if(statusName === "Potential")
