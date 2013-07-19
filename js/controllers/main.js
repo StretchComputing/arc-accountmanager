@@ -975,12 +975,19 @@ var EXELON = (function (r, $) {
 	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
 		  
 		  var cSubStep = cStep.SubSteps[subStepIndex];
+
 		  nextSubStepAdded = configureSubStepsTemplate(cSubStep);
 		  nextSubStepAdded = nextSubStepAdded.replace("ConfigureCheck_Step_SubStep", "ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number);
 		  if(cSubStep.Input != '#NA'){
 		      nextSubStepAdded = nextSubStepAdded.replace("ConfigureInput_Step_SubStep", "ConfigureInput_" + cStep.Number + "_" + cSubStep.Number);
 		  }
 		  subStepsHtml += nextSubStepAdded;
+	      }
+
+	      //fix Screenshot URL Images/... -> images/...
+	      for(var screenshotIndex = 0; screenshotIndex < cStep.Screenshots.length; screenshotIndex++) {
+		  cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('/Images','images');
+		  cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('JPG','png');
 	      }
 	      
 	      nextStepAdded = configureStepsTemplate(cStep);
