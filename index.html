@@ -117,7 +117,8 @@
 					<option <%if(POS == 'POS_OTHER'){ %>selected<% } %> selVal="POS_OTHER">Other</option>
 				</select></li>
 
-			<li><label for="<%=pageIdPrefix%>OtherPOS"> Other POS (if applicable)</label>
+			<li id="<%=pageIdPrefix%>OtherPOSLI" <% if(POS !== "POS_OTHER") {%>style="display:none" <% } %> >
+			<label for="<%=pageIdPrefix%>OtherPOS"> Other POS </label>
 			<input type="text" name="OtherPOS" id="<%=pageIdPrefix%>OtherPOS" value="<%=OtherPOS %>"</li>
 
 			<li><label for="<%=pageIdPrefix%>NumPOSTerminals"> Number of Point of Sale Terminals </label>
@@ -287,7 +288,7 @@
 			</a>
 		</li>
 
-		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:40px">
+		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu" index="<%=index%>">
 				<button data-icon="info" data-iconpos="notext" data-inline="true" class="selectButton" index="<%=index%>"></button>
 				<button data-icon="gear" data-iconpos="notext" data-inline="true" class="editButton" index="<%=index%>"></button>
 				<button data-icon="delete" data-iconpos="notext" data-inline="true" class="deleteButton" index="<%=index%>"></button>

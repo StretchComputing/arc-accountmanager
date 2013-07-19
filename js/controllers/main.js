@@ -74,6 +74,8 @@ var EXELON = (function (r, $) {
         content.on('click', '.selectMerchantLI', r.merchantSelectTap);
         content.on("swipeleft", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
         content.on("swiperight", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
+        content.on("swipeleft", '.selectMerchantMenu', r.merchantSelectMenuBack);
+        content.on("swiperight", '.selectMerchantMenu', r.merchantSelectMenuBack);
 
        content.on("click", ".editButton", function(e){
         	var index = $(this).attr("index");
@@ -97,12 +99,7 @@ var EXELON = (function (r, $) {
         	
         	});
         
-        content.on("click", ".backButton", function(e){
-        	var index = $(this).attr("index");
-      	    $("#selectMerchantListSwipeMenuElm"+index).hide();
-        	$("#selectMerchantListElm"+index).show();
-        });
-        /*put in the elements from the 'current customer' object*/
+        content.on("click", ".backButton", r.merchantSelectMenuBack);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.selectMerchantBeforeCreate');
       }
@@ -220,11 +217,20 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
     		var page = $('#merchantDisplay');
     		
-    		page.on('swipeleft', '.noteSwipe', function(){
+    		var noteSwipe = function(){
     			var index = $(this).attr('index');
     			$('#noteShow'+index).hide();
     			$('#noteMenu'+index).show();
-    		});
+    		};
+    		
+    		var noteBack = function(){
+    			var index = $(this).attr('index')
+    			$('#noteMenu'+index).hide();
+    			$('#noteShow'+index).show();
+    		};
+    		
+    		page.on('swipeleft', '.noteSwipe', noteSwipe);
+    		page.on('swiperight', '.noteSwipe', noteSwipe);
     		
     		page.on('click', '.noteDelete', function(){
     			return; //No backend functionality yet?
@@ -238,17 +244,9 @@ var EXELON = (function (r, $) {
     			disp.show();
     		});
     		
-    		page.on('click', '.noteBack', function(){
-    			var index = $(this).attr('index')
-    			$('#noteMenu'+index).hide();
-    			$('#noteShow'+index).show();
-    		});
-    		
-    		page.on('swiperight', '.noteMenu', function(){
-    			var index = $(this).attr('index');
-    			$('#noteMenu'+index).hide();
-    			$('#noteShow'+index).show();
-    		});
+    		page.on('click', '.noteBack', noteBack);
+    		page.on('swiperight', '.noteMenu', noteBack);
+    		page.on('swipeleft', '.noteMenu', noteBack);
     		
     		page.on('click', '.editNoteSave', function(){
     			var index = $(this).attr('index');
@@ -890,6 +888,15 @@ var EXELON = (function (r, $) {
 	  var editMerchantTemplate = _.template($('#editMerchantForm').html());
 
 	  content.append(editMerchantTemplate(merchant));
+
+	  $('#'+pageId+'POS').bind('change', function(){
+		  if($(this).val() === 'Other'){
+			  $('#'+pageId+'OtherPOSLI').show();
+		  }
+		  else{
+			  $('#'+pageId+'OtherPOSLI').hide();
+		  }
+	  });
 	  
 	  $('#'+pageId+'GetLoc').bind('click', function(){
 		  var success = function(position){
@@ -965,6 +972,11 @@ var EXELON = (function (r, $) {
 			  if(fieldVal !== ""){//This field was actually filled out
 				  formsFilled.push(form[i].name);
 			  }
+		  }
+		  
+		  if(merchant.POS !== 'POS_OTHER'){
+			  merchant.OtherPOS = "";
+			  updateObj.OtherPOS = "";
 		  }
 		  
 		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
@@ -1090,6 +1102,12 @@ var EXELON = (function (r, $) {
 	  var index = $(this).attr('index');
 	  $("#selectMerchantListElm"+index).hide();
 	  $("#selectMerchantListSwipeMenuElm"+index).show();
+  };
+  
+  r.merchantSelectMenuBack = function(){
+	  var index = $(this).attr('index');
+	  $("#selectMerchantListSwipeMenuElm"+index).hide();
+	  $("#selectMerchantListElm"+index).show();
   };
   
   /*Writes the 'notes' protion into merchantDisplay*/
