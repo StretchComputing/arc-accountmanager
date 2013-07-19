@@ -546,7 +546,7 @@ var EXELON = (function (r, $) {
         type: 'search',
         data: JSON.stringify(jsonobj),
         datatype: 'json',
-        contenttype: 'application/json',
+        contentType: 'application/json',
         url: closeurl,
         statuscode: r.statusCodeHandlers(),
 		headers: {'Authorization' : r.getAuthorizationHeader()},
@@ -614,14 +614,13 @@ var EXELON = (function (r, $) {
 		  
 		  var closeurl = baseUrl + 'merchants/update/' + merchant.Id;
 		  
-		  //var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
-		  var jsonobj = JSON.stringify({'Street' : "123 Fake Street"});
+		  var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		  var n;
 		  
 		  $.ajax({
 			  type : 'PUT',
 			  data : jsonobj,
-			  contenttype : 'application/json',
+			  contentType : 'application/json',
 			  url : closeurl,
 			  statuscode: r.statusCodeHandlers(),
 		      headers: {'Authorization' : r.getAuthorizationHeader()},
