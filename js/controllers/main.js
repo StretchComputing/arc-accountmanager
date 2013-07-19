@@ -839,15 +839,14 @@ var EXELON = (function (r, $) {
 		      headers: {'Authorization' : r.getAuthorizationHeader()},
 		      success: function(data, status, jqXHR) {
 		      try {
+			  if(r.merchantBeingConfigured)
+			      r.removeExistingConfigureStepsPages();
 			  r.merchantBeingConfigured = data.Results[0];
 			  r.fixMerchantBeingConfigured();
 			  r.setConfigureStepsPages();
-			  var goToStep;
-			  if(r.merchantBeingConfigured.Configuration[0].CurrentStep) {
-			      goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
-			  } else {
-			      goToStep = $('#ConfigureStep_' + '0');
-			  }
+			  var goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
+			  //for(var pageIndex = 0; pageIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; pageIndex++)
+			  //    $('#ConfigureStep' + (pageIndex + 1)).trigger('create');
 			  $.mobile.changePage(goToStep);
 			  var jtest = 5;
 		      } catch (e) {
@@ -941,7 +940,21 @@ var EXELON = (function (r, $) {
       } catch (e) {
 	  RSKYBOX.log.error(e,'fixMerchantBeingConfigured');
       }
-  }  
+  };
+
+  r.removeExistingConfigureStepsPages = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.removeExistingConfigureStepsPages');
+
+	  var cSteps = r.merchantBeingConfigured.Configuration[0].Steps;
+	  for(var stepIndex = 0; stepIndex < cSteps.length; stepIndex++){
+	      $('#ConfigureStep_' + (stepIndex + 1)).remove();
+	  }
+
+      } catch (e) {
+	  RSKYBOX.log.error(e,'removeExistingConfigureStepsPages');
+      }
+  };
 	  
   r.setConfigureStepsPages = function() {
       try{
@@ -994,9 +1007,23 @@ var EXELON = (function (r, $) {
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#configure');
 	      else
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number + 1));
-
-	      //$('#ConfigureStep_' + cStep.Number).trigger('create');
-	      var aTest = 1;
+	      
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
+		  
+		  cSubStep = cStep.SubSteps[subStepIndex];
+		  
+		  if(cSubStep.IsCompleted) {
+		      $("#ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
+		  }
+		  if(cSubStep.Input && cSubStep.Input != '#NA') {
+		      if(cSubStep.IsCompleted)
+			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).text(cSubStep.Input);
+		      else
+			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).attr('placeholder',cSubStep.Input);
+		  }
+	      }
+		  
+	      
 	  }
 	  
       } catch (e) {
