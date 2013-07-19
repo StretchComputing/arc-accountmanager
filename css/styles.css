@@ -149,3 +149,7 @@ li.reqAccountingli{
 .noteMenu .ui-btn { 
 	padding:10px;
 }
+
+#map-canvas { 
+	height: 100%;
+}

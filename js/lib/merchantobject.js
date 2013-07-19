@@ -18,7 +18,7 @@ var MERCHANT = (function($){
 		  { propName: "PriceLevel",            displayText: "Price Level",                        inputType: "option",   required:false, options: ["LOW", "MEDIUM", "HIGH"]},
 		  { propName: "Cuisine",               displayText: "Type of Food",                       inputType: "text",     required:false},
 		  { propName: "NumSeats",              displayText: "Number of Seats",                    inputType: "text",     required:false},
-		  { propName: "NumPOSTerminals",       displayText: "Number of Point of Sale Terminals",  inputType: "text",     required:false},
+		  { propName: "NumTerminals",       displayText: "Number of Point of Sale Terminals",  inputType: "text",     required:false},
 		  { propName: "AvgNumServers",         displayText: "Average Number of Servers",          inputType: "text",     required:false},
 		  { propName: "DMFirstName"},
 		  { propName: "DMLastName"},

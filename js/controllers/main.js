@@ -395,6 +395,33 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.error(e, 'main.js.merchantDisplayHide');
     	}
     },
+    
+    mapsBeforeCreate: function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.mapsBeforeCreate');	
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.mapsBeforeCreate');
+    	}
+    },
+    
+    mapsShow: function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.mapsShow');
+    		var mapOptions = {
+    				center : new google.maps.LatLng(-34.397, 150.644),
+    				zoom : 8,
+    				mapTypeId : google.maps.MapTypeId.ROADMAP
+    		};
+    		
+    		$('#mapCanvas').css({height: $(window).height() - $('#mapsHeader').height()});
+    		var map = new google.maps.Map(document.getElementById("mapCanvas"),
+    	            mapOptions);
+    	}
+    	catch(e){
+    		RSKYBOX.log.info('entering', 'main.js.mapsShow');
+    	}
+    },
 
     // Configure Screen
     configureBeforeCreate: function () {
@@ -490,7 +517,6 @@ var EXELON = (function (r, $) {
     }
   };
   
-  
 
   $(document).on('click', '.selectMerchant', function(e){
 		try {
@@ -533,7 +559,7 @@ var EXELON = (function (r, $) {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
-      var jsonobj = {};
+      var jsonobj = {Detailed : true};
       if(r.currLoc){
     	  jsonobj.Latitude = r.currLoc.Latitude;
     	  jsonobj.Longitude = r.currLoc.Longitude;
@@ -576,8 +602,9 @@ var EXELON = (function (r, $) {
 		var closeurl = baseUrl + 'merchants/create';
 		var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		var n;
+		
 		$.ajax({
-			type: 'post',
+			type: 'POST',
 			datatype: 'json',
 			data : jsonobj,
 			contentType: 'application/json',
@@ -612,11 +639,12 @@ var EXELON = (function (r, $) {
 		  
 		  var closeurl = baseUrl + 'merchants/update/' + merchant.Id;
 		  
-		  var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
+		 // var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
+		  var jsonobj = JSON.stringify({'POS' : "POS_ISIS"});
 		  var n;
 		  
 		  $.ajax({
-			  type : 'PUT',
+			  type : 'POST',
 			  data : jsonobj,
 			  contentType : 'application/json',
 			  url : closeurl,
@@ -1151,6 +1179,8 @@ var EXELON = (function (r, $) {
       { '#merchantDisplay':		 { handler: 'merchantDisplayBeforeCreate',  events: 'bc'} },
       { '#merchantDisplay':      { handler: 'merchantDisplayShow',			events: 's' } },
       { '#merchantDisplay':      { handler: 'merchantDisplayHide',			events: 'h' } },
+      { '#maps':                 { handler: 'mapsBeforeCreate',             events: 'bc'} },
+      { '#maps':                 { handler: 'mapsShow',                     events: 's' } },
       { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
       { '#configure':            { handler: 'configureInit',    events: 'i'  } },
       { '#configure':            { handler: 'configureShow',    events: 's'   } }

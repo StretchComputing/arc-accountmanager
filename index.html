@@ -37,6 +37,8 @@
 
 	  <script src="js/lib/merchantobject.js"></script>
 
+     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
+
       <script>
           $( document ).on( "pageshow", function(){
               $( "p.message" ).hide().delay( 1500 ).show( "fast" );
@@ -121,8 +123,8 @@
 			<label for="<%=pageIdPrefix%>OtherPOS"> Other POS </label>
 			<input type="text" name="OtherPOS" id="<%=pageIdPrefix%>OtherPOS" value="<%=OtherPOS %>"</li>
 
-			<li><label for="<%=pageIdPrefix%>NumPOSTerminals"> Number of Point of Sale Terminals </label>
-			<input type="number" name="NumPOSTerminals" id="<%=pageIdPrefix%>NumPOSTerminals" value="<%= NumPOSTerminals %>" ></li>
+			<li><label for="<%=pageIdPrefix%>NumTerminals"> Number of Point of Sale Terminals </label>
+			<input type="number" name="NumTerminals" id="<%=pageIdPrefix%>NumTerminals" value="<%= NumTerminals %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>Street"> Street* </label>
 			<input type="text" name="Street" id="<%=pageIdPrefix%>Street" value="<%= Street %>" required="true"></li>
@@ -310,6 +312,7 @@
             <li data-icon="alert">
               <a href="#" class="logOut">Log Out</a>
             </li>
+			<li><a href="#maps">Maps</a></li>
           </ul>
       </div><!-- /panel -->
 	</script>
@@ -396,7 +399,7 @@
 			<% } else { %>
 			<h3>Point of Sale Device: <%= OtherPOS%></h3>
 			<% } %>
-			<h3>Number of Terminals: <%= NumPOSTerminals%></h3>
+			<h3>Number of Terminals: <%= NumTerminals%></h3>
 		</li>
 
 		<li data-role="list-divider" class="collapsedListItem">Financial</li>
@@ -540,6 +543,17 @@
         <div>This is the Configure page</div>
       </div>
     </div><!-- /page -->
+    
+    <div data-role="page" id="maps">
+		<div data-role="header" data-position="fixed" data-tap-toggle="false" id="mapsHeader">
+			<h1>Sales Map</h1>
+		</div>
+		
+		<div data-role="content" id="mapsContent">
+			<div id="mapCanvas"></div>
+		</div>
+	
+	</div>
 
     <div data-role="page" id="configureTest">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
