@@ -77,6 +77,19 @@ var EXELON = (function (r, $) {
         content.on("swipeleft", '.selectMerchantMenu', r.merchantSelectMenuBack);
         content.on("swiperight", '.selectMerchantMenu', r.merchantSelectMenuBack);
 
+        $('#selectMerchantDeleteYes').bind('click', function(){
+        	var merchant = r.merchantList[r.tempIndex];
+        	r.deleteMerchant(merchant);
+        	var loc = $('#selectMerchantList');
+        	loc.empty();
+        	r.writeMerchantList(loc, r.merchantList);
+        	$('#selectMerchantConfirmDelete').popup('close');
+        });
+        
+        $('#selectMerchantDeleteNo').bind('click', function(){
+        	$('#selectMerchantConfirmDelete').popup('close');
+        });
+        
        content.on("click", ".editButton", function(e){
         	var index = $(this).attr("index");
         	r.merchantToEdit = r.merchantList[index];
@@ -90,13 +103,8 @@ var EXELON = (function (r, $) {
         });
         
         content.on("click", ".deleteButton", function(e){	
-        	var index = $(this).attr("index");
-        	var merchant = r.merchantList[index];
-        	r.deleteMerchant(merchant);
-        	var loc = $('#selectMerchantList');
-        	loc.empty();
-        	r.writeMerchantList(loc, r.merchantList);
-        	
+        		r.tempIndex = $(this).attr("index");
+        		$('#selectMerchantConfirmDelete').popup('open');
         	});
         
         content.on("click", ".backButton", r.merchantSelectMenuBack);
@@ -408,8 +416,10 @@ var EXELON = (function (r, $) {
     mapsShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
+    		var mapEngineURL = 'http://mapsengine.google.com/map/kml?mid=zqIvDlz84uWc.kmV36cZOh5Kg&lid=zqIvDlz84uWc.kNiZ_0lEiAbg';
+    		
     		var mapOptions = {
-    				center : new google.maps.LatLng(-34.397, 150.644),
+    				center : new google.maps.LatLng(41.8500, -87.6500),
     				zoom : 8,
     				mapTypeId : google.maps.MapTypeId.ROADMAP
     		};
@@ -417,6 +427,14 @@ var EXELON = (function (r, $) {
     		$('#mapCanvas').css({height: $(window).height() - $('#mapsHeader').height()});
     		var map = new google.maps.Map(document.getElementById("mapCanvas"),
     	            mapOptions);
+    		
+    		var mapsKML = new google.maps.KmlLayer({
+    			url: mapEngineURL
+    		});
+    		
+    		mapsEngineLayer.setMap(map);
+    	
+    		
     	}
     	catch(e){
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
@@ -559,7 +577,7 @@ var EXELON = (function (r, $) {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
-      var jsonobj = {Detailed : true};
+      var jsonobj = {Detailed : true, Config:true};
       if(r.currLoc){
     	  jsonobj.Latitude = r.currLoc.Latitude;
     	  jsonobj.Longitude = r.currLoc.Longitude;
@@ -639,8 +657,7 @@ var EXELON = (function (r, $) {
 		  
 		  var closeurl = baseUrl + 'merchants/update/' + merchant.Id;
 		  
-		 // var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
-		  var jsonobj = JSON.stringify({'POS' : "POS_ISIS"});
+		  var jsonobj = JSON.stringify(r.cleanMerchant(merchant));
 		  var n;
 		  
 		  $.ajax({
@@ -1004,7 +1021,8 @@ var EXELON = (function (r, $) {
 		  
 		  if(merchant.POS !== 'POS_OTHER'){
 			  merchant.OtherPOS = "";
-			  updateObj.OtherPOS = "";
+			  if(!newMerchant)
+				  updateObj.OtherPOS = "";
 		  }
 		  
 		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
