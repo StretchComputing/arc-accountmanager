@@ -112,6 +112,7 @@ var MERCHANT = (function($){
 	    		dispString += '"';
 	    		return dispString;
 	    	}
+	    	
 	    }
 	};
 			                  

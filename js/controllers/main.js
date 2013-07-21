@@ -63,7 +63,8 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
         var template = _.template($('#selectMerchantSidebarTemplate').html());
         
-        $('#selectMerchant').append(template({UserName: r.getUserName()}));
+        $('#selectMerchant').append(template({UserName: r.getUserName(),
+        									  versionNum : r.versionNum}));
         
         $("#selectMerchantSearch").bind('click', function(e){
         	$("#selectMerchantList").prev("form.ui-listview-filter").toggle();
@@ -130,6 +131,11 @@ var EXELON = (function (r, $) {
         	r.getMerchantsLoc();
         else
         	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
+        
+        /*Sets the default location for the maps page*/
+        if(r.currLoc)
+        	r.mapsCenter = new google.maps.LatLng(r.currLoc.Latitude,
+        										  r.currLoc.Longitude);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.selectMerchantShow');
       }
@@ -237,6 +243,13 @@ var EXELON = (function (r, $) {
     			$('#noteShow'+index).show();
     		};
     		
+    		page.on('click', '#merchantDisplayMaps', function(){
+    			var m = r.activeMerchant;
+    			r.mapsCenter = new google.maps.LatLng(m.Latitude,
+    												  m.Longitude);
+    			$.mobile.changePage('#maps', {transition:'slide'});
+    		});
+    		
     		page.on('swipeleft', '.noteSwipe', noteSwipe);
     		page.on('swiperight', '.noteSwipe', noteSwipe);
     		
@@ -285,7 +298,8 @@ var EXELON = (function (r, $) {
     		});
     		
     		var template = _.template($('#merchantDisplaySidebarTemplate').html());
-    		$('#merchantDisplay').append(template({UserName:r.getUserName() }));
+    		$('#merchantDisplay').append(template({UserName:r.getUserName(),
+    											   versionNum : r.versionNum}));
     		
     		$('#merchantDisplaySidebarEdit').bind('click', function(){
     			r.merchantToEdit = r.activeMerchant;
@@ -406,7 +420,11 @@ var EXELON = (function (r, $) {
     
     mapsBeforeCreate: function(){
     	try{
-    		RSKYBOX.log.info('entering', 'main.js.mapsBeforeCreate');	
+    		RSKYBOX.log.info('entering', 'main.js.mapsBeforeCreate');
+    		$('#maps').on('click', '.mapsMerchantDisplay', function(){
+    			r.activeMerchant = r.getMerchantByName($(this).attr('merchantName'));
+    			$.mobile.changePage('#merchantDisplay', {transition:'slide'});
+    		});
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.mapsBeforeCreate');
@@ -418,9 +436,12 @@ var EXELON = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
     		var mapEngineURL = 'http://mapsengine.google.com/map/kml?mid=zqIvDlz84uWc.kmV36cZOh5Kg&lid=zqIvDlz84uWc.kNiZ_0lEiAbg';
     		
+    		if(!r.mapsCenter)
+    			r.mapsCenter = new google.maps.LatLng(41.8500, -87.6500);
+    		
     		var mapOptions = {
-    				center : new google.maps.LatLng(41.8500, -87.6500),
-    				zoom : 8,
+    				center : r.mapsCenter,
+    				zoom : 14,
     				mapTypeId : google.maps.MapTypeId.ROADMAP
     		};
     		
@@ -428,12 +449,30 @@ var EXELON = (function (r, $) {
     		var map = new google.maps.Map(document.getElementById("mapCanvas"),
     	            mapOptions);
     		
+    		google.maps.event.addListenerOnce(map, 'zoom_change', function(){
+    			this.setZoom(14);
+    			this.setCenter(r.mapsCenter);
+    		});//Compensates for the behavior of adding the KML
+    		
     		var mapsKML = new google.maps.KmlLayer({
-    			url: mapEngineURL
+    			preserveViewport : true,
+    			url: mapEngineURL,
+    			suppressInfoWindows: true
     		});
     		
-    		mapsEngineLayer.setMap(map);
-    	
+    		mapsKML.setMap(map);
+    		
+    		google.maps.event.addListener(mapsKML, 'click', function(e){
+    			var merchant = r.getMerchantByName(e.featureData.name);
+    			if(merchant){
+    				var content = $('#mapsMerchantPopupContent');
+    				content.empty();
+    				var t = _.template($('#mapsMerchantPopupTemplate').html());
+    				content.append(t(merchant));
+    				content.trigger('create');
+    				$('#mapsMerchantPopup').popup('open', {positionTo : $('#mapsPopupLocation')});
+    			}
+    		});
     		
     	}
     	catch(e){
@@ -865,6 +904,7 @@ var EXELON = (function (r, $) {
 		  if(name === r.merchantList[i].Name)
 			  return r.merchantList[i];
 	  }
+	  return undefined;
   };
   
   r.fixMerchants = function(merchantList){
@@ -1174,7 +1214,9 @@ var EXELON = (function (r, $) {
   /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
   r.getStatusTheme = function(Status){
 	  return 'a';
-  }
+  };
+  
+  r.versionNum = 0.1;
 
 
   try {

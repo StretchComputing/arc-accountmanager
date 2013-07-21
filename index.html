@@ -327,6 +327,7 @@
             </li>
 			<li><a href="#maps">Maps</a></li>
           </ul>
+		Version: <%= versionNum %>
       </div><!-- /panel -->
 	</script>
 
@@ -539,10 +540,14 @@
 			<li data-icon="delete">
 				<a href="#merchantDisplayConfirmDelete" data-rel="popup">Delete</a>
 			</li>
+			<li>
+				<a id="merchantDisplayMaps" data-icon="grid">Maps</a>
+			</li>
             <li data-icon="alert">
               <a href="#" class="logOut">Log Out</a>
             </li>
           </ul>
+		  Version: <%= versionNum %>
       </div><!-- /panel -->
 	</script>
 
@@ -564,9 +569,28 @@
 		
 		<div data-role="content" id="mapsContent">
 			<div id="mapCanvas"></div>
+			<div id="mapsPopupLocation"></div>
+		</div>
+		
+		<div data-role="popup" id="mapsMerchantPopup" data-dismissible="false">
+			<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" 
+			   data-iconpos="notext" class="ui-btn-right">Close</a>
+			   <div id="mapsMerchantPopupContent"></div>
 		</div>
 	
 	</div>
+	
+		<script type="text/template" id="mapsMerchantPopupTemplate">
+			<ul data-role="listview">
+				<li><a class="mapsMerchantDisplay" merchantName="<%= Name %>">
+					<h1><%= Name %></h1>
+				    <h1><%= Street %> <%= City %> <%= State %>, <%= ZipCode %></h1>
+				    <h1>Status: <%= Status %></h1>
+				    <h1>POS: <% if(POS === 'POS_OTHER') { %> <%= OtherPOS %> 
+						 <% } else { %> <%= POS %> <% } %></h1>
+				</a></li>
+			</ul>
+		</script>
 
     <div data-role="page" id="configureTest">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
