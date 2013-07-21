@@ -504,8 +504,6 @@
     
     <script type="text/template" id="ConfigureStepsTemplate">
      
-      <div data-role="page" id="ConfigureStep_Number">
-	
 	<div data-role="header" data-position="fixed" data-tap-toggle="false">
 	  <h1>Configure: <%= EXELON.merchantBeingConfigured.Name  %></h1>
 	  <a href="" data-icon="arrow-l" data-iconpos="notext" id="ConfigureStepBack_Number"></a>
@@ -513,14 +511,14 @@
 	</div>
 	
 	<div data-role="content">
-	  <h1><%= Number %>. <%= Title %></h1>
+	  <h1><%= Number %>. <%= Title %><a href="#ConfigureCheckList" data-role="button" data-icon="check" data-iconpos="notext" style="padding:0px; position:absolute; top:70px; left:95%"></a></h1>
 	  <ul data-role="listview" id="ConfigureSubSteps_Step" data-inset="true">SUBSTEPS</ul>
 	  <div data-role="collapsible" data-content-theme="d">
 	    <h2>Instructions</h2>
 	    <p><%= Instructions %></p>
 	  </div>
 	  <ul data-role="listview" data-inset="true">
-	    <li data-role="list-divider">Screenshots</li>
+	    <li data-role="list-divider"><h2>Screenshots</h2></li>
 	    <% if(Screenshots.length  > 0) { %>
 	    <% for(var imgIndex = 0; imgIndex < Screenshots.length; imgIndex++) { %>
 	       <li>
@@ -534,12 +532,13 @@
 	    <li>N/A</li>
 	    <% } %>
 	  </ul>
-	  <!-- <ul data-role="listview" data-inset="true">
-	    <li data-role="listdivider">Notes</li>
-	  </ul> -->
+	  <ul data-role="listview" data-inset="true" id="ConfigurationNotesList_Step">
+	    <li data-role="list-divider" id="ConfigurationInsertNotes_Step" style="height:50px; padding-bottom:0px">
+	      <h2>Notes</h2>
+	      <a data-role="button" data-icon="plus" data-iconpos="notext" id="ConfigurationNotesAdd_Step" style="position:relative; bottom:40px; left:98%; padding:0px"></a>
+	    </li>
+	  </ul>
 	</div>
-	
-      </div>
       
     </script>
 
@@ -549,6 +548,37 @@
 	<% if(Input !== "#NA") { %>
 	<input type="text" id="ConfigureInput_Step_SubStep" placeholder="Default: "></input>
 	<% } %>
+      </li>
+    </script>
+
+    <script type="text/template" id="ConfigureInsertNoteTemplate">
+      <li id="ConfigureNote_Step_Id" data-icon="false" style="padding-top:20px; padding-bottom:0px">
+	<p><strong><%= "By: " + LastModifiedBy + "<br/>Time: " + LastUpdated.toString()%></strong></p>
+	<p><%= Note %></p>
+	<a data-role="button" data-icon="gear" data-iconpos="notext" style="position:relative; bottom:40px; left:97%; padding:0px"></a>
+      </li>
+    </script>
+
+    <div data-role="page" id="ConfigureCheckList">
+      <div data-role="header">
+	<h1>Configure Check List</h1>
+	<a data-role="button" data-rel="back" data-icon="back" data-iconpos="notext"></a>
+      </div>
+
+      <div data-role="content">
+	<ul data-inset="true" id="ConfigureCheckListContents">
+	</ul>
+      </div>
+    </div>
+    
+    <script type="text/template" id="ConfigureCheckListContentTemplate">
+      <li>
+	  <label><%= Description %><input type="checkbox" data-mini="true" id="ConfigureListCheck_Step_SubStep" /></label>
+	  <% if(Input !== '#NA') { %>
+	  <input type="text" id="ConfigureListInput_Step_SubStep" data-mini="true" placeholder="Default: "></input>
+	  <% } else { %>
+	  <div></div>
+	  <% } %>
       </li>
     </script>
 

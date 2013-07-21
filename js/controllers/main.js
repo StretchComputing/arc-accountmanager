@@ -804,12 +804,7 @@ var EXELON = (function (r, $) {
 	  $('#StartConfigure').click(function() {
 		  var merchantId = $(this).attr('merchantId'); 
 		  if(merchantId) {
-		      //if(r.merchantBeingConfigured && r.merchantBeingConfigured.Id != merchantID){
 		      r.getMerchantConfigurationInfo(merchantId);
-			  //}
-		      //r.setConfigureStepsPages();
-		      //$.mobile.changePage($('#ConfigureStep_' + r.merchantBeingConfigured.Configuration.CurrentStep));
-		      //$.mobile.changePage($('#COnfigureStep_0');
 		  }
 	      });
 	      
@@ -843,11 +838,7 @@ var EXELON = (function (r, $) {
 			      r.removeExistingConfigureStepsPages();
 			  r.merchantBeingConfigured = data.Results[0];
 			  r.fixMerchantBeingConfigured();
-			  r.setConfigureStepsPages();
-			  var goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
-			  //for(var pageIndex = 0; pageIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; pageIndex++)
-			  //    $('#ConfigureStep' + (pageIndex + 1)).trigger('create');
-			  $.mobile.changePage(goToStep);
+			  r.getMerchantConfigurationNotes(r.merchantBeingConfigured.Id);
 			  var jtest = 5;
 		      } catch (e) {
 			  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo.success');
@@ -955,6 +946,93 @@ var EXELON = (function (r, $) {
 	  RSKYBOX.log.error(e,'removeExistingConfigureStepsPages');
       }
   };
+
+  r.writeEmptyConfigureStepsPages = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.writeEmptyConfigureStepsPages');
+	  
+	  var allStepsPagesEmptyHtml = "";
+	  var currentStepEmpty;
+	  var stepsLen = r.merchantBeingConfigured.Configuration[0].Steps.length
+	  
+	  for(var stepIndex = 0; stepIndex < stepsLen; stepIndex++) {
+	      currentStepEmpty = '<div data-role="page" stepNumber="' + (stepIndex + 1) + '" id="ConfigureStep_' + (stepIndex + 1) + '"></div>';
+	      allStepsPagesEmptyHtml += currentStepEmpty;
+	  }
+        
+      $("#ConfigureMerchantListTemplate").after(allStepsPagesEmptyHtml);
+
+      } catch (e) {
+	  RSKYBOX.log.error(e,'writeEmptyConfigureStepsPages');
+      }
+  };
+  
+  r.getMerchantConfigurationNotes = function(merchantId) {
+      try{
+          RSKYBOX.log.info('entering','js.main.getMerchantConfigurationNotes');
+
+          var closeurl = devUrl + 'merchants/notes/list';
+          var jsonobj = {};
+
+          $.ajax({
+                  type: 'search',
+                      data: JSON.stringify(jsonobj),
+                      datatype: 'json',
+                      contentType: 'application/json',
+                      url: closeurl,
+                      statuscode: r.statusCodeHandlers(),
+                      headers: {'Authorization' : r.getAuthorizationHeader()},
+                      success: function(data, status, jqXHR) {
+                      try {
+                          r.merchantNotes1 = data.Results;
+			  r.writeEmptyConfigureStepsPages();
+
+                          var goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
+                          goToStep.on('pagebeforecreate',function() {
+                                  r.setConfigureStepsPages();
+                              });
+                          $.mobile.changePage(goToStep);
+                          var jtest = 5;
+                      } catch (e) {
+                          RSKYBOX.log.error(e, 'getMerchantConfigurationNotes.success');
+                      }
+                  }
+              });
+      } catch (e) {
+          RSKYBOX.log.error(e, 'getMerchantConfigurationNotes');
+      }
+      
+  };
+
+  r.insertConfigurationNotes = function(stepNumber) {
+      try{
+	  RSKYBOX.log.info('entering','main.js.insertConfigurationNotes');
+	  
+	  var configureInsertNoteTemplate = _.template($('#ConfigureInsertNoteTemplate').html());
+	  var allNotesHtml = "";
+	  var noteHtml;
+	  var cNote;
+	  
+	  for(var noteIndex = 0; noteIndex < r.merchantNotes1.length; noteIndex++) {
+	      cNote = r.merchantNotes1[noteIndex];
+	      
+	      if(cNote.Type = "NOTE_SALES") {
+		  noteHtml = configureInsertNoteTemplate(cNote);
+		  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + cNote.Id);
+		  allNotesHtml += noteHtml;
+	      }
+	  } 
+	  
+	  $('#ConfigurationInsertNotes_' + stepNumber).after(allNotesHtml);
+	  $('#ConfigureStep_' + stepNumber).on('pageinit',function() {
+		  $('#ConfigurationNotesList' + stepNumber).listview('refresh');
+	      });
+   
+      } catch(e) {
+	  RSKYBOX.log.error(e,'insertConfigurationNotes');
+      }
+  };
+
 	  
   r.setConfigureStepsPages = function() {
       try{
@@ -963,7 +1041,6 @@ var EXELON = (function (r, $) {
 	  var configureSubStepsTemplate = _.template($('#ConfigureSubStepsTemplate').html());
 	  var configureStepsTemplate = _.template($('#ConfigureStepsTemplate').html());
 
-	  var stepsHtml = "";
 	  var nextSubStepAdded;
 	  var nextStepAdded;
 
@@ -991,17 +1068,44 @@ var EXELON = (function (r, $) {
 	      }
 	      
 	      nextStepAdded = configureStepsTemplate(cStep);
-	      nextStepAdded = nextStepAdded.replace("ConfigureStep_Number", "ConfigureStep_" + cStep.Number);
 	      nextStepAdded = nextStepAdded.replace("SUBSTEPS", subStepsHtml);
 	      nextStepAdded = nextStepAdded.replace("ConfigureSubSteps_Step","ConfigureSubSteps_" + cStep.Number);
 	      nextStepAdded = nextStepAdded.replace("ConfigureStepBack_Number","ConfigureStepBack_" + cStep.Number);
 	      nextStepAdded = nextStepAdded.replace("ConfigureStepForward_Number","ConfigureStepForward_" + cStep.Number);
-
-	      stepsHtml += nextStepAdded;
+	      nextStepAdded = nextStepAdded.replace("ConfigurationNotesList_Step","ConfigurationNotesList_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigurationInsertNotes_Step","ConfigurationInsertNotes_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigurationNotesAdd_Step","ConfigurationNotesAdd_" + cStep.Number);
+	      
+	      $("#ConfigureStep_" + cStep.Number).append(nextStepAdded);
+	      
+	      r.insertConfigurationNotes(cStep.Number);
 	  }
 	  
-	  $("#ConfigureMerchantListTemplate").after(stepsHtml);
+	  //set the Check List up
+	  var ConfigureListHtml = "";
+	  var ConfigureListNextHtml;
+	  var ConfigureCheckListContentTemplate = _.template($('#ConfigureCheckListContentTemplate').html());
+	  
+	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
+	      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+	      
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++){
+		  cSubStep = cStep.SubSteps[subStepIndex];
+		  ConfigureListNextHtml = ConfigureCheckListContentTemplate(cSubStep);
+		  ConfigureListNextHtml = ConfigureListNextHtml.replace('ConfigureListCheck_Step_SubStep','ConfigureListCheck_' + cStep.Number + '_' + cSubStep.Number);
+		  if(cSubStep.Input != '#NA'){
+		      ConfigureListNextHtml = ConfigureListNextHtml.replace('ConfigureListInput_Step_SubStep','ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number);
+		  }
+		  ConfigureListHtml += ConfigureListNextHtml;
+	      }
+	  }
 
+	  $('#ConfigureCheckListContents').append(ConfigureListHtml);
+	  //$('#ConfigureCheckList').on('pageshow', function() {
+	  //	  $('#ConfigureCheckListContents').listview('refresh');
+	  //    });
+	  // ---CheckList set up
+	  
 	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
 	      
 	      cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
@@ -1021,16 +1125,18 @@ var EXELON = (function (r, $) {
 		  
 		  if(cSubStep.IsCompleted) {
 		      $("#ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
+		      $("#ConfigureListCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
 		  }
 		  if(cSubStep.Input && cSubStep.Input != '#NA') {
-		      if(cSubStep.IsCompleted)
+		      if(cSubStep.IsCompleted){
 			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).text(cSubStep.Input);
-		      else
+			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).text(cSubStep.Input);
+		      } else {
 			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).attr('placeholder',cSubStep.Input);
+			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).attr('placeholder',cSubStep.Input);
+		      }
 		  }
-	      }
-		  
-	      
+	      }   
 	  }
 	  
       } catch (e) {
