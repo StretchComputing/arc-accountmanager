@@ -390,8 +390,23 @@
 				</div>
 			</div>
 		</div>
+		
+		<div data-role="popup" id="meetingStart" class="ui-content" data-position-to="window">
+			<h3>Concerning</h3>
+			<input id="meetingStartAbout">
+
+			<h3>Members:</h3>
+			<div id="meetingStartMembers"></div>
+			<div data-role="formcontain">
+				<input id="meetingStartAddMemberField" data-inline="true">
+				<button data-inline="true" data-icon="plus" data-iconpos="notext" id="meetingStartAddMember"></button>
+			</div><!-- formcontain -->
+
+			<button data-icon="check" id="meetingStartButton">Start Meeting</button>
+			<button data-icon="delete" id="meetingStartCancel" data-rel="back">Cancel</button>
+		</div><!-- meetingStart -->
 	
-	</div>
+	</div><!-- merchantDisplay -->
 	
 	<script type="script/template" id="merchantDisplayContentTemplate">
 
@@ -540,8 +555,14 @@
 			<li data-icon="delete">
 				<a href="#merchantDisplayConfirmDelete" data-rel="popup">Delete</a>
 			</li>
-			<li>
-				<a id="merchantDisplayMaps" data-icon="grid">Maps</a>
+			<li data-icon="grid">
+				<a id="merchantDisplayMaps">Maps</a>
+			</li>
+			<li data-icon="plus" id="meetingStartButton" class="meetingStartButton">
+				<a href="#meetingStart" data-rel="popup">New Meeting</a>
+			</li>
+			<li data-icon="info" style="display:none" class="meetingDetailsButton" id="merchantDisplay_MeetingDetailsButton">
+				<a href="#merchantDisplay_MeetingDetails" data-rel="popup">Meeting in Progress</a>
 			</li>
             <li data-icon="alert">
               <a href="#" class="logOut">Log Out</a>
@@ -613,6 +634,38 @@
         <div>This is the Reports page</div>
       </div>
     </div><!-- /page -->
+
+	<script type="text/template" id="meetingPopupTemplate">
+		<a data-icon="delete" data-iconpos="notext" class="ui-btn-right" data-role="button" data-rel="back" href="#"></a>
+		<h1>Meeting in Progress</h1>
+		<h2>With:</h2>
+		<% for(var i = 0; i < Members.length; i++) { %>
+			<%= Members[i] %>, 
+		<% } %>
+		<h3>Concerning: <%= About %></h3>
+
+		<button class="meetingEnd">End</button>
+
+		<ul data-role="listview" data-inset="true">
+			<li data-icon="plus"><a class="meetingAddNote">Notes</a></li>
+			<li style="display:none" class="meetingAddNoteLI">
+				<div data-role="fieldcontain">
+					<textarea class="meetingAddNoteField" rows="10" cols="30"></textarea>
+					<button data-icon="check" data-iconpos="notext" class="meetingNoteSave"></button>
+				</div>
+			</li>
+		</ul>
+
+		<div data-role="collapsible" data-inset="true">
+			<h3> notes </h3>
+			<ul data-role="listview" class="meetingNotesList">
+			<% for(var i = Notes.length-1; i >= 0; i--) { %>
+				<li><%= Notes[i].Note %></li>
+			<% } %>
+			</ul>
+		</div>
+
+	</script>
 
     <script type="text/template" id="leftPanelTemplate">
       <div data-role="panel" id="page_leftPanel" data-theme="c" data-position-fixed="true">

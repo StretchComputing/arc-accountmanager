@@ -61,6 +61,9 @@ var EXELON = (function (r, $) {
     selectMerchantBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
+        
+        $.mobile.popup.prototype.options.history = false;
+        
         var template = _.template($('#selectMerchantSidebarTemplate').html());
         
         $('#selectMerchant').append(template({UserName: r.getUserName(),
@@ -316,6 +319,49 @@ var EXELON = (function (r, $) {
     			$('#merchantDisplayConfirmDelete').popup('close');
     		});
     		
+    		/*For the meetings popup*/
+    		r.attachMeeting('merchantDisplay');
+    		
+    		 $('#meetingStartButton').bind('click', function(){
+    			 if(!r.activeMeeting){
+    				 r.activeMeeting = {Members : [],
+    						            Notes : []};
+    			 }
+    			 r.activeMeeting.Merchant = r.activeMerchant;
+    			 r.activeMeeting.Start = new Date();
+    			 r.activeMeeting.About = $('#meetingStartAbout').val();
+    			 
+    			 $('#meetingStart').popup('close');
+    			 $('#meetingStartButton').hide();
+    			 r.handleMeetings('merchantDisplay');
+    		 });
+    		 
+    		 $('#meetingStartCancel').bind('click', function(){
+    			 if(r.activeMeeting)
+    				 delete r.activeMeeting;
+    			$('#meetingStart').popup('close'); 
+    		 });
+    		 
+    		 $('#meetingStartAddMember').bind('click', function(){
+    			 var field = $('#meetingStartAddMemberField');
+    			 if(field.val() === "")
+    				 return;
+    			if(!r.activeMeeting)
+    				r.activeMeeting = {Members : [],
+    								   Notes : []};
+    			r.activeMeeting.Members.push(field.val());
+    			$('#meetingStartMembers').append($('<button />', {
+    				'data-icon' : 'delete',
+    				'data-inline' : 'true',
+    				'data-iconpos' : 'right',
+    				'class' : 'meetingStartDeleteMember',
+    				'text' : field.val()
+    			}));
+    			field.val('');
+    			
+    			$('#meetingStart').trigger('create');
+    		 });
+    		
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.merchantDisplayBeforeCreate');
@@ -449,19 +495,37 @@ var EXELON = (function (r, $) {
     		var map = new google.maps.Map(document.getElementById("mapCanvas"),
     	            mapOptions);
     		
-    		google.maps.event.addListenerOnce(map, 'zoom_change', function(){
-    			this.setZoom(14);
-    			this.setCenter(r.mapsCenter);
-    		});//Compensates for the behavior of adding the KML
-    		
-    		var mapsKML = new google.maps.KmlLayer({
+    		/*var mapsKML = new google.maps.KmlLayer({
     			preserveViewport : true,
     			url: mapEngineURL,
     			suppressInfoWindows: true
     		});
     		
-    		mapsKML.setMap(map);
+    		mapsKML.setMap(map);*/
     		
+    		var markerClick = function(e){//Called when a marker is clicked
+    			var merchant = r.merchantList[this.title];
+    			var content = $('#mapsMerchantPopupContent');
+				content.empty();
+				var t = _.template($('#mapsMerchantPopupTemplate').html());
+				content.append(t(merchant));
+				content.trigger('create');
+				$('#mapsMerchantPopup').popup('open', {positionTo : $('#mapsPopupLocation')});
+    			
+    		};
+    		
+    		for(var i = 0; i < r.merchantList.length; i++){
+    			var LatLng = new google.maps.LatLng(r.merchantList[i].Latitude,
+    												r.merchantList[i].Longitude);
+    			var marker = new google.maps.Marker({
+    				position : LatLng,
+    				'map' : map,
+    				title : i.toString()
+    			});
+    			google.maps.event.addListener(marker, 'click', markerClick);
+    		}
+    		
+    		/*
     		google.maps.event.addListener(mapsKML, 'click', function(e){
     			var merchant = r.getMerchantByName(e.featureData.name);
     			if(merchant){
@@ -473,10 +537,11 @@ var EXELON = (function (r, $) {
     				$('#mapsMerchantPopup').popup('open', {positionTo : $('#mapsPopupLocation')});
     			}
     		});
+    		*/
     		
     	}
     	catch(e){
-    		RSKYBOX.log.info('entering', 'main.js.mapsShow');
+    		RSKYBOX.log.error(e, 'main.js.mapsShow');
     	}
     },
 
@@ -543,63 +608,6 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.error(e, 'main.js.unauthorized');
       }
   };
-  
-  // Define event handlers for panel. Done here so it only happens one time -- when HTML page is loaded
-  $(document).on('click', '.logOut', function(){
-		try {
-			r.logOut();
-			$.mobile.changePage( "#login", { transition: "slideup", changeHash: true });
-			return false;
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.click.logOut');
-    }
-  });
-  
-  $(document).on('click', '.geoLocation', function(){
-		try {
-			navigator.geolocation.getCurrentPosition(r.displayGeoLocation, function(){alert("geo error")});
-			return false;
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.click.logOut');
-    }
-  });
-
-  r.displayGeoLocation = function(position) {
-    try {
-      RSKYBOX.log.info('entering', 'main.js.displayGeoLocation');
-		  var message = "latitude: " + position.coords.latitude + ", longitude: " + position.coords.longitude;
-			alert(message);
-    } catch (e) {
-      RSKYBOX.log.error(e, 'displayGeoLocation');
-    }
-  };
-  
-
-  $(document).on('click', '.selectMerchant', function(e){
-		try {
-			if($.mobile.activePage.is('#selectMerchant')) {
-				$('#selectMerchant_leftPanel').panel("close");
-			} else {
-				$.mobile.changePage( "#selectMerchant", { transition: "slideup", changeHash: true });
-			}
-			return false;
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.click.selectMerchant');
-    }
-  });
-
-  $(document).on('click', '.configure', function(e){
-		try {
-			if($.mobile.activePage.is('#configure')) {
-				$('#configure_leftPanel').panel("close");
-			} else {
-				$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
-			}
-			return false;
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.click.configure');
-    }
-  });
 
   /*Attempts to get the current location and then calls getMerchants*/
   r.getMerchantsLoc = function(){
@@ -1209,16 +1217,127 @@ var EXELON = (function (r, $) {
 		$('#merchantDisplayNotesDisplay').listview('refresh');
 		$('#merchantDisplayContent').trigger('create');
 		
-  }
+  };
   
   /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
   r.getStatusTheme = function(Status){
 	  return 'a';
   };
   
-  r.versionNum = 0.1;
+  r.handleMeetings = function(pageName){
+	  if(r.activeMeeting){
+		  $('#'+pageName+'_MeetingDetailsButton').show();
+		  var meeting = $('#'+pageName+'_MeetingDetails');
+		  meeting.empty();
+		  var t = _.template($('#meetingPopupTemplate').html());
+		  meeting.append(t(r.activeMeeting));
+		  meeting.trigger('create');
+	  }
+  };
+  
+  r.attachMeeting = function(pageName){
+	  $('#'+pageName).append($('<div />', {
+		  'id' : pageName+'_MeetingDetails',
+		  'data-role' : 'popup',
+		  'class' : 'ui-content merchantDetails',
+		  'data-position-to':"window",
+	  }));
+  };
+  
+  r.versionNum = 0.1;//Change this value to set the version number
 
+  /*-----------------Registering class-wide event handlers--------------------*/
+  
+  // Define event handlers for panel. Done here so it only happens one time -- when HTML page is loaded
+  $(document).on('click', '.logOut', function(){
+		try {
+			r.logOut();
+			$.mobile.changePage( "#login", { transition: "slideup", changeHash: true });
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.logOut');
+    }
+  });
+  
+  $(document).on('click', '.geoLocation', function(){
+		try {
+			navigator.geolocation.getCurrentPosition(r.displayGeoLocation, function(){alert("geo error")});
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.logOut');
+    }
+  });
 
+  r.displayGeoLocation = function(position) {
+    try {
+      RSKYBOX.log.info('entering', 'main.js.displayGeoLocation');
+		  var message = "latitude: " + position.coords.latitude + ", longitude: " + position.coords.longitude;
+			alert(message);
+    } catch (e) {
+      RSKYBOX.log.error(e, 'displayGeoLocation');
+    }
+  };
+  
+
+  $(document).on('click', '.selectMerchant', function(e){
+		try {
+			if($.mobile.activePage.is('#selectMerchant')) {
+				$('#selectMerchant_leftPanel').panel("close");
+			} else {
+				$.mobile.changePage( "#selectMerchant", { transition: "slideup", changeHash: true });
+			}
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.selectMerchant');
+    }
+  });
+
+  $(document).on('click', '.configure', function(e){
+		try {
+			if($.mobile.activePage.is('#configure')) {
+				$('#configure_leftPanel').panel("close");
+			} else {
+				$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
+			}
+			return false;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'main.js.click.configure');
+    }
+  });
+  
+  //Handlers for the meeting details popup
+  $(document).on('click', '.meetingAddNote', function(e){
+	  $('.meetingAddNoteLI', $.mobile.activePage).toggle();
+  });
+  
+  $(document).on('click', '.meetingNoteSave', function(){
+	  var noteContent = $('.meetingAddNoteField', $.mobile.activePage).val();
+	  var note = {
+			  LastModifiedBy : r.getUserName(),
+			  LastUpdated : new Date(),
+	  		  Type : 'NOTE_MEETING',
+	  		  Note : noteContent
+	  };
+	  r.activeMeeting.Notes.push(note);
+	  
+	  var noteList = $('.meetingNotesList', $.mobile.activePage);
+	  noteList.prepend($('<li />', {
+		  text : noteContent
+	  }));
+	  noteList.listview('refresh');
+	  
+  });
+  
+  $(document).on('click', '.meetingEnd', function(){
+	 r.activeMeeting.End = new Date();
+	 /*TODO: API Calls and such*/
+	 delete r.activeMeeting;
+	 $('.merchantDetails', $.mobile.activePage).popup('close');
+	 $('.meetingDetailsButton', $.mobile.activePage).hide();
+	 $('.meetingStartButton', $.mobile.activePage).show();
+	 
+  });
+  
   try {
     r.router = new $.mobile.Router([
       { '.*':                    { handler: 'setupSession',        events: 'bs'  } },
