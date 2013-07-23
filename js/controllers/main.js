@@ -322,6 +322,10 @@ var EXELON = (function (r, $) {
     		/*For the meetings popup*/
     		r.attachMeeting('merchantDisplay');
     		
+    		page.on('click', '.meetingStartDeleteMember', function(){
+    			$(this).parent().remove()
+    		});
+    		
     		 $('#meetingStartButton').bind('click', function(){
     			 if(!r.activeMeeting){
     				 r.activeMeeting = {Members : [],
@@ -331,25 +335,35 @@ var EXELON = (function (r, $) {
     			 r.activeMeeting.Start = new Date();
     			 r.activeMeeting.About = $('#meetingStartAbout').val();
     			 
+    			 var mem = $('#meetingStartAddMemberField').val();
+    			 if(mem !== "")
+    				 r.activeMeeting.Members.push(mem);
+    			 $(':button', $('#meetingStartMembers')).each(function(){
+    				 r.activeMeeting.Members.push(this.innerText);
+    				 });
+    			 
     			 $('#meetingStart').popup('close');
     			 $('#meetingStartButton').hide();
     			 r.handleMeetings('merchantDisplay');
+    			 
+    			 /*Cleaning up*/
+    			 $('#meetingStartMembers').empty();
+    			 $('#meetingStartAbout').val('');
+    			 $('#meetingStartAddMemberField').val('');
     		 });
     		 
     		 $('#meetingStartCancel').bind('click', function(){
     			 if(r.activeMeeting)
     				 delete r.activeMeeting;
-    			$('#meetingStart').popup('close'); 
+    			 $('#meetingStartMembers').empty();
+    			 $('#meetingStartAbout').val('');
+    			 $('#meetingStartAddMemberField').val('');
     		 });
     		 
     		 $('#meetingStartAddMember').bind('click', function(){
     			 var field = $('#meetingStartAddMemberField');
     			 if(field.val() === "")
     				 return;
-    			if(!r.activeMeeting)
-    				r.activeMeeting = {Members : [],
-    								   Notes : []};
-    			r.activeMeeting.Members.push(field.val());
     			$('#meetingStartMembers').append($('<button />', {
     				'data-icon' : 'delete',
     				'data-inline' : 'true',
@@ -1312,6 +1326,7 @@ var EXELON = (function (r, $) {
   
   $(document).on('click', '.meetingNoteSave', function(){
 	  var noteContent = $('.meetingAddNoteField', $.mobile.activePage).val();
+	  $('.meetingAddNoteField', $.mobile.activePage).val('')
 	  var note = {
 			  LastModifiedBy : r.getUserName(),
 			  LastUpdated : new Date(),
@@ -1325,6 +1340,7 @@ var EXELON = (function (r, $) {
 		  text : noteContent
 	  }));
 	  noteList.listview('refresh');
+	  noteList.trigger('create');
 	  
   });
   
