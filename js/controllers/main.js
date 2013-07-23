@@ -494,7 +494,8 @@ var EXELON = (function (r, $) {
     mapsShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
-    		var mapEngineURL = 'http://mapsengine.google.com/map/kml?mid=zqIvDlz84uWc.kmV36cZOh5Kg&lid=zqIvDlz84uWc.kNiZ_0lEiAbg';
+    		//var mapEngineURL = 'http://mapsengine.google.com/map/kml?mid=zqIvDlz84uWc.kmV36cZOh5Kg&lid=zqIvDlz84uWc.kNiZ_0lEiAbg';
+    		var chartsURL = 'https://chart.googleapis.com/chart?chst='
     		
     		if(!r.mapsCenter)
     			r.mapsCenter = new google.maps.LatLng(41.8500, -87.6500);
@@ -531,10 +532,15 @@ var EXELON = (function (r, $) {
     		for(var i = 0; i < r.merchantList.length; i++){
     			var LatLng = new google.maps.LatLng(r.merchantList[i].Latitude,
     												r.merchantList[i].Longitude);
+    			var color = r.getColor(r.getPos(r.merchantList[i]));
+    			var chld = 'chld=|'+color+'|'
+    			var iconURL = chartsURL + 'd_map_pin_letter_withshadow&' + chld;
+    			
     			var marker = new google.maps.Marker({
-    				position : LatLng,
+    				'position' : LatLng,
     				'map' : map,
-    				title : i.toString()
+    				'title' : i.toString(),
+    				'icon' : iconURL
     			});
     			google.maps.event.addListener(marker, 'click', markerClick);
     		}
@@ -1258,6 +1264,15 @@ var EXELON = (function (r, $) {
 	  }));
   };
   
+  r.getPos = function(merchant){
+	  if(merchant.POS === "")
+		  return "";
+	  if(merchant.POS !== 'POS_OTHER')
+		  return MERCHANT.POSNames[merchant.POS];
+	  else
+		  return merchant.OtherPOS;
+  }
+  
   r.versionNum = 0.1;//Change this value to set the version number
 
   /*-----------------Registering class-wide event handlers--------------------*/
@@ -1292,6 +1307,61 @@ var EXELON = (function (r, $) {
     }
   };
   
+  r.hashStringDJB2 = function(s) {
+	  var hash = 0;
+	  var char;
+	  for(var i = 0; i < s.length; i++){
+		  char = s.charCodeAt(i);
+		  hash = ((hash<<5)-hash)+char;
+		  hash |= 0;
+	  }
+	  return hash;
+  };
+  
+  /*gets a (probably)unique color based on the name of the given POS
+   * in the HSL format accepted by CSS*/
+  r.getColor = function(PosName){
+	  var hex = Math.abs(r.hashStringDJB2(PosName));
+	  var H = hex % 255;
+	  var L = (70 - (hex % 40)) *.01
+	  var rgb = r.HSLToRGB(H, 1, L);
+	  var col = ""
+	  for(var i = 0; i < rgb.length;i++){
+		  var str = rgb[i].toString(16);
+		  if(str.length === 1)
+			  col += '0' + str;
+		  else
+			  col += str;
+	  }
+	  return col;
+  };
+  
+  r.HSLToRGB = function(H,S,L){
+	  var C = (1 - Math.abs(2*L-1)) * S;
+	  var HP = H/60;
+	  var X = C * (1- Math.abs((HP % 2) - 1))
+	  
+	  var rgb;
+	  if(HP < 1)
+		  rgb = [C,X,0];
+	  else if(HP < 2)
+		  rgb = [X,C,0];
+	  else if(HP < 3)
+		  rgb = [0,C,X];
+	  else if(HP < 4)
+		  rgb = [0,X,C];
+	  else if(HP < 5)
+		  rgb = [X,0,C];
+	  else
+		  rgb = [C,0,X];
+	  
+	  var m = L - ( 0.5*C );
+	  rgb[0] = Math.floor((rgb[0] + m) * 255);
+	  rgb[1] = Math.floor((rgb[1] + m) * 255);
+	  rgb[2] = Math.floor((rgb[2] + m) * 255);
+	  
+	  return rgb;
+  }
 
   $(document).on('click', '.selectMerchant', function(e){
 		try {
