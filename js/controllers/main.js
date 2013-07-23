@@ -801,6 +801,7 @@ var EXELON = (function (r, $) {
 		  });
 	  }
 	  
+	  $('#StartConfigure').off();
 	  $('#StartConfigure').click(function() {
 		  var merchantId = $(this).attr('merchantId'); 
 		  if(merchantId) {
@@ -835,8 +836,11 @@ var EXELON = (function (r, $) {
 		      success: function(data, status, jqXHR) {
 		      try {
 			  if(r.merchantBeingConfigured)
-			      r.removeExistingConfigureStepsPages();
+			      r.clearExistingConfigureStepsPages();
 			  r.merchantBeingConfigured = data.Results[0];
+			  r.currentNumberOfSteps = r.merchantBeingConfigured.Configuration[0].Steps.length;
+			  if(!r.numberOfConfigureStepsPages)
+			      r.numberOfConfigureStepsPages = 0;
 			  r.fixMerchantBeingConfigured();
 			  r.getMerchantConfigurationNotes(r.merchantBeingConfigured.Id);
 			  var jtest = 5;
@@ -933,13 +937,14 @@ var EXELON = (function (r, $) {
       }
   };
 
-  r.removeExistingConfigureStepsPages = function() {
+  r.clearExistingConfigureStepsPages = function() {
       try{
 	  RSKYBOX.log.info('entering','main.js.removeExistingConfigureStepsPages');
 
 	  var cSteps = r.merchantBeingConfigured.Configuration[0].Steps;
 	  for(var stepIndex = 0; stepIndex < cSteps.length; stepIndex++){
 	      $('#ConfigureStep_' + (stepIndex + 1)).remove();
+	      r.numberOfConfigureStepsPages = 0;
 	  }
 
       } catch (e) {
@@ -953,15 +958,21 @@ var EXELON = (function (r, $) {
 	  
 	  var allStepsPagesEmptyHtml = "";
 	  var currentStepEmpty;
-	  var stepsLen = r.merchantBeingConfigured.Configuration[0].Steps.length
+	  var stepsLen = r.merchantBeingConfigured.Configuration[0].Steps.length;
 	  
 	  for(var stepIndex = 0; stepIndex < stepsLen; stepIndex++) {
-	      currentStepEmpty = '<div data-role="page" stepNumber="' + (stepIndex + 1) + '" id="ConfigureStep_' + (stepIndex + 1) + '"></div>';
-	      allStepsPagesEmptyHtml += currentStepEmpty;
+	      if(stepIndex >= r.numberOfConfigureStepsPages) {
+		  currentStepEmpty = '<div data-role="page" stepNumber="' + (stepIndex + 1) + '" id="ConfigureStep_' + (stepIndex + 1) + '"></div>';
+		  r.numberOfConfigureStepsPages++;
+		  allStepsPagesEmptyHtml += currentStepEmpty;
+	      }
 	  }
-        
-      $("#ConfigureMerchantListTemplate").after(allStepsPagesEmptyHtml);
-
+	  
+	  if(allStepsPagesEmptyHtml)
+	      $("#ConfigureStepsTemplate").before(allStepsPagesEmptyHtml);
+	  
+	  r.setConfigureStepsPages();
+	  
       } catch (e) {
 	  RSKYBOX.log.error(e,'writeEmptyConfigureStepsPages');
       }
@@ -986,12 +997,9 @@ var EXELON = (function (r, $) {
                       try {
                           r.merchantNotes1 = data.Results;
 			  r.writeEmptyConfigureStepsPages();
-
                           var goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
-                          goToStep.on('pagebeforecreate',function() {
-                                  r.setConfigureStepsPages();
-                              });
                           $.mobile.changePage(goToStep);
+			  
                           var jtest = 5;
                       } catch (e) {
                           RSKYBOX.log.error(e, 'getMerchantConfigurationNotes.success');
@@ -1024,9 +1032,6 @@ var EXELON = (function (r, $) {
 	  } 
 	  
 	  $('#ConfigurationInsertNotes_' + stepNumber).after(allNotesHtml);
-	  $('#ConfigureStep_' + stepNumber).on('pageinit',function() {
-		  $('#ConfigurationNotesList' + stepNumber).listview('refresh');
-	      });
    
       } catch(e) {
 	  RSKYBOX.log.error(e,'insertConfigurationNotes');
@@ -1066,6 +1071,7 @@ var EXELON = (function (r, $) {
 		  cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('/Images','images');
 		  cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('JPG','png');
 	      }
+	      // --- 
 	      
 	      nextStepAdded = configureStepsTemplate(cStep);
 	      nextStepAdded = nextStepAdded.replace("SUBSTEPS", subStepsHtml);
@@ -1082,6 +1088,8 @@ var EXELON = (function (r, $) {
 	  }
 	  
 	  //set the Check List up
+	  $('#ConfigureCheckListContents').empty();
+	  
 	  var ConfigureListHtml = "";
 	  var ConfigureListNextHtml;
 	  var ConfigureCheckListContentTemplate = _.template($('#ConfigureCheckListContentTemplate').html());
@@ -1101,10 +1109,11 @@ var EXELON = (function (r, $) {
 	  }
 
 	  $('#ConfigureCheckListContents').append(ConfigureListHtml);
-	  //$('#ConfigureCheckList').on('pageshow', function() {
-	  //	  $('#ConfigureCheckListContents').listview('refresh');
-	  //    });
-	  // ---CheckList set up
+	  if(r.configureListExists){
+	      $('#ConfigureCheckList').trigger('create');
+	  }
+	  r.configureListExists = true;
+	  // --- 
 	  
 	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
 	      
@@ -1138,7 +1147,6 @@ var EXELON = (function (r, $) {
 		  }
 	      }   
 	  }
-	  
       } catch (e) {
 	  RSKYBOX.log.error(e, 'setConfigureStepsPages');
       }
