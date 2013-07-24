@@ -492,6 +492,41 @@ var EXELON = (function (r, $) {
     			r.activeMerchant = r.getMerchantByName($(this).attr('merchantName'));
     			$.mobile.changePage('#merchantDisplay', {transition:'slide'});
     		});
+    		
+    		$('#maps').on('click', '.mapsMerchantSearchLI', function(){
+    			var index = $(this).attr('index');
+    			var merchant = r.merchantList[index];
+    			r.map.setCenter( new google.maps.LatLng(merchant.Latitude,
+    													merchant.Longitude));
+    			$('#mapsSearch').popup('close');
+    			r.mapsSelectMerchant(merchant);
+    		});
+    		
+    		$('#mapsLocationSearchGo').bind('click', function(){
+    			$('#mapsLocationFailText').hide()
+    			var address = $('#mapsLocationSearchField').val();
+    			r.getGeocode(address, function(data){
+    				if(data.results.length === 0){
+    					$('#mapsLocationFailText').show()
+    					return;
+    				}
+    				
+    				var lat = data.results[0].geometry.location.lat;
+    				var lng = data.results[0].geometry.location.lng;
+    				
+    				r.maps.setCenter(new google.maps.LatLng(lat,lng));
+    			});
+    		});
+    		
+    		$("input[type='radio']", $('#mapsSearch')).bind('change', function(){
+    			var buttonVal = $(this).val();
+    			$('.searchTabContent', $('#mapsSearch')).each(function(){
+    				if($(this).attr('id') !== buttonVal)
+    					$(this).hide();
+    				else
+    					$(this).show();
+    			});
+    		});
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.mapsBeforeCreate');
@@ -501,7 +536,13 @@ var EXELON = (function (r, $) {
     mapsShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
-    		//var mapEngineURL = 'http://mapsengine.google.com/map/kml?mid=zqIvDlz84uWc.kmV36cZOh5Kg&lid=zqIvDlz84uWc.kNiZ_0lEiAbg';
+    		
+    		/*populates the list for merchant search*/
+    		var search = $('#mapsMerchantSearch');
+    		var t = _.template($('#mapsMerchantSearchTemplate').html());
+    		search.append(t(r));
+    		search.trigger('create')
+    		
     		var chartsURL = 'https://chart.googleapis.com/chart?chst='
     		
     		if(!r.mapsCenter)
@@ -516,24 +557,10 @@ var EXELON = (function (r, $) {
     		$('#mapCanvas').css({height: $(window).height() - $('#mapsHeader').height()});
     		var map = new google.maps.Map(document.getElementById("mapCanvas"),
     	            mapOptions);
-    		
-    		/*var mapsKML = new google.maps.KmlLayer({
-    			preserveViewport : true,
-    			url: mapEngineURL,
-    			suppressInfoWindows: true
-    		});
-    		
-    		mapsKML.setMap(map);*/
+    		r.map = map; //For access in pagewide registrations
     		
     		var markerClick = function(e){//Called when a marker is clicked
-    			var merchant = r.merchantList[this.title];
-    			var content = $('#mapsMerchantPopupContent');
-				content.empty();
-				var t = _.template($('#mapsMerchantPopupTemplate').html());
-				content.append(t(merchant));
-				content.trigger('create');
-				$('#mapsMerchantPopup').popup('open', {positionTo : $('#mapsPopupLocation')});
-    			
+    			r.mapsSelectMerchant( r.merchantList[this.title]);
     		};
     		
     		for(var i = 0; i < r.merchantList.length; i++){
@@ -551,20 +578,6 @@ var EXELON = (function (r, $) {
     			});
     			google.maps.event.addListener(marker, 'click', markerClick);
     		}
-    		
-    		/*
-    		google.maps.event.addListener(mapsKML, 'click', function(e){
-    			var merchant = r.getMerchantByName(e.featureData.name);
-    			if(merchant){
-    				var content = $('#mapsMerchantPopupContent');
-    				content.empty();
-    				var t = _.template($('#mapsMerchantPopupTemplate').html());
-    				content.append(t(merchant));
-    				content.trigger('create');
-    				$('#mapsMerchantPopup').popup('open', {positionTo : $('#mapsPopupLocation')});
-    			}
-    		});
-    		*/
     		
     	}
     	catch(e){
@@ -888,6 +901,23 @@ var EXELON = (function (r, $) {
 	  catch(e){
 		  RSKYBOX.log.error(e,'main.js.createNote');
 	  }
+  };
+  
+  /*Makes a call to the google geocode API. Calls callback functions with the results*/
+  r.getGeocode = function(address, success, failure){
+	  var url = "http://maps.googleapis.com/maps/api/geocode/json?address=";
+	  url += address.replace(/ /g, '+');
+	  url += '&sensor=false'
+	  
+	  $.ajax({
+		  type:'GET',
+		  datatype: 'json',
+		  contentType : 'applicaton/json',
+		  'url' : url,
+		  'success' : success,
+		  'failure' : failure
+	  });
+	  
   };
   
   /*Remove all forms equal to "" */
@@ -1372,7 +1402,16 @@ var EXELON = (function (r, $) {
 	  rgb[2] = Math.floor((rgb[2] + m) * 255);
 	  
 	  return rgb;
-  }
+  };
+  
+  r.mapsSelectMerchant = function(merchant){
+  	var content = $('#mapsMerchantPopupContent');
+	content.empty();
+	var t = _.template($('#mapsMerchantPopupTemplate').html());
+	content.append(t(merchant));
+	content.trigger('create');
+	$('#mapsMerchantPopup').popup('open', {positionTo : $('#mapsPopupLocation')});
+  };
 
   $(document).on('click', '.selectMerchant', function(e){
 		try {
@@ -1399,6 +1438,7 @@ var EXELON = (function (r, $) {
       RSKYBOX.log.error(e, 'main.js.click.configure');
     }
   });
+  
   
   //Handlers for the meeting details popup
   $(document).on('click', '.meetingAddNote', function(e){

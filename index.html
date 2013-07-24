@@ -590,6 +590,7 @@
     <div data-role="page" id="maps">
 		<div data-role="header" data-position="fixed" data-tap-toggle="false" id="mapsHeader">
 			<h1>Sales Map</h1>
+			<a data-role="button" data-icon="search" data-iconpos="notext" data-rel="popup" href="#mapsSearch">Search</a>
 		</div>
 		
 		<div data-role="content" id="mapsContent">
@@ -602,20 +603,57 @@
 			   data-iconpos="notext" class="ui-btn-right">Close</a>
 			   <div id="mapsMerchantPopupContent"></div>
 		</div>
-	
+		
+	<div data-role="popup" id="mapsSearch">
+		
+		<fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain" >
+			<label for="mapsMerchantSearchTab">Merchants</label>
+			<input id="mapsMerchantSearchTab" type="radio" checked="checked" value="mapsMerchantSearch" name="searchTab" class="mapsSearchTab" />
+			
+			<label for="mapsLocationSearchTab">Locations</label>
+			<input id="mapsLocationSearchTab"  type="radio" value="mapsLocationSearch"  name="searchTab" class="mapsSearchTab" />
+		</fieldset>
+		
+		<div id="mapsMerchantSearch" class="searchTabContent"></div>
+		
+		<div id="mapsLocationSearch" class="searchTabContent" style="display:none" >
+			<div data-role="fieldcontain">
+				<input type="search" name="search" id="mapsLocationSearchField" 
+				   	   placeholder="Enter an address" data-inline="true"/>
+				<button data-role="button" data-icon="search" data-iconpos="notext" 
+				        id="mapsLocationSearchGo" data-inline="true">Search</button>
+			</div>
+
+		</div>
 	</div>
 	
-		<script type="text/template" id="mapsMerchantPopupTemplate">
-			<ul data-role="listview">
-				<li><a class="mapsMerchantDisplay" merchantName="<%= Name %>">
-					<h1><%= Name %></h1>
-				    <h1><%= Street %> <%= City %> <%= State %>, <%= ZipCode %></h1>
-				    <h1>Status: <%= Status %></h1>
-				    <h1>POS: <% if(POS === 'POS_OTHER') { %> <%= OtherPOS %> 
-						 <% } else { %> <%= POS %> <% } %></h1>
-				</a></li>
-			</ul>
-		</script>
+</div>
+	
+	<script type="text/template" id="mapsMerchantPopupTemplate">
+		<ul data-role="listview">
+			<li><a class="mapsMerchantDisplay" merchantName="<%= Name %>">
+				<h1><%= Name %></h1>
+			    <h1><%= Street %> <%= City %> <%= State %>, <%= ZipCode %></h1>
+			    <h1>Status: <%= Status %></h1>
+			    <h1>POS: <% if(POS === 'POS_OTHER') { %> <%= OtherPOS %> 
+					 <% } else { %> <%= POS %> <% } %></h1>
+			</a></li>
+		</ul>
+	</script>
+	
+	<script type="text/template" id="mapsMerchantSearchTemplate">
+		<ul data-role="listview" data-filter="true" 
+		    data-filter-reveal="true" id="mapsMerchantSearchList"
+			data-filter-placeholder="Find a merchant">
+		<% for(var i = 0; i < merchantList.length; i++) { %>
+			<li index="<%= i %>" >
+				<a index="<%= i %>" class="mapsMerchantSearchLI" >
+				<%= merchantList[i].Name %>
+				</a>
+			</li>
+		<% } %>
+		</ul>
+	</script>
 
     <div data-role="page" id="configureTest">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
