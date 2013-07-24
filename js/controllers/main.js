@@ -61,6 +61,7 @@ var EXELON = (function (r, $) {
     selectMerchantBeforeCreate: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
+        r.attachMeeting("selectMerchant");
         
         $.mobile.popup.prototype.options.history = false;
         
@@ -129,6 +130,7 @@ var EXELON = (function (r, $) {
     selectMerchantShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantShow');
+        r.handleMeetings("selectMerchant")
         
         if(!r.merchantList)
         	r.getMerchantsLoc();
@@ -386,6 +388,8 @@ var EXELON = (function (r, $) {
     	try{
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayShow');
     		
+    		r.handleMeetings('merchantDisplay');
+    		
     		if(!r.activeMerchant.Notes){
     			r.getNotes(r.activeMerchant, true, r.writeNotes);
     		}
@@ -393,6 +397,9 @@ var EXELON = (function (r, $) {
     		$('#merchantDisplayHead').text(r.activeMerchant.Name);
     		
     		var content = $('#merchantDisplayContent');
+    		
+    		content.empty(); //just in case
+    		
     		var template = _.template($('#merchantDisplayContentTemplate').html());
     		
     		content.prepend(template(r.activeMerchant));
@@ -1003,7 +1010,7 @@ var EXELON = (function (r, $) {
 	  content.append(editMerchantTemplate(merchant));
 
 	  $('#'+pageId+'POS').bind('change', function(){
-		  if($(this).val() === 'Other'){
+		  if($(this).val() === 'Other'){ 
 			  $('#'+pageId+'OtherPOSLI').show();
 		  }
 		  else{
@@ -1245,13 +1252,16 @@ var EXELON = (function (r, $) {
   };
   
   r.handleMeetings = function(pageName){
-	  if(r.activeMeeting){
-		  $('#'+pageName+'_MeetingDetailsButton').show();
+	  if(r.activeMeeting !== undefined){
+		  $('.meetingDetailsButton', $.mobile.activePage).show();
 		  var meeting = $('#'+pageName+'_MeetingDetails');
 		  meeting.empty();
 		  var t = _.template($('#meetingPopupTemplate').html());
 		  meeting.append(t(r.activeMeeting));
 		  meeting.trigger('create');
+	  }
+	  else{
+		  $('.meetingDetailsButton', $.mobile.activePage).hide();
 	  }
   };
   
@@ -1261,6 +1271,7 @@ var EXELON = (function (r, $) {
 		  'data-role' : 'popup',
 		  'class' : 'ui-content merchantDetails',
 		  'data-position-to':"window",
+		  'data-dismissible' : false
 	  }));
   };
   
@@ -1417,10 +1428,12 @@ var EXELON = (function (r, $) {
   $(document).on('click', '.meetingEnd', function(){
 	 r.activeMeeting.End = new Date();
 	 /*TODO: API Calls and such*/
-	 delete r.activeMeeting;
+	 r.activeMeeting = undefined;
 	 $('.merchantDetails', $.mobile.activePage).popup('close');
 	 $('.meetingDetailsButton', $.mobile.activePage).hide();
-	 $('.meetingStartButton', $.mobile.activePage).show();
+	 $('.meetingStartButton').each(function(){
+		 $(this).show();
+	 });
 	 
   });
   

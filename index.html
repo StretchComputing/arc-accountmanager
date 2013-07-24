@@ -326,6 +326,9 @@
               <a href="#" class="logOut">Log Out</a>
             </li>
 			<li><a href="#maps">Maps</a></li>
+			<li data-icon="info" style="display:none" class="meetingDetailsButton" id="selectMerchant_MeetingDetailsButton">
+				<a href="#selectMerchant_MeetingDetails" data-rel="popup">Meeting in Progress</a>
+			</li>
           </ul>
 		Version: <%= versionNum %>
       </div><!-- /panel -->
@@ -391,7 +394,7 @@
 			</div>
 		</div>
 		
-		<div data-role="popup" id="meetingStart" data-position-to="window" class="ui-content">
+		<div data-role="popup" id="meetingStart" data-position-to="window" class="ui-content" data-dismissible="false">
 			<a data-role="button"  data-rel="back" href="#" data-icon="delete" data-iconpos="notext" id="meetingStartCancel" class="ui-btn-right"></a>
 			
 			<h3>Concerning</h3>
@@ -638,7 +641,7 @@
 
 	<script type="text/template" id="meetingPopupTemplate">
 		<a data-icon="delete" data-iconpos="notext" class="ui-btn-right" data-role="button" data-rel="back" href="#"></a>
-		<h1>Meeting in Progress</h1>
+		<h1>Meeting for <%= Merchant.Name %> in progress</h1>
 		<h2>With:</h2>
 		<% for(var i = 0; i < Members.length; i++) { %>
 			<%= Members[i] %>, 

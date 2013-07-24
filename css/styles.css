@@ -150,6 +150,10 @@ li.reqAccountingli{
 	padding:10px;
 }
 
+.meetingDetailsButton {
+	background:hsl(103,100%,55%);
+}
+
 #map-canvas { 
 	height: 100%;
 }
