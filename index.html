@@ -35,7 +35,7 @@
       <script src="js/views/base.js"></script>
       <script src="js/views/login.js"></script>
 
-	  <script src="js/lib/merchantobject.js"></script>
+        <script src="js/lib/merchantobject.js"></script>
 
      <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
 
@@ -168,10 +168,10 @@
 			<input type="text" name="Cuisine" id="<%=pageIdPrefix%>Cuisine" value="<%= Cuisine %>"></li>
 
 			<li><label for="<%=pageIdPrefix%>eMail"> eMail </label>
-			<input type="email" name="eMail" id="<%=pageIdPrefix%>eMail" value="<%= eMail %>" ></li>
-
+			  <input type="email" name="eMail" id="<%=pageIdPrefix%>eMail" value="<%= eMail %>" ></li>
+			
 			<li><label for="<%=pageIdPrefix%>Website"> Website </label>
-			<input type="url" name="Website" id="<%=pageIdPrefix%>Website" value="<%= Website %>" ></li>
+			  <input type="url" name="Website" id="<%=pageIdPrefix%>Website" value="<%= Website %>" ></li>
 
 			<li><label for="<%=pageIdPrefix%>PriceLevel"> Average Price of a Menu Item </label>
 			<input type="text" name="PriceLevel" id="<%=pageIdPrefix%>PriceLevel" value="<%= PriceLevel %>" ></li>
@@ -210,7 +210,7 @@
 	</div>
 	</ul>
 
-	</script>
+      </script>
 
 	<script type="text/template" id="decisionMakerForm">
 	<li>
@@ -249,7 +249,7 @@
 		
 	</script>
 
-    <div data-role="page" id="selectMerchant">
+  <div data-role="page" id="selectMerchant">
     
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
        <a href="#selectMerchant_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
@@ -268,6 +268,7 @@
       	<ul data-role="listview" data-filter="true" id="selectMerchantList" data-inset="true">
       		
       	</ul>
+	
       </div>
       
       <div data-role="popup" id="selectMerchantConfirmDelete" class="ui-content" data-position-to="window">
@@ -275,7 +276,7 @@
 				Once it has been deleted it cannot be recovered.</h1>
 			<div class="ui-grid-a">
 				<div class="ui-block-a">
-					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
+OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
 				</div>
 				<div class="ui-block-b">
 					<button id="selectMerchantDeleteNo" data-icon="back">No</button>
@@ -573,17 +574,25 @@
             </li>
           </ul>
 		  Version: <%= versionNum %>
-      </div><!-- /panel -->
+		</div><!-- /panel -->
 	</script>
 
     <div data-role="page" id="configure">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">
         <h1>Account Manager</h1>
         <a href="#configure_leftPanel" data-role="none" class="header-custom-bars">&nbsp;</a>
+	<a href="#configureList" data-role="button" data-icon="check">List</a>
       </div>
 
       <div data-role="content">
-        <div>This is the Configure page</div>
+        <div class="ui-grid-a">
+	  <div class="ui-block-a">
+	    <ul data-role="listview" data-filter="true" data-inset="true" id="ConfigureMerchantSelect"></ul>
+	  </div>
+	  <div class="ui-block-b">
+	    <a data-role="button" id="StartConfigure" merchantId="" data-position="fixed">Configure</a>
+	  </div>
+	</div>
       </div>
     </div><!-- /page -->
     
@@ -654,6 +663,96 @@
 		<% } %>
 		</ul>
 	</script>
+
+    <script type="text/template" id="ConfigureMerchantListTemplate">
+      <li>
+	<a merNum="" id="merchant_configSelect">
+	  <h3><%= Name %></h3>
+	  <p><%= Street %></p>
+	  <p><%= City %></p>
+	</a>
+      </li>
+    </script>
+    
+    <script type="text/template" id="ConfigureStepsTemplate">
+     
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+	  <h1>Configure: <%= EXELON.merchantBeingConfigured.Name  %></h1>
+	  <a href="" data-icon="arrow-l" data-iconpos="notext" id="ConfigureStepBack_Number"></a>
+	  <a href="" data-icon="arrow-r" data-iconpos="notext" id="ConfigureStepForward_Number"></a>
+	</div>
+	
+	<div data-role="content">
+	  <h1><%= Number %>. <%= Title %><a href="#ConfigureCheckList" data-role="button" data-icon="check" data-iconpos="notext" style="padding:0px; position:absolute; top:70px; left:95%"></a></h1>
+	  <ul data-role="listview" id="ConfigureSubSteps_Step" data-inset="true">SUBSTEPS</ul>
+	  <div data-role="collapsible" data-content-theme="d">
+	    <h2>Instructions</h2>
+	    <p><%= Instructions %></p>
+	  </div>
+	  <ul data-role="listview" data-inset="true">
+	    <li data-role="list-divider"><h2>Screenshots</h2></li>
+	    <% if(Screenshots.length  > 0) { %>
+	    <% for(var imgIndex = 0; imgIndex < Screenshots.length; imgIndex++) { %>
+	       <li>
+		 <div data-role="fieldcontain">
+		   <h3><%= Screenshots[imgIndex].Name %></h3>
+		   <img src="images/App/Configuration/pos_micros_web_scvs_01.png" />
+		 </div>
+	       </li>
+	       <% } %>
+	    <% } else {%>
+	    <li>N/A</li>
+	    <% } %>
+	  </ul>
+	  <ul data-role="listview" data-inset="true" id="ConfigurationNotesList_Step">
+	    <li data-role="list-divider" id="ConfigurationInsertNotes_Step" style="height:50px; padding-bottom:0px">
+	      <h2>Notes</h2>
+	      <a data-role="button" data-icon="plus" data-iconpos="notext" id="ConfigurationNotesAdd_Step" style="position:relative; bottom:30px; left:98%; padding:0px"></a>
+	    </li>
+	  </ul>
+	</div>
+      
+    </script>
+
+    <script type="text/template" id="ConfigureSubStepsTemplate">
+      <li>
+	<label><%=Description %><input type="checkbox" id="ConfigureCheck_Step_SubStep" /></label>
+	<% if(Input !== "#NA") { %>
+	<input type="text" id="ConfigureInput_Step_SubStep" placeholder="Default: "></input>
+	<% } %>
+      </li>
+    </script>
+
+    <script type="text/template" id="ConfigureInsertNoteTemplate">
+      <li id="ConfigureNote_Step_Id" data-icon="false" style="padding-top:20px; padding-bottom:0px">
+	<p><strong><%= "By: " + LastModifiedBy + "<br/>Time: " + LastUpdated.toString()%></strong></p>
+	<p><%= Note %></p>
+	<a data-role="button" data-icon="gear" data-iconpos="notext" style="position:relative; bottom:40px; left:97%; padding:0px"></a>
+      </li>
+    </script>
+
+    <div data-role="page" id="ConfigureCheckList">
+      <div data-role="header">
+	<h1>Configure Check List</h1>
+	<a data-role="button" data-rel="back" data-icon="back" data-iconpos="notext"></a>
+      </div>
+
+      <div data-role="content">
+	<ul data-inset="true" id="ConfigureCheckListContents">
+	</ul>
+      </div>
+    </div>
+    
+    <script type="text/template" id="ConfigureCheckListContentTemplate">
+      <li>
+	  <label><%= Description %><input type="checkbox" data-mini="true" id="ConfigureListCheck_Step_SubStep" /></label>
+	  <% if(Input !== '#NA') { %>
+	  <input type="text" id="ConfigureListInput_Step_SubStep" data-mini="true" placeholder="Default: "></input>
+	  <% } else { %>
+	  <div></div>
+	  <% } %>
+      </li>
+    </script>
 
     <div data-role="page" id="configureTest">
       <div data-role="header" data-position="fixed" data-tap-toggle="false">

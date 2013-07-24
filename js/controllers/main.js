@@ -606,6 +606,7 @@ var EXELON = (function (r, $) {
     configureShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.configureShow');
+	r.setConfigurePage(r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.configureShow');
       }
@@ -1476,11 +1477,453 @@ var EXELON = (function (r, $) {
 	 });
 	 
   });
+
+  r.setConfigurePage = function(merchants) {
+      try{
+	  RSKYBOX.log.info('entering','main.js.setConfigurePage');
+	  
+	  var configureMerchantListTemplate = _.template($('#ConfigureMerchantListTemplate').html());
+	  var configureMerchantListHtml = "";
+	  var nextMerchant;
+
+	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+	      nextMerchant = configureMerchantListTemplate(merchants[merIndex]);
+	      nextMerchant = nextMerchant.replace("merchant_configSelect", "ConfigSelect" + merIndex);
+	      configureMerchantListHtml += nextMerchant;
+	  }
+
+	  $('#ConfigureMerchantSelect').html(configureMerchantListHtml);
+
+	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
+	      $('#' + 'ConfigSelect' + merIndex).attr('merNum',merIndex);
+	      $('#' + 'ConfigSelect' + merIndex).click(function() {
+		      var merIndex = $(this).attr('merNum');
+		      $('#StartConfigure').attr("merchantId",merchants[merIndex].Id);
+		      $('#StartConfigure>span').empty();
+		      $('#StartConfigure>span').text("Start Configure: " + merchants[merIndex].Name);
+		  });
+	  }
+	  
+	  $('#StartConfigure').off();
+	  $('#StartConfigure').click(function() {
+		  var merchantId = $(this).attr('merchantId'); 
+		  if(merchantId) {
+		      r.getMerchantConfigurationInfo(merchantId);
+		  }
+	      });
+	      
+	  $('#ConfigureMerchantSelect').listview('refresh');
+	  
+      } catch (e) {
+	  RSKYBOX.log.error(e, 'setConfigurePage');
+      }
+  };
+
+  r.getMerchantConfigurationInfo = function(merchantID) {
+      try{
+	  RSKYBOX.log.info('entering','js.main.getMerchantConfigurationInfo');
+	  
+	  
+	  var closeurl = baseUrl + 'merchants/list';
+	  var jsonobj = {"Config":true,
+	                 "Id": merchantID};
+	  
+	  $.ajax({
+		  type: 'search',
+		      data: JSON.stringify(jsonobj),
+		      datatype: 'json',
+		      contentType: 'application/json',
+		      url: closeurl,
+		      statuscode: r.statusCodeHandlers(),
+		      headers: {'Authorization' : r.getAuthorizationHeader()},
+		      success: function(data, status, jqXHR) {
+		      try {
+			  if(r.merchantBeingConfigured)
+			      r.clearExistingConfigureStepsPages();
+			  r.merchantBeingConfigured = data.Results[0];
+			  r.currentNumberOfSteps = r.merchantBeingConfigured.Configuration[0].Steps.length;
+			  if(!r.numberOfConfigureStepsPages)
+			      r.numberOfConfigureStepsPages = 0;
+			  r.fixMerchantBeingConfigured();
+			  r.getMerchantConfigurationNotes(r.merchantBeingConfigured.Id);
+			  var jtest = 5;
+		      } catch (e) {
+			  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo.success');
+		      }
+		  }
+	      });
+      } catch (e) {
+	  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo');
+      }
+  };
+
+  //Check to make sure all configure fields are provided. If not, fill in with dummy or empty values
+  r.fixMerchantBeingConfigured = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.fixMerchantBeingConfigured');
+	  
+	  var confObj = r.merchantBeingConfigured.Configuration[0];
+	  var confStep;
+	  var confSubStep;
+
+	  if(confObj.DateCompleted === undefined)
+	      confObj.DateCompleted = null;
+
+	  if(confObj.CurrentStep === undefined)
+	      confObj.CurrentStep = 1;
+	  
+	  for(var stepIndex = 0; stepIndex < confObj.Steps.length; stepIndex++){
+	      confStep = confObj.Steps[stepIndex];
+	      
+	      if(confStep.Title === undefined)
+		  confStep.Title = "";
+	      
+	      if(confStep.Number === undefined)
+		  confStep.Number = stepIndex + 1;
+
+	      if(confStep.Instructions === undefined)
+                  confStep.Instructions = "NO INSTRUCTIONS";
+
+	      if(confStep.LastUpdated === undefined)
+                  confStep.LastUpdated = null;
+
+	      if(confStep.LastUpdatedBy === undefined)
+                  confStep.LastUpdatedBy = "";
+
+	      if(confStep.IsCompleted === undefined)
+                  confStep.IsCompleted = false;
+
+	      if(confStep.Screenshots === undefined)
+                  confStep.Screenshots = [];
+
+	      for(var ssIndex = 0; ssIndex < confStep.Screenshots.length; ssIndex++){
+		  
+		  if(confStep.Screenshots[ssIndex].Name === undefined)
+		      ConfStep.Screenshots[ssIndex].Name = "";
+		  
+		  if(confStep.Screenshots[ssIndex].URL === undefined)
+		      ConfStep.Screenshots[ssIndex].URL = "";
+	      }
+
+	      if(confStep.SubSteps === undefined)
+                  confStep.SubSteps = [{}];
+
+	      for(var subStepIndex = 0; subStepIndex < confStep.SubSteps.length; subStepIndex++) {
+		  confSubStep = confStep.SubSteps[subStepIndex];
+
+		  if(confSubStep.Number === undefined)
+		      confSubStep.Number = subStepIndex + 1;
+
+		  if(confSubStep.RequireInput === undefined){
+		      if(confSubStep.Input === undefined)
+			  confSubStep.RequireInput = "#NA";
+		      else
+			  confSubStep.RequireInput = false;
+		  }
+		  
+		  if(confSubStep.Description === undefined)
+                      confSubStep.Description = "NO DESCRIPTION";
+		  
+		  if(confSubStep.IsCompleted === undefined)
+                      confSubStep.IsCompleted = false;
+
+		  if(confSubStep.Input === undefined) {
+		      if(confSubStep.RequireInput != "#NA")
+			  confSubStep.Input = "";
+		      else
+			  confSubStep.Input = "#NA";
+		  }  
+	      }
+	  }
+      } catch (e) {
+	  RSKYBOX.log.error(e,'fixMerchantBeingConfigured');
+      }
+  };
+
+  r.clearExistingConfigureStepsPages = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.removeExistingConfigureStepsPages');
+
+	  var cSteps = r.merchantBeingConfigured.Configuration[0].Steps;
+	  for(var stepIndex = 0; stepIndex < cSteps.length; stepIndex++){
+	      $('#ConfigureStep_' + (stepIndex + 1)).remove();
+	      r.numberOfConfigureStepsPages = 0;
+	  }
+
+      } catch (e) {
+	  RSKYBOX.log.error(e,'removeExistingConfigureStepsPages');
+      }
+  };
+
+  r.writeEmptyConfigureStepsPages = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.writeEmptyConfigureStepsPages');
+	  
+	  var allStepsPagesEmptyHtml = "";
+	  var currentStepEmpty;
+	  var stepsLen = r.merchantBeingConfigured.Configuration[0].Steps.length;
+	  
+	  for(var stepIndex = 0; stepIndex < stepsLen; stepIndex++) {
+	      if(stepIndex >= r.numberOfConfigureStepsPages) {
+		  currentStepEmpty = '<div data-role="page" stepNumber="' + (stepIndex + 1) + '" id="ConfigureStep_' + (stepIndex + 1) + '"></div>';
+		  r.numberOfConfigureStepsPages++;
+		  allStepsPagesEmptyHtml += currentStepEmpty;
+	      }
+	  }
+	  
+	  if(allStepsPagesEmptyHtml)
+	      $("#ConfigureStepsTemplate").before(allStepsPagesEmptyHtml);
+	  
+	  r.setConfigureStepsPages();
+	  
+      } catch (e) {
+	  RSKYBOX.log.error(e,'writeEmptyConfigureStepsPages');
+      }
+  };
+  
+  r.getMerchantConfigurationNotes = function(merchantId) {
+      try{
+          RSKYBOX.log.info('entering','js.main.getMerchantConfigurationNotes');
+
+          var closeurl = baseUrl + 'merchants/notes/list';
+          var jsonobj = {};
+
+          $.ajax({
+                  type: 'search',
+                      data: JSON.stringify(jsonobj),
+                      datatype: 'json',
+                      contentType: 'application/json',
+                      url: closeurl,
+                      statuscode: r.statusCodeHandlers(),
+                      headers: {'Authorization' : r.getAuthorizationHeader()},
+                      success: function(data, status, jqXHR) {
+                      try {
+                          r.merchantNotes1 = data.Results;
+			  r.writeEmptyConfigureStepsPages();
+                          var goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
+                          $.mobile.changePage(goToStep);
+			  
+                          var jtest = 5;
+                      } catch (e) {
+                          RSKYBOX.log.error(e, 'getMerchantConfigurationNotes.success');
+                      }
+                  }
+              });
+      } catch (e) {
+          RSKYBOX.log.error(e, 'getMerchantConfigurationNotes');
+      }
+      
+  };
+
+  r.insertConfigurationNotes = function(stepNumber) {
+      try{
+	  RSKYBOX.log.info('entering','main.js.insertConfigurationNotes');
+	  
+	  var configureInsertNoteTemplate = _.template($('#ConfigureInsertNoteTemplate').html());
+	  var allNotesHtml = "";
+	  var noteHtml;
+	  var cNote;
+	  
+	  for(var noteIndex = 0; noteIndex < r.merchantNotes1.length; noteIndex++) {
+	      cNote = r.merchantNotes1[noteIndex];
+	      
+	      if(cNote.Type = "NOTE_SALES") {
+		  noteHtml = configureInsertNoteTemplate(cNote);
+		  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + cNote.Id);
+		  allNotesHtml += noteHtml;
+	      }
+	  } 
+	  
+	  $('#ConfigurationInsertNotes_' + stepNumber).after(allNotesHtml);
+   
+      } catch(e) {
+	  RSKYBOX.log.error(e,'insertConfigurationNotes');
+      }
+  };
+
+	  
+  r.setConfigureStepsPages = function() {
+      try{
+	  RSKYBOX.log.info('entering','main.js.setConfigureStepsPages');
+	  
+	  var configureSubStepsTemplate = _.template($('#ConfigureSubStepsTemplate').html());
+	  var configureStepsTemplate = _.template($('#ConfigureStepsTemplate').html());
+
+	  var nextSubStepAdded;
+	  var nextStepAdded;
+
+	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++) {
+	      
+	      var subStepsHtml = "";
+	      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+	      
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
+		  
+		  var cSubStep = cStep.SubSteps[subStepIndex];
+
+		  nextSubStepAdded = configureSubStepsTemplate(cSubStep);
+		  nextSubStepAdded = nextSubStepAdded.replace("ConfigureCheck_Step_SubStep", "ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number);
+		  if(cSubStep.Input != '#NA'){
+		      nextSubStepAdded = nextSubStepAdded.replace("ConfigureInput_Step_SubStep", "ConfigureInput_" + cStep.Number + "_" + cSubStep.Number);
+		  }
+		  subStepsHtml += nextSubStepAdded;
+	      }
+
+	      //fix Screenshot URL Images/... -> images/...
+	      for(var screenshotIndex = 0; screenshotIndex < cStep.Screenshots.length; screenshotIndex++) {
+		  cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('/Images','images');
+		  cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('JPG','png');
+	      }
+	      // --- 
+	      
+	      nextStepAdded = configureStepsTemplate(cStep);
+	      nextStepAdded = nextStepAdded.replace("SUBSTEPS", subStepsHtml);
+	      nextStepAdded = nextStepAdded.replace("ConfigureSubSteps_Step","ConfigureSubSteps_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureStepBack_Number","ConfigureStepBack_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureStepForward_Number","ConfigureStepForward_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigurationNotesList_Step","ConfigurationNotesList_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigurationInsertNotes_Step","ConfigurationInsertNotes_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigurationNotesAdd_Step","ConfigurationNotesAdd_" + cStep.Number);
+	      
+	      $("#ConfigureStep_" + cStep.Number).append(nextStepAdded);
+	      
+	      r.insertConfigurationNotes(cStep.Number);
+	  }
+	  
+	  //set the Check List up
+	  $('#ConfigureCheckListContents').empty();
+	  
+	  var ConfigureListHtml = "";
+	  var ConfigureListNextHtml;
+	  var ConfigureCheckListContentTemplate = _.template($('#ConfigureCheckListContentTemplate').html());
+	  
+	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
+	      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+	      
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++){
+		  cSubStep = cStep.SubSteps[subStepIndex];
+		  ConfigureListNextHtml = ConfigureCheckListContentTemplate(cSubStep);
+		  ConfigureListNextHtml = ConfigureListNextHtml.replace('ConfigureListCheck_Step_SubStep','ConfigureListCheck_' + cStep.Number + '_' + cSubStep.Number);
+		  if(cSubStep.Input != '#NA'){
+		      ConfigureListNextHtml = ConfigureListNextHtml.replace('ConfigureListInput_Step_SubStep','ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number);
+		  }
+		  ConfigureListHtml += ConfigureListNextHtml;
+	      }
+	  }
+
+	  $('#ConfigureCheckListContents').append(ConfigureListHtml);
+	  if(r.configureListExists){
+	      $('#ConfigureCheckList').trigger('create');
+	  }
+	  r.configureListExists = true;
+	  // --- 
+	  
+	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
+	      
+	      cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+	      if(stepIndex == 0)
+		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#configure');  
+	      else 
+		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number - 1));
+
+	      if(stepIndex == r.merchantBeingConfigured.Configuration[0].Steps.length - 1)
+		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#configure');
+	      else
+		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number + 1));
+	      
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
+		  
+		  cSubStep = cStep.SubSteps[subStepIndex];
+		  
+		  //Set handlers on checkboxes
+		  $("#ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number).click(function() {
+			  var step_substep_pattern = /\d+/g;
+			  var checkBoxId = $(this).attr('id');
+			  var step_substep = checkBoxId.match(step_substep_pattern);
+			  var isChecked = $(this).prop('checked');
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+			  var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+			  cSubStep.IsCompleted = isChecked;
+			  r.setConfigureCheckBoxPair(cStep, cSubStep);
+		      });
+		  $("#ConfigureListCheck_" + cStep.Number + "_" + cSubStep.Number).click(function() {
+                          var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+                          var isChecked = $(this).prop('checked');
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+			  var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+			  cSubStep.IsCompleted = isChecked;
+			  r.setConfigureCheckBoxPair(cStep, cSubStep);
+                      });
+		  // ---
+	      
+		  //Initialize checkboxes
+		  if(cSubStep.IsCompleted){
+		      $("#ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
+		      $("#ConfigureListCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
+		  }
+		  // ---
+		  
+		  //Initialize text Inputs
+		  if(cSubStep.Input && cSubStep.Input != '#NA') {
+		      if(cSubStep.IsCompleted){
+			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+		      } else {
+			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).attr('placeholder',cSubStep.Input);
+			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).attr('placeholder',cSubStep.Input);
+		      }
+		  }
+		  // ---
+
+		  //Set handlers for changes in Input
+		  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).change(function() {
+			  var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+                          var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+			  cSubStep.Input = $(this).val();
+			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+		      });
+		  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).change(function() {
+			  var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+                          var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+                          var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+                          cSubStep.Input = $(this).val();
+                          $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+		      });
+		  // ---
+	      }
+	  }
+      } catch (e) {
+	  RSKYBOX.log.error(e, 'setConfigureStepsPages');
+      }
+  };
+  
+  r.setConfigureCheckBoxPair = function(step,substep) {
+      try{  
+	  RSKYBOX.log.info('entering','main.js.setConfigureCheckBoxPair');
+	  
+	  if(substep.IsCompleted) {
+	      var isChecked = true;
+	  } else {
+	      var isChecked = false;
+	  }
+	  $("#ConfigureCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
+	  $("#ConfigureListCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
+      } catch (e) {
+	  RSKYBOX.log.error(e,'setConfigureCheckBoxPair');
+      }
+  };
   
   try {
-    r.router = new $.mobile.Router([
+      r.router = new $.mobile.Router([
       { '.*':                    { handler: 'setupSession',        events: 'bs'  } },
-//      { '.*':                    { handler: 'flashCheck',        events: 's'   } },
+      //      { '.*':                    { handler: 'flashCheck',        events: 's'   } },
       { '#login':                { handler: 'isLoggedIn',        events: 'bC', step: 'page' } },
       { '#login':                { handler: 'loginBeforeShow',   events: 'bs'  } },
       { '#login':                { handler: 'loginShow',         events: 's'   } },
