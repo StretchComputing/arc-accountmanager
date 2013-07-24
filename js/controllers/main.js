@@ -1132,31 +1132,95 @@ var EXELON = (function (r, $) {
 		  
 		  cSubStep = cStep.SubSteps[subStepIndex];
 		  
-		  if(cSubStep.IsCompleted) {
+		  //Set handlers on checkboxes
+		  $("#ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number).click(function() {
+			  var step_substep_pattern = /\d+/g;
+			  var checkBoxId = $(this).attr('id');
+			  var step_substep = checkBoxId.match(step_substep_pattern);
+			  var isChecked = $(this).prop('checked');
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+			  var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+			  cSubStep.IsCompleted = isChecked;
+			  r.setConfigureCheckBoxPair(cStep, cSubStep);
+		      });
+		  $("#ConfigureListCheck_" + cStep.Number + "_" + cSubStep.Number).click(function() {
+                          var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+                          var isChecked = $(this).prop('checked');
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+			  var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+			  cSubStep.IsCompleted = isChecked;
+			  r.setConfigureCheckBoxPair(cStep, cSubStep);
+                      });
+		  // ---
+	      
+		  //Initialize checkboxes
+		  if(cSubStep.IsCompleted){
 		      $("#ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
 		      $("#ConfigureListCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
 		  }
+		  // ---
+		  
+		  //Initialize text Inputs
 		  if(cSubStep.Input && cSubStep.Input != '#NA') {
 		      if(cSubStep.IsCompleted){
-			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).text(cSubStep.Input);
-			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).text(cSubStep.Input);
+			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
 		      } else {
 			  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).attr('placeholder',cSubStep.Input);
 			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).attr('placeholder',cSubStep.Input);
 		      }
 		  }
-	      }   
+		  // ---
+
+		  //Set handlers for changes in Input
+		  $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).change(function() {
+			  var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+                          var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+			  cSubStep.Input = $(this).val();
+			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+		      });
+		  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).change(function() {
+			  var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+                          var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+                          var cSubStep = cStep.SubSteps[step_substep[1] - 1];
+                          cSubStep.Input = $(this).val();
+                          $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+		      });
+		  // ---
+	      }
 	  }
       } catch (e) {
 	  RSKYBOX.log.error(e, 'setConfigureStepsPages');
       }
   };
-	      
-
+  
+  r.setConfigureCheckBoxPair = function(step,substep) {
+      try{  
+	  RSKYBOX.log.info('entering','main.js.setConfigureCheckBoxPair');
+	  
+	  if(substep.IsCompleted) {
+	      var isChecked = true;
+	  } else {
+	      var isChecked = false;
+	  }
+	  $("#ConfigureCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
+	  $("#ConfigureListCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
+      } catch (e) {
+	  RSKYBOX.log.error(e,'setConfigureCheckBoxPair');
+      }
+  };
+  
   try {
-    r.router = new $.mobile.Router([
+      r.router = new $.mobile.Router([
       { '.*':                    { handler: 'setupSession',        events: 'bs'  } },
-//      { '.*':                    { handler: 'flashCheck',        events: 's'   } },
+      //      { '.*':                    { handler: 'flashCheck',        events: 's'   } },
       { '#login':                { handler: 'isLoggedIn',        events: 'bC', step: 'page' } },
       { '#login':                { handler: 'loginBeforeShow',   events: 'bs'  } },
       { '#login':                { handler: 'loginShow',         events: 's'   } },
