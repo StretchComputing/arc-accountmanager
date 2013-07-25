@@ -507,16 +507,13 @@ var EXELON = (function (r, $) {
     		$('#mapsLocationSearchGo').bind('click', function(){
     			$('#mapsLocationFailText').hide()
     			var address = $('#mapsLocationSearchField').val();
-    			r.getGeocode(address, function(data){
-    				if(data.results.length === 0){
+    			r.getGeocode(address, function(results, status){
+    				if(status !== google.maps.GeocoderStatus.OK){
     					$('#mapsLocationFailText').show()
     					return;
     				}
     				
-    				var lat = data.results[0].geometry.location.lat;
-    				var lng = data.results[0].geometry.location.lng;
-    				
-    				r.maps.setCenter(new google.maps.LatLng(lat,lng));
+    				r.map.setCenter(results[0].geometry.location);
     			});
     		});
     		
@@ -671,9 +668,8 @@ var EXELON = (function (r, $) {
       if(r.currLoc){
     	  jsonobj.Latitude = r.currLoc.Latitude;
     	  jsonobj.Longitude = r.currLoc.Longitude;
-    	  jsonobj.Top = 5;
+    	  jsonobj.Top = 10;
       }
-
 
       $.ajax({
         type: 'search',
@@ -908,21 +904,16 @@ var EXELON = (function (r, $) {
   };
   
   /*Makes a call to the google geocode API. Calls callback functions with the results*/
-  r.getGeocode = function(address, success, failure){
-	  var url = "http://maps.googleapis.com/maps/api/geocode/json?address=";
-	  url += address.replace(/ /g, '+');
-	  url += '&sensor=false'
-	  
-	  $.ajax({
-		  type:'GET',
-		  datatype: 'json',
-		  contentType : 'applicaton/json',
-		  'url' : url,
-		  'success' : success,
-		  'failure' : failure
-	  });
-	  
-  };
+  r.getGeocode = function(address, callback){
+	  try{
+		  RSKYBOX.log.info('main.js.getGeocode');
+		  var geocoder = new google.maps.Geocoder();
+		  geocoder.geocode({"address" : address}, callback);
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.getGeocode');
+	  }
+  }
   
   /*Remove all forms equal to "" */
   r.cleanMerchant = function(merchant){
