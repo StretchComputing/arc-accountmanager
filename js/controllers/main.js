@@ -1701,7 +1701,7 @@ var EXELON = (function (r, $) {
                           r.merchantNotes1 = data.Results;
 			  r.writeEmptyConfigureStepsPages();
                           var goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
-                          $.mobile.changePage(goToStep);
+                          $.mobile.changePage(goToStep,{transition:'slide', changeHash:true});
 			  
                           var jtest = 5;
                       } catch (e) {
@@ -1821,16 +1821,30 @@ var EXELON = (function (r, $) {
 	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
 	      
 	      cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
-	      if(stepIndex == 0)
-		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#configure');  
-	      else 
+	      if(stepIndex == 0){
+		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#configure');
+		  $("ConfigureStep_" + cStep.Number).on('swiperight',function() {
+			  $.mobile.changePage('#configure',{transition:'slide', reverse:true, changeHash:true});
+		      });
+	      } else { 
 		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number - 1));
+		  $("ConfigureStep_" + cStep.Number).on('swiperight',function() {
+                          $.mobile.changePage('#ConfigureStep_' + (cStep.Number - 1), {transition:'slide', reverse:true, changeHash:true});
+                      });
+	      }
 
-	      if(stepIndex == r.merchantBeingConfigured.Configuration[0].Steps.length - 1)
+	      if(stepIndex == r.merchantBeingConfigured.Configuration[0].Steps.length - 1){
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#configure');
-	      else
+		  $("ConfigureStep_" + cStep.Number).on('swipeleft',function() {
+                          $.mobile.changePage('#configure',{transition:'slide', changeHash:true});
+                      });
+	      } else {
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number + 1));
-	      
+		  $("ConfigureStep_" + cStep.Number).on('swipeleft',function() {
+                          $.mobile.changePage('#ConfigureStep_' + (cStep.Number + 1), {transition:'slide', changeHash:true});
+                      });
+	      }
+		  
 	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
 		  
 		  cSubStep = cStep.SubSteps[subStepIndex];
