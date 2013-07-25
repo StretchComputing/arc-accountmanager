@@ -500,7 +500,6 @@ var EXELON = (function (r, $) {
     			var merchant = r.merchantList[index];
     			r.map.setCenter( new google.maps.LatLng(merchant.Latitude,
     													merchant.Longitude));
-    			$('#mapsSearch').popup('close');
     			r.mapsSelectMerchant(merchant);
     		});
     		
@@ -538,6 +537,7 @@ var EXELON = (function (r, $) {
     		
     		/*populates the list for merchant search*/
     		var search = $('#mapsMerchantSearch');
+    		search.empty();
     		var t = _.template($('#mapsMerchantSearchTemplate').html());
     		search.append(t(r));
     		search.trigger('create')
@@ -1279,7 +1279,7 @@ var EXELON = (function (r, $) {
 		  $('.meetingDetailsButton', $.mobile.activePage).show();
 		  var meeting = $('#'+pageName+'_MeetingDetails');
 		  meeting.empty();
-		  var t = _.template($('#meetingPopupTemplate').html());
+		  var t = _.template($('#meetingDetailsTemplate').html());
 		  meeting.append(t(r.activeMeeting));
 		  meeting.trigger('create');
 	  }
@@ -1289,12 +1289,15 @@ var EXELON = (function (r, $) {
   };
   
   r.attachMeeting = function(pageName){
-	  $('#'+pageName).append($('<div />', {
+	  $('#'+pageName).prepend($('<div />', {
 		  'id' : pageName+'_MeetingDetails',
-		  'data-role' : 'popup',
-		  'class' : 'ui-content merchantDetails',
-		  'data-position-to':"window",
-		  'data-dismissible' : false
+		  'data-role' : 'panel',
+		  'class' : 'merchantDetails',
+		  'data-position':"right",
+		  'data-display' : "push",
+		  'data-position-fixed' : false,
+		  'data-dismissible' : false,
+		  'data-theme' : 'a'
 	  }));
   };
   
@@ -1398,12 +1401,13 @@ var EXELON = (function (r, $) {
   };
   
   r.mapsSelectMerchant = function(merchant){
-  	var content = $('#mapsMerchantPopupContent');
+  	var content = $('#mapsMerchantSelect');
 	content.empty();
 	var t = _.template($('#mapsMerchantPopupTemplate').html());
 	content.append(t(merchant));
-	content.trigger('create');
-	$('#mapsMerchantPopup').popup('open', {positionTo : $('#mapsPopupLocation')});
+	content.show();
+	$('#mapsPanelList').listview('refresh');
+	$('#mapsPanel').panel('open');
   };
 
   $(document).on('click', '.selectMerchant', function(e){
@@ -1462,7 +1466,7 @@ var EXELON = (function (r, $) {
 	 r.activeMeeting.End = new Date();
 	 /*TODO: API Calls and such*/
 	 r.activeMeeting = undefined;
-	 $('.merchantDetails', $.mobile.activePage).popup('close');
+	 $('.merchantDetails', $.mobile.activePage).panel('close');
 	 $('.meetingDetailsButton', $.mobile.activePage).hide();
 	 $('.meetingStartButton').each(function(){
 		 $(this).show();
