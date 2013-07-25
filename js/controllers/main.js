@@ -390,15 +390,17 @@ var EXELON = (function (r, $) {
     		
     		r.handleMeetings('merchantDisplay');
     		
+    		var content = $('#merchantDisplayContent');
+    		content.empty(); //just in case
+    		
     		if(!r.activeMerchant.Notes){
-    			r.getNotes(r.activeMerchant, true, r.writeNotes);
+    			r.getNotes(r.activeMerchant, true, r.writeNotes);//Notes will be displayed as part of the call back r.writeNotes
+    		}
+    		else{//Add the current Notes
+    			r.writeNotes(r.activeMerchant);
     		}
     		
     		$('#merchantDisplayHead').text(r.activeMerchant.Name);
-    		
-    		var content = $('#merchantDisplayContent');
-    		
-    		content.empty(); //just in case
     		
     		var template = _.template($('#merchantDisplayContentTemplate').html());
     		
@@ -669,8 +671,9 @@ var EXELON = (function (r, $) {
       if(r.currLoc){
     	  jsonobj.Latitude = r.currLoc.Latitude;
     	  jsonobj.Longitude = r.currLoc.Longitude;
-    	  jsonobj.UseMaxGeoDistance = true;
+    	  jsonobj.Top = 5;
       }
+
 
       $.ajax({
         type: 'search',
@@ -1265,16 +1268,14 @@ var EXELON = (function (r, $) {
   /*Writes the 'notes' protion into merchantDisplay*/
   r.writeNotes = function(merchant){
 	  var t = _.template($('#merchantDisplayNotesTemplate').html());
-	  $('#merchantDisplayNotesDisplay').append(t(merchant));
+	  $('#merchantDisplayContent').append(t(merchant));
 
 		$('#merchantDisplayAddNoteCancel').bind('click', function(e){
 			$('#merchantDisplayNoteText').prop('value', "");
 			$('#merchantDisplayAddNoteBox').hide();
 		});
 		
-		$('#merchantDisplayNotesDisplay').listview('refresh');
 		$('#merchantDisplayContent').trigger('create');
-		
   };
   
   /*returns a letter (a,b,c,d, or e) based on the status field of a merchant*/
