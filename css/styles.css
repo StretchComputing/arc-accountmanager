@@ -157,3 +157,30 @@ li.reqAccountingli{
 #map-canvas { 
 	height: 100%;
 }
+
+
+  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-push.ui-panel-content-fixed-toolbar-position-left,
+  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-reveal.ui-panel-content-fixed-toolbar-position-left,
+  .ui-page-panel-open .ui-panel-content-wrap-display-push.ui-panel-content-wrap-position-left,
+  .ui-page-panel-open .ui-panel-content-wrap-display-reveal.ui-panel-content-wrap-position-left {
+      margin-right: 17em;
+  }
+  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-push.ui-panel-content-fixed-toolbar-position-right,
+  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-reveal.ui-panel-content-fixed-toolbar-position-right,
+  .ui-page-panel-open .ui-panel-content-wrap-display-push.ui-panel-content-wrap-position-right,
+  .ui-page-panel-open .ui-panel-content-wrap-display-reveal.ui-panel-content-wrap-position-right {
+      margin-left: 17em;
+  }
+  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-push,
+  .ui-page-panel-open .ui-panel-content-fixed-toolbar-display-reveal {
+      width: auto;
+  }
+
+  /* disable "dismiss" on wide viewports for "push" panels */
+  .ui-panel-dismiss-display-reveal {
+      display: none;
+  }
+  
+  .meetingEnd {
+  	background : hsl(0, 100%, 63%);
+  }

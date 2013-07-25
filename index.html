@@ -595,8 +595,13 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
     
     <div data-role="page" id="maps">
 		<div data-role="header" data-position="fixed" data-tap-toggle="false" id="mapsHeader">
+			<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
+				<a data-role="button" data-icon="arrow-l" data-iconpos="notext" data-rel="back">Back</a>
+			</div>
 			<h1>Sales Map</h1>
-			<a data-role="button" data-icon="search" data-iconpos="notext" data-rel="popup" href="#mapsSearch">Search</a>
+			<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
+				<a data-role="button" data-icon="search" data-iconpos="notext" data-rel="popup" href="#mapsPanel">Search</a>
+			</div>
 		</div>
 		
 		<div data-role="content" id="mapsContent">
@@ -604,47 +609,44 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
 			<div id="mapsPopupLocation"></div>
 		</div>
 		
-		<div data-role="popup" id="mapsMerchantPopup" data-dismissible="false">
-			<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" 
-			   data-iconpos="notext" class="ui-btn-right">Close</a>
-			   <div id="mapsMerchantPopupContent"></div>
-		</div>
-		
-	<div data-role="popup" id="mapsSearch">
-		
-		<fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain" >
-			<label for="mapsMerchantSearchTab">Merchants</label>
-			<input id="mapsMerchantSearchTab" type="radio" checked="checked" value="mapsMerchantSearch" name="searchTab" class="mapsSearchTab" />
+		<div data-role="panel" data-position="right" data-display="push" id="mapsPanel">
+	
+		<ul data-role="listview" id="mapsPanelList">
+			<li id="mapsSearch"><fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
+				<label for="mapsMerchantSearchTab">Merchants</label>
+				<input id="mapsMerchantSearchTab" type="radio" checked="checked" value="mapsMerchantSearch" name="searchTab" class="mapsSearchTab" />
 			
-			<label for="mapsLocationSearchTab">Locations</label>
-			<input id="mapsLocationSearchTab"  type="radio" value="mapsLocationSearch"  name="searchTab" class="mapsSearchTab" />
-		</fieldset>
+				<label for="mapsLocationSearchTab">Locations</label>
+				<input id="mapsLocationSearchTab"  type="radio" value="mapsLocationSearch"  name="searchTab" class="mapsSearchTab" />
+			</fieldset>
 		
-		<div id="mapsMerchantSearch" class="searchTabContent"></div>
+			<div id="mapsMerchantSearch" class="searchTabContent"></div>
 		
-		<div id="mapsLocationSearch" class="searchTabContent" style="display:none" >
-			<div data-role="fieldcontain">
-				<input type="search" name="search" id="mapsLocationSearchField" 
-				   	   placeholder="Enter an address" data-inline="true"/>
-				<button data-role="button" data-icon="search" data-iconpos="notext" 
+			<div id="mapsLocationSearch" class="searchTabContent" style="display:none" >
+				<div data-role="fieldcontain">
+					<input name="search" id="mapsLocationSearchField" 
+				   	   placeholder="Enter an address" data-inline="true" />
+					<button data-icon="search" data-iconpos="notext" 
 				        id="mapsLocationSearchGo" data-inline="true">Search</button>
-			</div>
+				</div>
 
+			</div></li>
+		
+			<li data-role="list-divider"></li>
+			<li id="mapsMerchantSelect" style="display:none" data-icon="arrow-r"></li>
+			</ul>
 		</div>
+	
 	</div>
 	
-</div>
-	
 	<script type="text/template" id="mapsMerchantPopupTemplate">
-		<ul data-role="listview">
-			<li><a class="mapsMerchantDisplay" merchantName="<%= Name %>">
-				<h1><%= Name %></h1>
-			    <h1><%= Street %> <%= City %> <%= State %>, <%= ZipCode %></h1>
-			    <h1>Status: <%= Status %></h1>
-			    <h1>POS: <% if(POS === 'POS_OTHER') { %> <%= OtherPOS %> 
-					 <% } else { %> <%= POS %> <% } %></h1>
-			</a></li>
-		</ul>
+		<a class="mapsMerchantDisplay" merchantName="<%= Name %>" >
+			<h1><%= Name %></h1>
+			<h1><%= Street %> <%= City %> <%= State %>, <%= ZipCode %></h1>
+			<h1>Status: <%= Status %></h1>
+			<h1>POS: <% if(POS === 'POS_OTHER') { %> <%= OtherPOS %> 
+				<% } else { %> <%= POS %> <% } %></h1>
+		</a>
 	</script>
 	
 	<script type="text/template" id="mapsMerchantSearchTemplate">
@@ -773,17 +775,18 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
       </div>
     </div><!-- /page -->
 
-	<script type="text/template" id="meetingPopupTemplate">
-		<a data-icon="delete" data-iconpos="notext" class="ui-btn-right" data-role="button" data-rel="back" href="#"></a>
-		<h1>Meeting for <%= Merchant.Name %> in progress</h1>
-		<h2>With:</h2>
+	<script type="text/template" id="meetingDetailsTemplate">
+		<ul data-role="listview" data-inset="true">
+			<li data-icon="delete"><a data-rel="close" href="#"></a></li>
+			<li><h1>Meeting for <b><%= Merchant.Name %></b> in progress</h1>
+			<h3>Concerning: <%= About %></h3>
+		<h2>With:
 		<% for(var i = 0; i < Members.length; i++) { %>
 			<%= Members[i] %>, 
-		<% } %>
-		<h3>Concerning: <%= About %></h3>
+		<% } %> </h2> </li>
 
-		<button class="meetingEnd">End</button>
-
+		<li><a class="meetingEnd">End</a></li>
+		</ul>
 		<div data-role="collapsible" data-inset="true">
 		<h3>Notes</h3>
 			<ul data-role="listview" data-inset="true">
