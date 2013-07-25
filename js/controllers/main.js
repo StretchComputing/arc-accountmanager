@@ -1925,6 +1925,38 @@ var EXELON = (function (r, $) {
 	  RSKYBOX.log.error(e,'setConfigureCheckBoxPair');
       }
   };
+
+  //the ajax call for configuration update of a substep (apply later whenever box checked? or page change?)
+  r.configureUpdateSubStep = function(subStep) {
+      try{
+          RSKYBOX.log.info('entering','main.js.configureUpdateSubStep');
+
+          var closeurl = baseUrl + 'merchants/configuration/update';
+          var jsonobj = {Id: subStep.Id,
+	                 Code: subStep.Code,
+	                 Input: subStep.Input,
+	                 IsComplete: subStep.IsComplete};
+
+          $.ajax({
+                  type: 'POST',
+                      data: JSON.stringify(jsonobj),
+                      datatype: 'json',
+                      contentType: 'application/json',
+                      url: closeurl,
+                      statuscode: r.statusCodeHandlers(),
+                      headers: {'Authorization' : r.getAuthorizationHeader()},
+                      success: function(data, status, jqXHR) {
+                      try {
+			  RSKYBOX.log.info('finished','configureUpdateSubStep');
+                      } catch (e) {
+                          RSKYBOX.log.error(e, 'configureUpdateSubStep.success');
+                      }
+                  }
+              });
+      } catch (e) {
+          RSKYBOX.log.error(e, 'configureUpdateSubStep');
+      }
+  };
   
   try {
       r.router = new $.mobile.Router([
