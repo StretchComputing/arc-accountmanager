@@ -35,7 +35,8 @@
       <script src="js/views/base.js"></script>
       <script src="js/views/login.js"></script>
 
-        <script src="js/lib/merchantobject.js"></script>
+      <script src="js/lib/merchantobject.js"></script>
+      <script src="js/lib/iscroll.js"></script>
 
      <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
 
@@ -609,7 +610,7 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
 			<div id="mapsPopupLocation"></div>
 		</div>
 		
-		<div data-role="panel" data-position="right" data-display="push" id="mapsPanel">
+		<div data-role="panel" data-position="right" data-display="push" id="mapsPanel" data-dismissible="false" data-position-fixed="true">
 	
 		<ul data-role="listview" id="mapsPanelList">
 			<li id="mapsSearch"><fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
@@ -645,7 +646,7 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
 			<h1><%= Street %> <%= City %> <%= State %>, <%= ZipCode %></h1>
 			<h1>Status: <%= Status %></h1>
 			<h1>POS: <% if(POS === 'POS_OTHER') { %> <%= OtherPOS %> 
-				<% } else { %> <%= POS %> <% } %></h1>
+				<% } else { %> <%= MERCHANT.POSNames[POS] %> <% } %></h1>
 		</a>
 	</script>
 	
