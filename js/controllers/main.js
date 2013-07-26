@@ -1277,7 +1277,7 @@ var EXELON = (function (r, $) {
   r.handleMeetings = function(pageName){
 	  if(r.activeMeeting !== undefined){
 		  $('.meetingDetailsButton', $.mobile.activePage).show();
-		  var meeting = $('#'+pageName+'_MeetingDetails');
+		  var meeting = $('#'+pageName+'_MeetingDetailsInner');
 		  meeting.empty();
 		  var t = _.template($('#meetingDetailsTemplate').html());
 		  meeting.append(t(r.activeMeeting));
@@ -1295,9 +1295,13 @@ var EXELON = (function (r, $) {
 		  'class' : 'merchantDetails',
 		  'data-position':"right",
 		  'data-display' : "push",
-		  'data-position-fixed' : false,
+		  'data-position-fixed' : true,
 		  'data-dismissible' : false,
 		  'data-theme' : 'a'
+	  }));
+	  
+	  $('#'+pageName+'_MeetingDetails').append($('<div />', {
+		  id : pageName+'_MeetingDetailsInner'
 	  }));
   };
   
