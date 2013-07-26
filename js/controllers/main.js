@@ -1896,6 +1896,7 @@ var EXELON = (function (r, $) {
                           var cSubStep = cStep.SubSteps[step_substep[1] - 1];
 			  cSubStep.Input = $(this).val();
 			  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+			  r.configureUpdateSubStep(cSubStep);
 		      });
 		  $('#ConfigureListInput_' + cStep.Number + '_' + cSubStep.Number).change(function() {
 			  var step_substep_pattern = /\d+/g;
@@ -1905,6 +1906,7 @@ var EXELON = (function (r, $) {
                           var cSubStep = cStep.SubSteps[step_substep[1] - 1];
                           cSubStep.Input = $(this).val();
                           $('#ConfigureInput_' + cStep.Number + '_' + cSubStep.Number).val(cSubStep.Input);
+			  r.configureUpdateSubStep(cSubStep);
 		      });
 		  // ---
 	      }
@@ -1925,6 +1927,7 @@ var EXELON = (function (r, $) {
 	  }
 	  $("#ConfigureCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
 	  $("#ConfigureListCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
+	  r.configureUpdateSubStep(substep);
       } catch (e) {
 	  RSKYBOX.log.error(e,'setConfigureCheckBoxPair');
       }
@@ -1936,14 +1939,14 @@ var EXELON = (function (r, $) {
           RSKYBOX.log.info('entering','main.js.configureUpdateSubStep');
 
           var closeurl = baseUrl + 'merchants/configuration/update';
-          var jsonobj = {Id: subStep.Id,
-	                 Code: subStep.Code,
-	                 Input: subStep.Input,
-	                 IsComplete: subStep.IsComplete};
+          var jsonobj = JSON.stringify([{Id: subStep.Id,
+					 Code: subStep.Code,
+					 Input: subStep.Input,
+					 IsCompleted: subStep.IsCompleted}]);
 
           $.ajax({
                   type: 'POST',
-                      data: JSON.stringify(jsonobj),
+                      data: jsonobj,
                       datatype: 'json',
                       contentType: 'application/json',
                       url: closeurl,
@@ -1953,9 +1956,11 @@ var EXELON = (function (r, $) {
                       try {
 			  RSKYBOX.log.info('finished','configureUpdateSubStep');
                       } catch (e) {
-                          RSKYBOX.log.error(e, 'configureUpdateSubStep.success');
-                      }
-                  }
+                          RSKYBOX.log.error(e,'configureUpdateSubStep.success');
+                      }},  
+		      error: function(error){
+		      alert('Could not update merchant configuration process, error code:' + error.status);
+		  }
               });
       } catch (e) {
           RSKYBOX.log.error(e, 'configureUpdateSubStep');
