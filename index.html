@@ -707,9 +707,20 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
 	  <ul data-role="listview" data-inset="true" id="ConfigurationNotesList_Step">
 	    <li data-role="list-divider" id="ConfigurationInsertNotes_Step" style="height:50px; padding-bottom:0px">
 	      <h2>Notes</h2>
-	      <a data-role="button" data-icon="plus" data-iconpos="notext" id="ConfigurationNotesAdd_Step" style="position:relative; bottom:30px; left:98%; padding:0px"></a>
+	      <a href="#ConfigureNewNote" data-rel="popup" data-role="button" data-icon="plus" data-iconpos="notext" id="ConfigurationNotesAdd_Step" style="position:relative; bottom:30px; left:97%; padding:0px"></a>
 	    </li>
 	  </ul>
+	</div>
+
+        <div data-role="popup" id="ConfigureNewNote">
+	  <form>
+            <div style="padding:10px 10px">
+              <h3>New Configure Step Note</h3>
+              <textarea id="ConfigureNewNoteContents"></textarea>
+              <a data-role="button" data-icon="check" data-iconpos="notext" style="background-color:green" data-inline="true" id="ConfigureNewNoteSubmit"></a>
+              <a data-role="button" data-icon="delete" data-iconpos="notext" style="background-color:red" data-inline="true" id="ConfigureNewNoteCancel"></a>
+            </div>
+	  </form>
 	</div>
       
     </script>
@@ -727,7 +738,7 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
       <li id="ConfigureNote_Step_Id" data-icon="false" style="padding-top:20px; padding-bottom:0px">
 	<p><strong><%= "By: " + LastModifiedBy + "<br/>Time: " + LastUpdated.toString()%></strong></p>
 	<p><%= Note %></p>
-	<a data-role="button" data-icon="gear" data-iconpos="notext" style="position:relative; bottom:40px; left:97%; padding:0px"></a>
+	<a data-role="button" data-icon="gear" data-iconpos="notext" style="position:relative; bottom:40px; left:95%; padding:0px"></a>
       </li>
     </script>
 
