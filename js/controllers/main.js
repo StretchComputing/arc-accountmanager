@@ -1929,9 +1929,22 @@ var EXELON = (function (r, $) {
 	  } else {
 	      var isChecked = false;
 	  }
-	  $("#ConfigureCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
-	  $("#ConfigureListCheck_" + step.Number + "_" + substep.Number).prop('checked',isChecked).checkboxradio('refresh');
+
 	  r.configureUpdateSubStep(substep);
+
+	  var wizardCheck = $("#ConfigureCheck_" + step.Number + "_" + substep.Number);
+	  var listCheck = $("#ConfigureListCheck_" + step.Number + "_" + substep.Number);
+
+	  if(wizardCheck.parent().hasClass('ui-checkbox'))
+	      wizardCheck.prop('checked',isChecked).checkboxradio('refresh');
+	  else
+	      wizardCheck.prop('checked',isChecked).checkboxradio();
+	 
+	  if(listCheck.parent().hasClass('ui-checkbox'))
+	      listCheck.prop('checked',isChecked).checkboxradio('refresh');
+	  else
+	      listCheck.prop('checked',isChecked).checkboxradio();
+
       } catch (e) {
 	  RSKYBOX.log.error(e,'setConfigureCheckBoxPair');
       }
