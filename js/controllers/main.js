@@ -1773,7 +1773,7 @@ var EXELON = (function (r, $) {
 	  for(var noteIndex = 0; noteIndex < r.merchantNotes1.length; noteIndex++) {
 	      cNote = r.merchantNotes1[noteIndex];
 	      
-	      if(cNote.Type = "NOTE_SALES") {
+	      if(cNote.Type == "NOTE_CONFIG") {
 		  noteHtml = configureInsertNoteTemplate(cNote);
 		  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + cNote.Id);
 		  allNotesHtml += noteHtml;
@@ -1830,6 +1830,11 @@ var EXELON = (function (r, $) {
 	      nextStepAdded = nextStepAdded.replace("ConfigurationNotesList_Step","ConfigurationNotesList_" + cStep.Number);
 	      nextStepAdded = nextStepAdded.replace("ConfigurationInsertNotes_Step","ConfigurationInsertNotes_" + cStep.Number);
 	      nextStepAdded = nextStepAdded.replace("ConfigurationNotesAdd_Step","ConfigurationNotesAdd_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureNewNoteOpen_Step","ConfigureNewNote_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureNewNote_Step","ConfigureNewNote_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureNewNoteContents_Step","ConfigureNewNoteContents_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureNewNoteSubmit_Step","ConfigureNewNoteSubmit_" + cStep.Number);
+	      nextStepAdded = nextStepAdded.replace("ConfigureNewNoteCancel_Step","ConfigureNewNoteCancel_" + cStep.Number);
 	      
 	      $("#ConfigureStep_" + cStep.Number).append(nextStepAdded);
 	      
@@ -1867,30 +1872,56 @@ var EXELON = (function (r, $) {
 	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
 	      
 	      cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+	      
+	      //set Navigation between Pages up
 	      if(stepIndex == 0){
 		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#configure');
-		  $("ConfigureStep_" + cStep.Number).on('swiperight',function() {
+		  $("#ConfigureStep_" + cStep.Number).on('swiperight',function() {
 			  $.mobile.changePage('#configure',{transition:'slide', reverse:true, changeHash:true});
 		      });
 	      } else { 
 		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number - 1));
-		  $("ConfigureStep_" + cStep.Number).on('swiperight',function() {
+		  $("#ConfigureStep_" + cStep.Number).on('swiperight',function() {
                           $.mobile.changePage('#ConfigureStep_' + (cStep.Number - 1), {transition:'slide', reverse:true, changeHash:true});
                       });
 	      }
 
 	      if(stepIndex == r.merchantBeingConfigured.Configuration[0].Steps.length - 1){
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#configure');
-		  $("ConfigureStep_" + cStep.Number).on('swipeleft',function() {
+		  $("#ConfigureStep_" + cStep.Number).on('swipeleft',function() {
                           $.mobile.changePage('#configure',{transition:'slide', changeHash:true});
                       });
 	      } else {
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number + 1));
-		  $("ConfigureStep_" + cStep.Number).on('swipeleft',function() {
+		  $("#ConfigureStep_" + cStep.Number).on('swipeleft',function() {
                           $.mobile.changePage('#ConfigureStep_' + (cStep.Number + 1), {transition:'slide', changeHash:true});
                       });
 	      }
-		  
+	      // ---
+	      
+	      //set handlers for entering Notes
+	      $('#ConfigureNewNoteSubmit_' + cStep.Number).attr('StepIndex',stepIndex);
+	      $('#ConfigureNewNoteCancel_' + cStep.Number).attr('StepIndex',stepIndex);
+	      //$('#ConfigurationNotesAdd_' + cStep.Number).on('click',function(){
+	      //      $('#ConfigureNewNote_' + cStep.Number).popup('open',{transition:"slide", positionTo:"window"});
+	      //	  });
+	      $('#ConfigureNewNoteSubmit_' + cStep.Number).on('click',function(){
+		      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
+		      var newConfigNote = {MerchantId: r.merchantBeingConfigured.Id,
+					   Note: $('#ConfigureNewNoteContents_' + cStep.Number).text(),
+					   Type: 'NOTE_CONFIG',
+					   ConfigurationStepId: cStep.Id};
+		      r.createConfigurationNote(newConfigNote,cStep.Number);
+		      $('#ConfigureNewNoteContents_' + cStep.Number).val("");
+		      $('#ConfigureNewNote_' + cStep.Number).popup('close');
+		  });
+	      $('#ConfigureNewNoteCancel_' + cStep.Number).on('click',function(){
+		      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
+		      $('#ConfigureNewNoteContents_' + cStep.Number).val("");
+		      $('#ConfigureNewNote_' + cStep.Number).popup('close');
+		  });
+	      // ---
+
 	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
 		  
 		  cSubStep = cStep.SubSteps[subStepIndex];
@@ -1996,7 +2027,48 @@ var EXELON = (function (r, $) {
       }
   };
 
-  //the ajax call for configuration update of a substep (apply later whenever box checked? or page change?)
+  //the ajax call for create configuration note
+  r.createConfigurationNote = function(newConfigNote,stepnumber) {
+      try{
+          RSKYBOX.log.info('entering','main.js.createConfigurationNote');
+
+          var closeurl = baseUrl + 'merchants/notes/create';
+          var jsonobj = JSON.stringify(newConfigNote);
+
+          $.ajax({
+                  type: 'POST',
+                      data: jsonobj,
+                      datatype: 'json',
+                      contentType: 'application/json',
+                      url: closeurl,
+                      statuscode: r.statusCodeHandlers(),
+                      headers: {'Authorization' : r.getAuthorizationHeader()},
+                      success: function(data, status, jqXHR) {
+                      try {
+                          RSKYBOX.log.info('finished','createConfigurationNote');
+
+			  var configureInsertNoteTemplate = _.template($('#ConfigureInsertNoteTemplate').html());
+			  var noteHtml;
+
+			  noteHtml = configureInsertNoteTemplate(data.Results);
+			  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + data.Results.Id);
+			  noteHtml = noteHtml.replace("COnfigureEditNote_Step_Id","ConfigureEditNote_" + stepnumber + "_" +  data.Results.Id);
+							  
+			  $('#ConfigurationInsertNotes_' + stepnumber).after(noteHtml);
+			  $('#ConfigurationNotesList_' + stepnumber).listview('refresh');
+                      } catch (e) {
+                          RSKYBOX.log.error(e,'createConfigurationNote.success');
+                      }},
+                      error: function(error){
+                      alert('Could not create new Configuration Note, error code:' + error.status);
+                  }
+              });
+      } catch (e) {
+          RSKYBOX.log.error(e, 'createConfigurationNote');
+      }
+  };
+
+  //the ajax call for configuration update of a substep
   r.configureUpdateSubStep = function(subStep) {
       try{
           RSKYBOX.log.info('entering','main.js.configureUpdateSubStep');
