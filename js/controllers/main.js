@@ -133,7 +133,7 @@ var EXELON = (function (r, $) {
         r.handleMeetings("selectMerchant")
         
         if(!r.merchantList)
-        	r.getMerchantsLoc();
+        	r.getMerchantsLoc(10);
         else
         	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
         
@@ -650,25 +650,26 @@ var EXELON = (function (r, $) {
   };
 
   /*Attempts to get the current location and then calls getMerchants*/
-  r.getMerchantsLoc = function(){
+  r.getMerchantsLoc = function(numMerchants){
 	  var success = function(location){
 		  r.currLoc = { Longitude : location.coords.longitude,
 				        Latitude : location.coords.latitude };
-		  r.getMerchants();
+		  r.getMerchants(numMerchants);
 	  }
-	  var failure = function(){ r.getMerchants();};
+	  var failure = function(){ r.getMerchants(numMerchants);};
 	  navigator.geolocation.getCurrentPosition(success,failure);
   };
   
-  r.getMerchants = function() {
+  r.getMerchants = function(numMerchants) {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
       var jsonobj = {Detailed : true, Config:true};
+	  jsonobj.Top = numMerchants;
+	  
       if(r.currLoc){
     	  jsonobj.Latitude = r.currLoc.Latitude;
     	  jsonobj.Longitude = r.currLoc.Longitude;
-    	  jsonobj.Top = 10;
       }
 
       $.ajax({
@@ -682,9 +683,9 @@ var EXELON = (function (r, $) {
         success: function(data, status, jqXHR) {
                     try {
                     	r.merchantList = data.Results;
+                    	r.merchantList.numExpected = numMerchants;
                     	r.fixMerchants(r.merchantList);
                     	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
-                    	var jtest = 5;
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
                     }
@@ -934,6 +935,8 @@ var EXELON = (function (r, $) {
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
 		  
+		  location.empty();
+		  
 		  var merchantTemplate = _.template($('#selectMerchantTemplate').html());
 		  
 		  var templateData = {};
@@ -949,6 +952,16 @@ var EXELON = (function (r, $) {
 			  templateData.index = i.toString();
 			
 			  location.append(merchantTemplate(templateData));
+		  }
+		  
+		  //i.e. if there are more to merchants to be recieved
+		  if( merchantList.numExpected === merchantList.length){
+			  var t = _.template($('#selectMerchantListMoreTemplate').html())
+			  location.append(t());
+			  
+			  $('#selectMerchantListMore').bind('click', function(){
+				  r.getMerchants(merchantList.numExpected+10);
+			  });
 		  }
 		  
 		  $('#selectMerchantContent').trigger('create');
