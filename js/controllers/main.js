@@ -63,8 +63,11 @@ var EXELON = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
         r.attachMeeting("selectMerchant");
         
+        /*Global operations*/
         $.mobile.popup.prototype.options.history = false;
         
+        
+        /*Operations specifically for the selectMerchant page*/
         var template = _.template($('#selectMerchantSidebarTemplate').html());
         
         $('#selectMerchant').append(template({UserName: r.getUserName(),
@@ -250,7 +253,8 @@ var EXELON = (function (r, $) {
     		
     		page.on('click', '#merchantDisplayMaps', function(){
     			var m = r.activeMerchant;
-    			r.mapsCenter = new google.maps.LatLng(m.Latitude,
+    			if(m.Latitude !== "" && m.Longitude !== "")
+    				r.mapsCenter = new google.maps.LatLng(m.Latitude,
     												  m.Longitude);
     			$.mobile.changePage('#maps', {transition:'slide'});
     		});
@@ -1468,16 +1472,45 @@ var EXELON = (function (r, $) {
 	  		  Type : 'NOTE_MEETING',
 	  		  Note : noteContent
 	  };
-	  r.activeMeeting.Notes.push(note);
 	  
 	  var noteList = $('.meetingNotesList', $.mobile.activePage);
-	  noteList.prepend($('<li />', {
-		  text : noteContent
-	  }));
-	  noteList.listview('refresh');
+	  var t = _.template($('#merchantDetailsNotesListTemplate').html());
+	  
+	  noteList.prepend(t({
+		  i : r.activeMerchant.Notes.nextIndex,
+		  Note : noteContent
+		  }));
+	  
+	  r.activeMeeting.Notes.push(note);
+	  r.activeMeeting.Notes.nextIndex++;
+	  
 	  noteList.trigger('create');
+	  noteList.listview('refresh');
 	  
   });
+  
+  $(document).on('click', '.meetingNoteEdit', function(){
+	  $('.meetingDetailsNote').each(function(){
+		 var mode = $(this).attr('deleteMode') === "true";
+		 if(mode){
+			 $(this).attr('deleteMode','false');
+		 }
+		 else{
+			 $(this).attr('deleteMode','true');
+		 }
+		 
+		 $('.ui-icon', $(this)).toggle();
+		 
+	  });
+  });
+  
+  $(document).on('click', '.meetingDetailsNote', function(){
+	  if($(this).attr('deleteMode') === "true"){
+		  var index = $(this).attr('index');
+		  delete r.activeMeeting.Notes[index];
+		  $(this).remove();
+	  }
+  })
   
   $(document).on('click', '.meetingEnd', function(){
 	 r.activeMeeting.End = new Date();

@@ -277,7 +277,7 @@
 				Once it has been deleted it cannot be recovered.</h1>
 			<div class="ui-grid-a">
 				<div class="ui-block-a">
-OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
+					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
 				</div>
 				<div class="ui-block-b">
 					<button id="selectMerchantDeleteNo" data-icon="back">No</button>
@@ -809,18 +809,30 @@ OA					<button id="selectMerchantDeleteYes" data-icon="check">Yes</button>
 			<li class="meetingAddNoteLI">
 				<div data-role="fieldcontain">
 					<textarea class="meetingAddNoteField" rows="10" cols="30"></textarea>
-					<button data-icon="check" data-iconpos="notext" class="meetingNoteSave"></button>
 				</div>
+				<button data-icon="check" data-iconpos="notext" class="meetingNoteSave" data-inline="true"></button>
+				<button data-icon="gear" data-iconpos="notext" class="meetingNoteEdit" data-inline="true"></button>
 			</li>
 		</ul>
 		<ul data-role="listview" class="meetingNotesList" data-inset="true">
+
+			<% Notes.nextIndex = Notes.length; %>
 			<% for(var i = Notes.length-1; i >= 0; i--) { %>
-				<li><%= Notes[i].Note %></li>
+				<% if(Notes[i]){ %>
+					<% var t = _.template($('#merchantDetailsNotesListTemplate').html()); %>
+					<%= t({i : i, Note : Notes[i].Note}) %>
+				<% } %>
 			<% } %>
 		</ul>
 
 		</div><!-- collapsible -->
 
+	</script>
+	
+	<script type="text/template" id="merchantDetailsNotesListTemplate">
+		<li class="meetingDetailsNote" index="<%= i %>" deleteMode="false" data-icon="delete">
+			<a><%= Note %></a>
+		</li>
 	</script>
 
     <script type="text/template" id="leftPanelTemplate">

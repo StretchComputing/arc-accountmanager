@@ -184,3 +184,7 @@ li.reqAccountingli{
   .meetingEnd {
   	background : hsl(0, 100%, 63%);
   }
+  
+  .meetingDetailsNote .ui-icon{
+  	display:none;
+  }
