@@ -335,7 +335,8 @@ var EXELON = (function (r, $) {
     		 $('#meetingStartButton').bind('click', function(){
     			 if(!r.activeMeeting){
     				 r.activeMeeting = {Members : [],
-    						            Notes : []};
+    						            Notes : [],
+    						            deleteMode : false};
     			 }
     			 r.activeMeeting.Merchant = r.activeMerchant;
     			 r.activeMeeting.Start = new Date();
@@ -352,6 +353,7 @@ var EXELON = (function (r, $) {
     			 $('#meetingStartButton').hide();
     			 r.handleMeetings('merchantDisplay');
     			 
+    			 $('.merchantDetails', $.mobile.currentPage).panel('open')
     			 /*Cleaning up*/
     			 $('#meetingStartMembers').empty();
     			 $('#meetingStartAbout').val('');
@@ -1476,21 +1478,27 @@ var EXELON = (function (r, $) {
 	  var noteList = $('.meetingNotesList', $.mobile.activePage);
 	  var t = _.template($('#merchantDetailsNotesListTemplate').html());
 	  
-	  noteList.prepend(t({
-		  i : r.activeMerchant.Notes.nextIndex,
-		  Note : noteContent
+	  var note = $(t({
+		  i : r.activeMeeting.Notes.nextIndex,
+		  Note : noteContent,
+		  deleteMode : r.activeMeeting.deleteMode
 		  }));
+	  noteList.prepend(note)
 	  
 	  r.activeMeeting.Notes.push(note);
 	  r.activeMeeting.Notes.nextIndex++;
 	  
 	  noteList.trigger('create');
 	  noteList.listview('refresh');
+	  if(r.activeMeeting.deleteMode){//Add delete button if deleteMode is active
+		  $('.ui-icon', note).toggle();
+	  }
 	  
   });
   
   $(document).on('click', '.meetingNoteEdit', function(){
 	  $('.meetingDetailsNote').each(function(){
+		  r.activeMeeting.deleteMode = !r.activeMeeting.deleteMode
 		 var mode = $(this).attr('deleteMode') === "true";
 		 if(mode){
 			 $(this).attr('deleteMode','false');
