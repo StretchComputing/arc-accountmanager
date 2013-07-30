@@ -1912,7 +1912,7 @@ var EXELON = (function (r, $) {
 		      var configNoteNew = {MerchantId: r.merchantBeingConfigured.Id,
 					   Note: $('#ConfigureNewNoteContents_' + cStep.Number).val(),
 					   Type: 'NOTE_CONFIG',
-					   ConfigurationStepId: cStep.Id};
+					   MerchantConfigurationId: cStep.Id};
 		      r.createConfigurationNote(configNoteNew,cStep.Number);
 		      $('#ConfigureNewNoteContents_' + cStep.Number).val("");
 		      $('#ConfigureNewNote_' + cStep.Number).popup('close');
@@ -2036,7 +2036,7 @@ var EXELON = (function (r, $) {
 	  var jsonobj = JSON.stringify({MerchantId : configNoteNew.MerchantId,
 					'Note' : configNoteNew.Note,
 					'Type' : configNoteNew.Type,
-					'ConfigurationStepId' : configNoteNew.ConfigurationStepId});
+					'MerchantConfigurationId' : configNoteNew.ConfigurationStepId});
 
 	  $.ajax({
 		  type: 'POST',
@@ -2053,9 +2053,9 @@ var EXELON = (function (r, $) {
 			  var configureInsertNoteTemplate = _.template($('#ConfigureInsertNoteTemplate').html());
 			  var noteHtml;
 
-			  noteHtml = configureInsertNoteTemplate(data.Results);
-			  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + data.Results.Id);
-			  noteHtml = noteHtml.replace("ConfigureEditNote_Step_Id","ConfigureEditNote_" + stepnumber + "_" +  data.Results.Id);
+			  noteHtml = configureInsertNoteTemplate(data.Results[0]);
+			  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepnumber + "_" + data.Results[0].Id);
+			  noteHtml = noteHtml.replace("ConfigureEditNote_Step_Id","ConfigureEditNote_" + stepnumber + "_" +  data.Results[0].Id);
 							  
 			  $('#ConfigurationInsertNotes_' + stepnumber).after(noteHtml);
 			  $('#ConfigurationNotesList_' + stepnumber).listview('refresh');
