@@ -1882,6 +1882,7 @@ var EXELON = (function (r, $) {
 	      } else { 
 		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number - 1));
 		  $("#ConfigureStep_" + cStep.Number).on('swiperight',function() {
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[Number($(this).attr('stepnumber')) - 1];
                           $.mobile.changePage('#ConfigureStep_' + (cStep.Number - 1), {transition:'slide', reverse:true, changeHash:true});
                       });
 	      }
@@ -1894,6 +1895,7 @@ var EXELON = (function (r, $) {
 	      } else {
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number + 1));
 		  $("#ConfigureStep_" + cStep.Number).on('swipeleft',function() {
+			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[Number($(this).attr('stepnumber')) - 1];
                           $.mobile.changePage('#ConfigureStep_' + (cStep.Number + 1), {transition:'slide', changeHash:true});
                       });
 	      }
@@ -1907,11 +1909,11 @@ var EXELON = (function (r, $) {
 	      //	  });
 	      $('#ConfigureNewNoteSubmit_' + cStep.Number).on('click',function(){
 		      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
-		      var newConfigNote = {MerchantId: r.merchantBeingConfigured.Id,
-					   Note: $('#ConfigureNewNoteContents_' + cStep.Number).text(),
+		      var configNoteNew = {MerchantId: r.merchantBeingConfigured.Id,
+					   Note: $('#ConfigureNewNoteContents_' + cStep.Number).val(),
 					   Type: 'NOTE_CONFIG',
 					   ConfigurationStepId: cStep.Id};
-		      r.createConfigurationNote(newConfigNote,cStep.Number);
+		      r.createConfigurationNote(configNoteNew,cStep.Number);
 		      $('#ConfigureNewNoteContents_' + cStep.Number).val("");
 		      $('#ConfigureNewNote_' + cStep.Number).popup('close');
 		  });
@@ -1935,7 +1937,7 @@ var EXELON = (function (r, $) {
 			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
 			  var cSubStep = cStep.SubSteps[step_substep[1] - 1];
 			  cSubStep.IsCompleted = isChecked;
-			  r.setConfigureCheckBoxPair(cStep, cSubStep);
+			  r.setConfigureCheckBoxPair(cStep, cSubStep, true);
 		      });
 		  $("#ConfigureListCheck_" + cStep.Number + "_" + cSubStep.Number).click(function() {
                           var step_substep_pattern = /\d+/g;
@@ -1945,17 +1947,14 @@ var EXELON = (function (r, $) {
 			  var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
 			  var cSubStep = cStep.SubSteps[step_substep[1] - 1];
 			  cSubStep.IsCompleted = isChecked;
-			  r.setConfigureCheckBoxPair(cStep, cSubStep);
+			  r.setConfigureCheckBoxPair(cStep, cSubStep, true);
                       });
 		  // ---
 	      
 		  //Initialize checkboxes
-		  if(cSubStep.IsCompleted){
-		      $("#ConfigureCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
-		      $("#ConfigureListCheck_" + cStep.Number + "_" + cSubStep.Number).prop('checked',true);
-		  }
+		  r.setConfigureCheckBoxPair(cStep, cSubStep,false);
 		  // ---
-		  
+
 		  //Initialize text Inputs
 		  if(cSubStep.Input && cSubStep.Input != '#NA') {
 		      if(cSubStep.IsCompleted){
@@ -1997,7 +1996,7 @@ var EXELON = (function (r, $) {
       }
   };
   
-  r.setConfigureCheckBoxPair = function(step,substep) {
+  r.setConfigureCheckBoxPair = function(step,substep,isUpdate) {
       try{  
 	  RSKYBOX.log.info('entering','main.js.setConfigureCheckBoxPair');
 	  
@@ -2006,8 +2005,9 @@ var EXELON = (function (r, $) {
 	  } else {
 	      var isChecked = false;
 	  }
-
-	  r.configureUpdateSubStep(substep);
+	  
+	  if(isUpdate)
+	      r.configureUpdateSubStep(substep);
 
 	  var wizardCheck = $("#ConfigureCheck_" + step.Number + "_" + substep.Number);
 	  var listCheck = $("#ConfigureListCheck_" + step.Number + "_" + substep.Number);
@@ -2028,22 +2028,25 @@ var EXELON = (function (r, $) {
   };
 
   //the ajax call for create configuration note
-  r.createConfigurationNote = function(newConfigNote,stepnumber) {
+  r.createConfigurationNote = function(configNoteNew,stepnumber) {
       try{
           RSKYBOX.log.info('entering','main.js.createConfigurationNote');
+	  
+	  var closeurl = baseUrl + 'merchants/notes/create';
+	  var jsonobj = JSON.stringify({MerchantId : configNoteNew.MerchantId,
+					'Note' : configNoteNew.Note,
+					'Type' : configNoteNew.Type,
+					'ConfigurationStepId' : configNoteNew.ConfigurationStepId});
 
-          var closeurl = baseUrl + 'merchants/notes/create';
-          var jsonobj = JSON.stringify(newConfigNote);
-
-          $.ajax({
-                  type: 'POST',
-                      data: jsonobj,
-                      datatype: 'json',
-                      contentType: 'application/json',
-                      url: closeurl,
-                      statuscode: r.statusCodeHandlers(),
-                      headers: {'Authorization' : r.getAuthorizationHeader()},
-                      success: function(data, status, jqXHR) {
+	  $.ajax({
+		  type: 'POST',
+		      datatype: 'json',
+		      data : jsonobj,
+		      contentType: 'application/json',
+		      url: closeurl,
+		      statuscode: r.statusCodeHandlers(),
+		      headers: {'Authorization' : r.getAuthorizationHeader()},
+		      success: function(data){
                       try {
                           RSKYBOX.log.info('finished','createConfigurationNote');
 
@@ -2052,7 +2055,7 @@ var EXELON = (function (r, $) {
 
 			  noteHtml = configureInsertNoteTemplate(data.Results);
 			  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + data.Results.Id);
-			  noteHtml = noteHtml.replace("COnfigureEditNote_Step_Id","ConfigureEditNote_" + stepnumber + "_" +  data.Results.Id);
+			  noteHtml = noteHtml.replace("ConfigureEditNote_Step_Id","ConfigureEditNote_" + stepnumber + "_" +  data.Results.Id);
 							  
 			  $('#ConfigurationInsertNotes_' + stepnumber).after(noteHtml);
 			  $('#ConfigurationNotesList_' + stepnumber).listview('refresh');
