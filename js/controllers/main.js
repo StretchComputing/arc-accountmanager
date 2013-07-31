@@ -548,7 +548,7 @@ var EXELON = (function (r, $) {
     		search.append(t(r));
     		search.trigger('create')
     		
-    		var chartsURL = 'https://chart.googleapis.com/chart?chst='
+    		var chartsURL = 'https://chart.googleapis.com/chart?'
     		
     		if(!r.mapsCenter)
     			r.mapsCenter = new google.maps.LatLng(41.8500, -87.6500);
@@ -565,7 +565,8 @@ var EXELON = (function (r, $) {
     		r.map = map; //For access in pagewide registrations
     		
     		var markerClick = function(e){//Called when a marker is clicked
-    			r.mapsSelectMerchant( r.merchantList[this.title]);
+    			if(this.title !== 'You Are Here')
+    				r.mapsSelectMerchant( r.merchantList[this.title]);
     		};
     		
     		for(var i = 0; i < r.merchantList.length; i++){
@@ -573,7 +574,7 @@ var EXELON = (function (r, $) {
     												r.merchantList[i].Longitude);
     			var color = r.getColor(r.getPos(r.merchantList[i]));
     			var chld = 'chld=|'+color+'|'
-    			var iconURL = chartsURL + 'd_map_pin_letter_withshadow&' + chld;
+    			var iconURL = chartsURL + 'chst=d_map_pin_letter_withshadow&' + chld;
     			
     			var marker = new google.maps.Marker({
     				'position' : LatLng,
@@ -624,6 +625,69 @@ var EXELON = (function (r, $) {
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.flashCheck');
       }
+    },
+    
+    cohortReportBeforeCreate : function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.cohortReportBeforeCreate');
+    		
+    		var content = $('#cohortReportContent');
+    		
+    		$("input[type='radio']", $('#cohortReportFooter')).bind('change', function(){
+    			r.changeTimescale($(this).val());
+    		});
+    		
+    		content.on('click', '.cohortReportOverviewLI', function(){
+    			r.cohortReport.activeField = $(this).attr('name');
+    			r.cohortReportShiftFocus('Canvas');
+    			r.drawGraph(r.cohortReport.Timescale,
+    					    r.cohortReport.activeTime,
+    					    r.cohortReport.activeField);
+    		});
+    		
+    		$('#cohortReportChartBack').bind('click', function(){
+    			r.cohortReportShiftFocus('Overview');
+    			r.displayCohortReportOverview(r.cohortReport.activeTime)
+    		});
+    		
+    		$('#cohortReportItemviewButton').bind('click', function(){
+    			r.cohortReportShiftFocus('Itemview')
+    			r.displayCohortReportItemview(
+    						r.cohortReport.Timescale,
+    					    r.cohortReport.activeTime,
+    					    r.cohortReport.activeField);	
+    		});
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e,'main.js.cohortReportBeforeCreate');
+    	}
+    },
+    
+    cohortReportShow : function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.cohortReportShow');
+    		
+    		r.cohortReport = {
+    			Timescale : 'Monthly',
+    			activeTime : new Date(), //Right now!
+    			merchant : r.activeMerchant,
+    			currentFocus : 'Overview',
+    			dataCache : r.constructTestCache()
+    		};
+    		
+    		/*Set the canvas width and height to that of the page*/
+    		var ctx = $('#cohortReportChart').get(0).getContext("2d");
+    		var h = $("#cohortReportChartTitle")
+    		ctx.canvas.width = Math.floor(($(window).width() - h.width()) *.95);
+    		ctx.canvas.height = Math.floor(($(window).height() - h.height()) *.85);
+    		
+    		r.displayCohortReportOverview(r.cohortReport.activeTime);
+    		
+    		
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e, 'main.js.cohortReportShow');
+    	}
     }
 
   };
@@ -1432,6 +1496,354 @@ var EXELON = (function (r, $) {
 	$('#mapsPanelList').listview('refresh');
 	$('#mapsPanel').panel('open');
   };
+  
+  /*Helper methods for cohortReport #$%*/
+  r.drawGraph = function(timescale,date,field){
+	  var dataToGraph = r.getData(timescale,date,field);
+	  var context = $('#cohortReportChart').get(0).getContext("2d");
+	  switch(timescale){
+		  case 'Daily':
+			  break;
+		  case 'Weekly':
+			  r.graphDaily(context,dataToGraph);
+			  break;
+		  case 'Monthly':
+			  r.graphMonthly(context,dataToGraph,date);
+			  break;
+		  case 'Yearly':
+			  r.graphYearly(context,dataToGraph);
+			  break;
+		  case 'AllTime':
+			  r.graphAllTime(context,dataToGraph);
+			  break;
+	  }
+  };
+  
+  r.graphWeekly = function(chartContext, dataToGraph){
+	  var data = {
+			  labels : ["Sun","Mon","Tue","Wed","Thurs", "Fri","Sat"],
+			  datasets : [{
+				  fillColor : "rgba(220,220,220,0.5)",
+				  strokeColor : "rgba(220,220,220,1)",
+				  pointColor : "rgba(220,220,220,1)",
+				  'data' : dataToGraph
+			  }],
+	  };
+	  
+	  var options = {
+			  animation : false,
+	  };
+	  
+	  new Chart(chartContext).Line(data,options);
+	  
+  };
+  
+  r.graphMonthly = function(chartContext, dataToGraph, date){
+	  var data = {
+			  labels : r.getMonthLabels(date),
+			  datasets : [{
+				  fillColor : "rgba(220,220,220,0.5)",
+				  strokeColor : "rgba(220,220,220,1)",
+				  pointColor : "rgba(220,220,220,1)",
+				  'data' : dataToGraph
+			  }],
+	  };
+	  
+	  var options = {
+			  animation : false,
+	  };
+	  
+	  new Chart(chartContext).Line(data,options);
+  };
+  
+  r.graphYearly = function(chartContext, dataToGraph){
+	  var data = {
+			  labels : ["Jan","Feb","Mar","Apr","May", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+			  datasets : [{
+				  fillColor : "rgba(220,220,220,0.5)",
+				  strokeColor : "rgba(220,220,220,1)",
+				  pointColor : "rgba(220,220,220,1)",
+				  'data' : dataToGraph
+			  }],
+	  };
+	  
+	  var options = {
+			  animation : false,
+	  };
+	  
+	  new Chart(chartContext).Line(data,options);
+	  
+  };
+  
+  r.graphAllTime = function(chartContext, dataToGraph, merchant){
+	  var data = {
+			  labels : r.getAllTimeLabels(merchant),
+			  datasets : [{
+				  fillColor : "rgba(220,220,220,0.5)",
+				  strokeColor : "rgba(220,220,220,1)",
+				  pointColor : "rgba(220,220,220,1)",
+				  'data' : dataToGraph
+			  }],
+	  };
+	  
+	  var options = {
+			  animation : false,
+	  };
+	  
+	  new Chart(chartContext).Line(data,options);
+  };
+  
+  r.getMonthLabels = function(date){
+	  var high = new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
+	  var labels = [];
+	  for(var i = 1; i <= high; i++){
+		  labels.push(i.toString());
+	  }
+	  return labels;
+  };
+  
+  r.getAllTimeLabels = function(merchant){
+	  var startYear = 2013
+	  var endYear = new Date().getFullYear();
+	  
+	  var labels = [];
+	  for(var i = startYear; i <= endYear; i++){
+		  labels.push(i.toString());
+	  }
+	  
+	  return labels;
+  };
+  
+  r.getLabels = function(timescale, date){
+	  switch(timescale){
+	  case 'Daily':
+		  return date.toDateString();
+	  case 'Weekly':
+		  return ['Sun','Mon', 'Tue', 'Wed','Thr','Fir','Sat'];
+	  case 'Monthly':
+		  return r.getMonthLabels(date);
+	  case 'Yearly':
+		  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+	  }
+  };
+  
+  r.getData = function(timescale,date,field){
+	try{
+		RSKYBOX.log.info('entering', 'main.js.getData');
+		/*Search the Cache, if a cache miss occurs, make an ajax call for the data*/
+		//for now, just cache will be populated by prefabs
+		var cache = r.cohortReport.dataCache;
+		switch(timescale){
+			case 'AllTime':
+				return r.getDataAllTime(cache,date,field);
+			case 'Yearly':
+				return r.getDataYearly(cache[date.getFullYear],field);
+			case 'Monthly':
+				return r.getDataMonthly(cache[date.getFullYear()][date.getMonth()],date,field);
+			case 'Weekly':
+				return r.getDataWeekly(cache[date.getFullYear()][date.getMonth()],date,field);
+			case 'Daily':
+				return r.getDataDaily(cache[date.getFullYear()][date.getMonth()],date,field);
+		}
+	}  
+	catch(e){
+		RSKYBOX.log.error(e, 'main.hs.getData');
+	}
+  };
+  
+  r.getDataAllTime = function(cache,date,field){
+	  
+	  var res = [];
+	  for(var i = 2013; i <= date.getFullYear(); i++){
+		  if(cache[i].overview !== undefined)
+			  res.push(cache[i].overview[field]);
+		  else{
+			  continue;//Ajax call to get down data
+		  }
+	  }
+	  return res;
+  };
+  
+  r.getDataYearly = function(cache,field){
+	  var res = [];
+	  for(var i = 0; i < 12; i++){
+		  res.push(cache[i].overview[field]);
+	  }
+	  return res;
+  }
+  
+  r.getDataMonthly = function(cache,date,field){
+	  
+	  var high = new Date(date.getFullYear(),date.getMonth()+1,0).getDate()
+	  var res = [];
+	  for(var i = 0; i < high; i++){
+		  if(cache[i] !== undefined)
+			  res.push(cache[i].overview[field]);
+	  }
+	  return res;
+  };
+  
+  r.getDataWeekly = function(cache,date,field){
+	  var res = [];
+	  var start = r.getSunday(date)-1;
+	  for(var i = start; i < start+7; i++){
+		  res.push(cache[i].overview[field])
+	  }
+  };
+  
+  r.getDataDaily = function(cache,date,field){
+	  return cache[date.getDate].overview[field];
+  };
+  
+  r.constructTestCache = function(){
+	  var d = new Date();
+	  var cache = {};
+	  cache[d.getFullYear()] = {};
+	  cache[d.getFullYear()][d.getMonth()] = {};
+	  
+	  var pop = cache[d.getFullYear()][d.getMonth()];
+	  for(var i = 0; i < d.getDate(); i++){
+		  pop[i] = {};
+		  pop[i].overview = {
+				  'AmountProcessed' : Math.random() * 30,
+				  'PaidCredit': Math.random() * 30,
+				  'PaidDebit' : Math.random() * 30,
+				  'PaidDwolla' : Math.random() * 30,
+				  'RepeatCustomer' : Math.random() * 30,
+				  'PaidErrors' : Math.random() * 30
+		  }
+	  }
+	  return cache;
+  };
+  
+  r.getCohortOrverview = function(timescale, date, merchant){
+	try{
+		RSKYBOX.log.info('entering', 'main.js.getCohortOverview');
+		/*Ajax call. for now, just return prefab data*/
+		if(timescale === "Weekly"){
+			return {
+				'AmountProcessed' : 45.03,
+	    	    'PaidCredit' : 7,
+	    	    'PaidDebit' : 3,
+	    	    'PaidDwolla' : 1,
+	    	    'RepeatCustomer' : 1,
+	    	    'PaidErrors' : 1
+			};
+		}
+		else if(timescale === "Monthly"){
+			return {
+				'AmountProcessed' : 150.03,
+	    	    'PaidCredit' : 16,
+	    	    'PaidDebit' : 24,
+	    	    'PaidDwolla' : 4,
+	    	    'RepeatCustomer' : 8,
+	    	    'PaidErrors' : 9
+			};
+		}
+		else {
+			return {
+				'AmountProcessed' : 5089.03,
+	    	    'PaidCredit' : 100,
+	    	    'PaidDebit' : 150,
+	    	    'PaidDwolla' : 30,
+	    	    'RepeatCustomer' : 50,
+	    	    'PaidErrors' : 100
+			};
+		}
+		
+	}
+	catch(e){
+		RSKYBOX.log.error(e,'main.js.getCohortOverview');
+	}
+  };
+  
+  r.cohortReportShiftFocus = function(to){
+	  if(!r.cohortReport.Screens){
+		  r.cohortReport.Screens = {
+			'Overview' : $('#cohortReportOverview'),
+			'Itemview' : $('#cohortReportItemview'),
+			'Canvas' : $('#cohortReportCanvas'),
+			'Calendar' : $('cohortReportCalendar')
+		  };
+	  }
+	  
+	  r.cohortReport.Screens[r.cohortReport.currentFocus].hide();
+	  r.cohortReport.currentFocus = to;
+	  r.cohortReport.Screens[to].show();
+	  
+  };
+  
+  r.changeTimescale = function(newTimescale){
+	  r.cohortReport.Timescale = newTimescale;
+	  
+	  switch(r.cohortReport.currentFocus){
+	  	case 'Overview':
+	  		r.displayCohortReportOverview(r.cohortReport.activeTime);
+	  		break;
+	  	case 'Canvas':
+	  		r.drawGraph(
+	  				r.cohortReport.Timescale,
+	  				r.cohortReport.activeTime,
+	  				r.cohortReport.activeField);
+	  		break;
+	  	case 'Itemview':
+	  		r.displayCohortReportItemview(
+	  				r.cohortReport.Timescale,
+	  				r.cohortReport.activeTime,
+	  				r.cohortReport.activeField);
+	  		break;
+	  }
+  };
+  
+  r.displayCohortReportOverview = function(date){
+	  r.cohortReportShiftFocus('Overview');
+	  
+	  var overview = r.cohortReport.Screens['Overview'];
+	  
+	  overview.empty();
+	  var templateData = r.getCohortOrverview(r.cohortReport.Timescale, 
+				  date, r.cohortReport.merchant);
+	  templateData.TimescaleDisplay = r.getTimescaleDisplay(r.cohortReport.Timescale,
+			                                                date);
+	  
+	  var t = _.template($('#cohortReportOverviewTemplate').html());
+	  
+	  overview.append(t(templateData));
+	  
+	  overview.trigger('create');	  
+  };
+  
+  r.displayCohortReportItemview = function(timescale,date,field){
+
+	  var t = _.template($('#cohortReportItemviewTemplate').html());
+	  var itemview = r.cohortReport.Screens['Itemview'];
+	  itemview.empty();
+	  
+	  itemview.append(t({
+		  'Data' : r.getData(timescale,date,field),
+		  'Labels' : r.getLabels(timescale,date)}));
+	  itemview.trigger('create');
+	  
+  };
+  
+  r.getTimescaleDisplay = function(timescale,date){
+	  var disp = "Cohrot report for ";
+	  if(timescale === "Daily")
+		  return disp + date.toDateString();
+	  if(timescale === "Weekly")
+		  return disp + "the week of " + r.getSunday(date).toDateString();
+	  if(timescale === "Monthly")
+		  return disp + (date.getMonth()+1) + "/" + date.getFullYear();
+	  if(timescale === "Yearly")
+		  return disp + date.getFullYear();
+		return disp + "All Time"
+  };
+  
+  r.getSunday = function(date){
+	  var day = Math.max(1, date.getDate() - date.getDay());
+	  return new Date(date.getFullYear(),date.getMonth()+1,day);
+  };
+  /*End cohortReport helper functions #$%*/
 
   $(document).on('click', '.selectMerchant', function(e){
 		try {
@@ -2062,7 +2474,9 @@ var EXELON = (function (r, $) {
       { '#maps':                 { handler: 'mapsShow',                     events: 's' } },
       { '#configure':            { handler: 'configureBeforeCreate',  events: 'bc'  } },
       { '#configure':            { handler: 'configureInit',    events: 'i'  } },
-      { '#configure':            { handler: 'configureShow',    events: 's'   } }
+      { '#configure':            { handler: 'configureShow',    events: 's'   } },
+      { '#cohortReport' :        { handler: 'cohortReportBeforeCreate',  events: 'bc'} },
+      { '#cohortReport' :        { handler: 'cohortReportShow',          events: 's'} },
     ], r.controller);
   } catch (e) {
     RSKYBOX.log.error(e, 'EXELON.main.router');
