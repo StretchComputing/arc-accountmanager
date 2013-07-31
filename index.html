@@ -784,7 +784,7 @@
 	       <li>
 		 <div data-role="fieldcontain">
 		   <h3><%= Screenshots[imgIndex].Name %></h3>
-		   <img src="images/App/Configuration/pos_micros_web_scvs_01.png" />
+		   <img src="<%= Screenshots[imgIndex].URL %>"/>
 		 </div>
 	       </li>
 	       <% } %>
@@ -795,18 +795,18 @@
 	  <ul data-role="listview" data-inset="true" id="ConfigurationNotesList_Step">
 	    <li data-role="list-divider" id="ConfigurationInsertNotes_Step" style="height:50px; padding-bottom:0px">
 	      <h2>Notes</h2>
-	      <a href="#ConfigureNewNote" data-rel="popup" data-role="button" data-icon="plus" data-iconpos="notext" id="ConfigurationNotesAdd_Step" style="position:relative; bottom:30px; left:97%; padding:0px"></a>
+	      <a href="#ConfigureNewNoteOpen_Step" data-rel="popup" data-role="button" data-icon="plus" data-iconpos="notext" id="ConfigurationNotesAdd_Step" style="position:relative; bottom:30px; left:96%; padding:0px"></a>
 	    </li>
 	  </ul>
 	</div>
 
-        <div data-role="popup" id="ConfigureNewNote">
+        <div data-role="popup" id="ConfigureNewNote_Step">
 	  <form>
             <div style="padding:10px 10px">
               <h3>New Configure Step Note</h3>
-              <textarea id="ConfigureNewNoteContents"></textarea>
-              <a data-role="button" data-icon="check" data-iconpos="notext" style="background-color:green" data-inline="true" id="ConfigureNewNoteSubmit"></a>
-              <a data-role="button" data-icon="delete" data-iconpos="notext" style="background-color:red" data-inline="true" id="ConfigureNewNoteCancel"></a>
+              <textarea id="ConfigureNewNoteContents_Step"></textarea>
+              <a data-role="button" StepIndex="" data-icon="check" data-iconpos="notext" style="background-color:green" data-inline="true" id="ConfigureNewNoteSubmit_Step"></a>
+              <a data-role="button" StepIndex="" data-icon="delete" data-iconpos="notext" style="background-color:red" data-inline="true" id="ConfigureNewNoteCancel_Step"></a>
             </div>
 	  </form>
 	</div>
@@ -826,7 +826,7 @@
       <li id="ConfigureNote_Step_Id" data-icon="false" style="padding-top:20px; padding-bottom:0px">
 	<p><strong><%= "By: " + LastModifiedBy + "<br/>Time: " + LastUpdated.toString()%></strong></p>
 	<p><%= Note %></p>
-	<a data-role="button" data-icon="gear" data-iconpos="notext" style="position:relative; bottom:40px; left:95%; padding:0px"></a>
+	<a data-role="button" data-icon="gear" data-iconpos="notext" style="position:relative; bottom:40px; left:95%; padding:0px" id="ConfigureEditNote_Step_Id"></a>
       </li>
     </script>
 
