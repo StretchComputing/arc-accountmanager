@@ -1770,12 +1770,13 @@ var EXELON = (function (r, $) {
 	  var noteHtml;
 	  var cNote;
 	  
-	  for(var noteIndex = 0; noteIndex < r.merchantNotes1.length; noteIndex++) {
+	  for(var noteIndex = (r.merchantNotes1.length - 1); noteIndex >= 0; noteIndex--) {
 	      cNote = r.merchantNotes1[noteIndex];
 	      
 	      if(cNote.Type == "NOTE_CONFIG") {
 		  noteHtml = configureInsertNoteTemplate(cNote);
 		  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + cNote.Id);
+		  noteHtml = noteHtml.replace("ConfigureEditNote_Step_Id","ConfigureEditNote_" + stepNumber + "_" +  cNote.Id);
 		  allNotesHtml += noteHtml;
 	      }
 	  } 
@@ -2059,6 +2060,8 @@ var EXELON = (function (r, $) {
 							  
 			  $('#ConfigurationInsertNotes_' + stepnumber).after(noteHtml);
 			  $('#ConfigurationNotesList_' + stepnumber).listview('refresh');
+			  $('#ConfigureEditNote_' + stepnumber + '_' + data.Results[0].Id).button().button('refresh');
+
                       } catch (e) {
                           RSKYBOX.log.error(e,'createConfigurationNote.success');
                       }},
