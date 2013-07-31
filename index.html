@@ -820,7 +820,7 @@
 			<% for(var i = Notes.length-1; i >= 0; i--) { %>
 				<% if(Notes[i]){ %>
 					<% var t = _.template($('#merchantDetailsNotesListTemplate').html()); %>
-					<%= t({i : i, Note : Notes[i].Note}) %>
+					<%= t({i : i, Note : Notes[i].Note, deleteMode : false}) %>
 				<% } %>
 			<% } %>
 		</ul>
@@ -829,10 +829,7 @@
 
 	</script>
 	
-	<script type="text/template" id="merchantDetailsNotesListTemplate">
-		<li class="meetingDetailsNote" index="<%= i %>" deleteMode="false" data-icon="delete">
-			<a><%= Note %></a>
-		</li>
+	<script type="text/template" id="merchantDetailsNotesListTemplate"><li class="meetingDetailsNote" index="<%= i %>" deleteMode="<%=deleteMode%>" data-icon="delete"><a><%= Note %></a></li>
 	</script>
 
     <script type="text/template" id="leftPanelTemplate">
