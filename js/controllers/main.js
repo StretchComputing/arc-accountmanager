@@ -313,7 +313,11 @@ var EXELON = (function (r, $) {
     		$('#merchantDisplaySidebarEdit').bind('click', function(){
     			r.merchantToEdit = r.activeMerchant;
     			$.mobile.changePage('#editMerchant', {transition:'slide'});
-    		});
+		});
+
+		$('#merchantDisplaySidebarConfigure').bind('click',function(){
+			r.getMerchantConfigurationInfo(r.activeMerchant.Id);
+		});
     		
     		$('#merchantDisplayDeleteYes').bind('click', function(){
     			r.deleteMerchant(r.activeMerchant); //API Call
@@ -1448,16 +1452,16 @@ var EXELON = (function (r, $) {
 
   $(document).on('click', '.configure', function(e){
 		try {
-			if($.mobile.activePage.is('#configure')) {
-				$('#configure_leftPanel').panel("close");
-			} else {
-				$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
-			}
-			return false;
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.click.configure');
-    }
-  });
+		    if($.mobile.activePage.is('#configure')) {
+		    	$('#configure_leftPanel').panel("close");
+		    } else {
+		    	$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
+		    }
+		    return false;
+		} catch (e) {
+		    RSKYBOX.log.error(e, 'main.js.click.configure');
+		}
+      });
   
   
   //Handlers for the meeting details popup
@@ -1534,20 +1538,20 @@ var EXELON = (function (r, $) {
 
   r.setConfigurePage = function(merchants) {
       try{
-	  RSKYBOX.log.info('entering','main.js.setConfigurePage');
+  	  RSKYBOX.log.info('entering','main.js.setConfigurePage');
 	  
 	  var configureMerchantListTemplate = _.template($('#ConfigureMerchantListTemplate').html());
 	  var configureMerchantListHtml = "";
 	  var nextMerchant;
-
+	  
 	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
 	      nextMerchant = configureMerchantListTemplate(merchants[merIndex]);
 	      nextMerchant = nextMerchant.replace("merchant_configSelect", "ConfigSelect" + merIndex);
 	      configureMerchantListHtml += nextMerchant;
 	  }
-
+	  
 	  $('#ConfigureMerchantSelect').html(configureMerchantListHtml);
-
+	  
 	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
 	      $('#' + 'ConfigSelect' + merIndex).attr('merNum',merIndex);
 	      $('#' + 'ConfigSelect' + merIndex).click(function() {
@@ -1565,14 +1569,14 @@ var EXELON = (function (r, $) {
 		      r.getMerchantConfigurationInfo(merchantId);
 		  }
 	      });
-	      
-	  $('#ConfigureMerchantSelect').listview('refresh');
 	  
+	  $('#ConfigureMerchantSelect').listview('refresh');
+    
       } catch (e) {
 	  RSKYBOX.log.error(e, 'setConfigurePage');
       }
   };
-
+  
   r.getMerchantConfigurationInfo = function(merchantID) {
       try{
 	  RSKYBOX.log.info('entering','js.main.getMerchantConfigurationInfo');
@@ -1884,7 +1888,7 @@ var EXELON = (function (r, $) {
 	      
 	      //set Navigation between Pages up
 	      if(stepIndex == 0){
-		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#configure');
+		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#merchantDisplay');
 		  $("#ConfigureStep_" + cStep.Number).on('swiperight',function() {
 			  $.mobile.changePage('#configure',{transition:'slide', reverse:true, changeHash:true});
 		      });
@@ -1897,7 +1901,7 @@ var EXELON = (function (r, $) {
 	      }
 
 	      if(stepIndex == r.merchantBeingConfigured.Configuration[0].Steps.length - 1){
-		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#configure');
+		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#merchantDisplay');
 		  $("#ConfigureStep_" + cStep.Number).on('swipeleft',function() {
                           $.mobile.changePage('#configure',{transition:'slide', changeHash:true});
                       });
