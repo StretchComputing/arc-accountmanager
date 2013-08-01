@@ -431,3 +431,74 @@ var EXELON = (function(r, $) {
 
   return r;
 }(EXELON || {}, jQuery));
+
+
+
+// This is here so we automatically get page loading messages when Ajax requests start and
+// they are hidden when the Ajax requests are complete.
+(function ($) {
+  'use strict';
+
+
+  var hidePageLoadingMessage, pageLoad, pageLoadCount, showPageLoadingMessage;
+
+  pageLoadCount = 0;
+  pageLoad = function (operator) {
+    try {
+      switch (operator) {
+      case 'decrement':
+        pageLoadCount -= pageLoadCount === 0 ? 0 : 1;
+        break;
+      case 'increment':
+        pageLoadCount += 1;
+        break;
+      default:
+        RSKYBOX.log.warn('inappropriate operator', 'pageLoad');
+      }
+      return pageLoadCount;
+    } catch (e) {
+      RSKYBOX.log.error(e, 'pageLoad');
+    }
+  };
+
+
+  // Manage showing/hiding the page loading message based on the number of times it's been called.
+  hidePageLoadingMessage = function () {
+    if (pageLoad('decrement') <= 0) {
+      $.mobile.hidePageLoadingMsg();
+      $.mobile.activePage.removeClass('ui-disabled');
+    }
+  };
+
+  showPageLoadingMessage = function () {
+    pageLoad('increment');
+    $.mobile.activePage.addClass('ui-disabled');
+    $.mobile.showPageLoadingMsg();
+  };
+
+  $('html').ajaxSend(function (event, jqXHR, settings) {
+    try {
+      if (settings.headers && (settings.headers.Authorization || settings.headers.background)) {
+        return;
+      }
+      RSKYBOX.log.local(settings.url, 'ajaxSend');
+      showPageLoadingMessage();
+    } catch (e) {
+      RSKYBOX.log.error(e, 'ajaxSend');
+    }
+  });
+
+  $('html').ajaxComplete(function (event, jqXHR, settings) {
+    try {
+      if (settings.headers && (settings.headers.Authorization || settings.headers.background)) {
+        return;
+      }
+      RSKYBOX.log.local(settings.url, 'ajaxComplete');
+      hidePageLoadingMessage();
+    } catch (e) {
+      RSKYBOX.log.warn(e, 'ajaxComplete');
+    }
+  });
+}(jQuery));
+
+

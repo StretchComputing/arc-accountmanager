@@ -36,7 +36,7 @@
       <script src="js/views/login.js"></script>
 
       <script src="js/lib/merchantobject.js"></script>
-      <script src="js/lib/iscroll.js"></script>
+      <script src="js/lib/Charts.js"></script>
 
      <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
 
@@ -335,6 +335,7 @@
 			<li data-icon="info" style="display:none" class="meetingDetailsButton" id="selectMerchant_MeetingDetailsButton">
 				<a href="#selectMerchant_MeetingDetails" data-rel="popup">Meeting in Progress</a>
 			</li>
+			<li><a href="#cohortReport">Cohort Report</a></li>
           </ul>
 		Version: <%= versionNum %>
       </div><!-- /panel -->
@@ -557,7 +558,7 @@
 				<a href="#configureTest" data-transtion="slide">ConfigureTest</a>
 			</li>
 			<li data-icon="info">
-				<a href="#reports">Reports</a>
+				<a href="#cohortReport">Reports</a>
 			</li>
 			<li data-icon="delete">
 				<a href="#merchantDisplayConfirmDelete" data-rel="popup">Delete</a>
@@ -657,7 +658,8 @@
 	<script type="text/template" id="mapsMerchantSearchTemplate">
 		<ul data-role="listview" data-filter="true" 
 		    data-filter-reveal="true" id="mapsMerchantSearchList"
-			data-filter-placeholder="Find a merchant">
+			data-filter-placeholder="Find a merchant"
+			data-inset="true">
 		<% for(var i = 0; i < merchantList.length; i++) { %>
 			<li index="<%= i %>" >
 				<a index="<%= i %>" class="mapsMerchantSearchLI" >
@@ -665,6 +667,88 @@
 				</a>
 			</li>
 		<% } %>
+		</ul>
+	</script>
+	
+	<div id="cohortReport" data-role="page">
+		<div id="cohortReportHeader" data-role="header">
+			<h1>Cohort Report</h1>
+		</div>
+		
+		<div id="cohortReportContent" data-role="content">
+		
+			<div id="cohortReportOverview">
+			</div>
+			
+			<div id="cohortReportItemview" style="display:none">
+			</div>
+		
+			<div id="cohortReportCanvas" style="display:none">
+				
+				<h1 id="cohortReportChartTitle">
+				<button data-inline="true" data-icon="back" data-iconpos="notext" id="cohortReportChartBack"></button>
+				Test Title
+				<button data-inline="true" data-icon="grid" data-iconpos="notext" id="cohortReportItemviewButton"></button>
+				</h1>
+				<canvas id="cohortReportChart"></canvas>
+			</div>
+			
+			<div id="cohortReportCalendar" style="display:none">
+			</div>		
+			
+		</div>
+		
+		<div data-role="footer" data-position="fixed" id="cohortReportFooter">
+			<fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
+				<label for="cohortReportDailyTab">Daily</label>
+				<input id="cohortReportDailyTab" type="radio" value="Daily" name="timescaleTab" class="cohortReportTimeControl" />
+				
+				<label for="cohortReportWeeklyTab">Weekly</label>
+				<input id="cohortReportWeeklyTab" type="radio" value="Weekly" name="timescaleTab" class="cohortReportTimeControl" />
+				
+				<label for="cohortReportMonthlyTab">Monthly</label>
+				<input id="cohortReportMonthlyTab" type="radio" value="Monthly" name="timescaleTab" checked="true" class="cohortReportTimeControl" />
+				
+				<label for="cohortReportYearlyTab">Yearly</label>
+				<input id="cohortReportYearlyTab" type="radio" value="Yearly" name="timescaleTab" class="cohortReportTimeControl" />
+				
+				<label for="cohortReportAllTimeTab">All Time</label>
+				<input id="cohortReportAllTimeTab" type="radio" value="AllTime" name="timescaleTab" class="cohortReportTimeControl" />
+			</fieldset>
+		</div>
+		
+	</div>
+		
+	<script type="text/template" id="cohortReportOverviewTemplate">
+	<ul data-role="listview" data-inset="true">
+		<li><h1><%= TimescaleDisplay %></h1></li>
+		<li><a class="cohortReportOverviewLI" name="AmountProcessed">				Total Processed : $<%= AmountProcessed.toFixed(2) %></a>
+		</li>
+		<li><a class="cohortReportOverviewLI" name="PaidCredit">
+			Number Paid with Credit : <%= PaidCredit %></a>
+		</li>
+		<li><a class="cohortReportOverviewLI" name="PaidDebit">
+			Number Paid with Debit : <%= PaidDebit %></a>
+		</li>
+		<li><a class="cohortReportOverviewLI" name="PaidDwolla">
+			Number Paid with Dwolla : <%= PaidDwolla %></a>
+		</li>
+
+		<li><a class="cohortReportOverviewLI" name="RepeatCustomer">
+			Number of Repeat Users : <%= RepeatCustomer %></a>
+		</li>
+
+		<li><a class="cohortReportOverviewLI" name="PaidErrors">
+			Number of Customers who Encountered Errors : <%= PaidErrors %>
+		</li>
+	</ul>
+	</script>
+	
+	<script type="text/template" id="cohortReportItemviewTemplate">
+		<ul data-role="listview" data-inset="true">
+			<% for(var i = 0; i < Data.length; i++){ %>
+				<li><%= Labels[i] %> : <%= Data[i] %></li>
+			<% } %>
 		</ul>
 	</script>
 
