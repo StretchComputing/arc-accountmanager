@@ -633,29 +633,43 @@ var EXELON = (function (r, $) {
     		
     		var content = $('#cohortReportContent');
     		
+    		
     		$("input[type='radio']", $('#cohortReportFooter')).bind('change', function(){
     			r.changeTimescale($(this).val());
     		});
     		
+    		//--------Overview handlers ----------
     		content.on('click', '.cohortReportOverviewLI', function(){
     			r.cohortReport.activeField = $(this).attr('name');
     			r.cohortReportShiftFocus('Canvas');
-    			r.drawGraph(r.cohortReport.Timescale,
-    					    r.cohortReport.activeTime,
-    					    r.cohortReport.activeField);
     		});
     		
-    		$('#cohortReportChartBack').bind('click', function(){
+    		//--------Canvas handlers--------------
+    		content.on('swiperight', '.cohortReportDataDisplay', function(){
+    			if(r.cohortReport.Timescale === "AllTime")
+    				return;
+    			r.cohortReportChangeDate(r.getNextDate(r.cohortReport.Timescale,
+    												   r.cohortReport.activeDate));
+    		});
+    		content.on('swipeleft','.cohortReportDataDisplay', function(){
+    			if(r.cohortReport.Timescale === "AllTime")
+    				return;
+    			r.cohortReportChangeDate(r.getPrevDate(r.cohortReport.Timescale,
+						   r.cohortReport.activeDate));
+    		});
+    		
+    		
+    		content.on('click', '.cohortReportDataviewBack', function(){
     			r.cohortReportShiftFocus('Overview');
-    			r.displayCohortReportOverview(r.cohortReport.activeTime)
     		});
     		
-    		$('#cohortReportItemviewButton').bind('click', function(){
-    			r.cohortReportShiftFocus('Itemview')
-    			r.displayCohortReportItemview(
-    						r.cohortReport.Timescale,
-    					    r.cohortReport.activeTime,
-    					    r.cohortReport.activeField);	
+    		content.on('click', '.cohortReportDataviewSwitch', function(){
+    			if(r.cohortReport.currentFocus === 'Canvas'){
+    				r.cohortReportShiftFocus('Itemview');
+    			}
+    			else{
+    				r.cohortReportShiftFocus('Canvas');
+    			}
     		});
     	}
     	catch(e){
@@ -669,11 +683,12 @@ var EXELON = (function (r, $) {
     		
     		r.cohortReport = {
     			Timescale : 'Monthly',
-    			activeTime : new Date(), //Right now!
+    			activeDate : new Date(), //Right now!
     			merchant : r.activeMerchant,
     			currentFocus : 'Overview',
     			dataCache : r.constructTestCache()
     		};
+    		r.cacheCohortReportScreens();
     		
     		/*Set the canvas width and height to that of the page*/
     		var ctx = $('#cohortReportChart').get(0).getContext("2d");
@@ -681,7 +696,7 @@ var EXELON = (function (r, $) {
     		ctx.canvas.width = Math.floor(($(window).width() - h.width()) *.95);
     		ctx.canvas.height = Math.floor(($(window).height() - h.height()) *.85);
     		
-    		r.displayCohortReportOverview(r.cohortReport.activeTime);
+    		r.displayCohortReportOverview(r.cohortReport.activeDate);
     		
     		
     	}
@@ -1499,13 +1514,22 @@ var EXELON = (function (r, $) {
   
   /*Helper methods for cohortReport #$%*/
   r.drawGraph = function(timescale,date,field){
+	  //Modify the title
+	  
+	  var head = $('#cohortReportCanvasHead');
+	  head.empty()
+	  var t = _.template($('#cohortReportHeadingTemplate').html());
+	  head.append(t({ Title : r.getTimescaleDisplay(timescale,date,
+			  							field + " for ")}));
+	  head.trigger('create');
+	  
 	  var dataToGraph = r.getData(timescale,date,field);
 	  var context = $('#cohortReportChart').get(0).getContext("2d");
 	  switch(timescale){
 		  case 'Daily':
 			  break;
 		  case 'Weekly':
-			  r.graphDaily(context,dataToGraph);
+			  r.graphWeekly(context,dataToGraph);
 			  break;
 		  case 'Monthly':
 			  r.graphMonthly(context,dataToGraph,date);
@@ -1594,7 +1618,7 @@ var EXELON = (function (r, $) {
   };
   
   r.getMonthLabels = function(date){
-	  var high = new Date(date.getFullYear(),date.getMonth()+1,0).getDate();
+	  var high = new Date(date.getFullYear(),date.getMonth(),0).getDate();
 	  var labels = [];
 	  for(var i = 1; i <= high; i++){
 		  labels.push(i.toString());
@@ -1632,41 +1656,70 @@ var EXELON = (function (r, $) {
 		RSKYBOX.log.info('entering', 'main.js.getData');
 		/*Search the Cache, if a cache miss occurs, make an ajax call for the data*/
 		//for now, just cache will be populated by prefabs
-		var cache = r.cohortReport.dataCache;
+		var cache = r.cohortReport.dataCache;//
 		switch(timescale){
 			case 'AllTime':
 				return r.getDataAllTime(cache,date,field);
 			case 'Yearly':
-				return r.getDataYearly(cache[date.getFullYear],field);
+				r.checkCache(cache,date.getFullYear);
+				return r.getDataYearly(cache[date.getFullYear],date,field);
 			case 'Monthly':
+				r.checkCache(cache,date.getFullYear(),date.getMonth());
 				return r.getDataMonthly(cache[date.getFullYear()][date.getMonth()],date,field);
 			case 'Weekly':
+				r.checkCache(cache,date.getFullYear(),date.getMonth());
 				return r.getDataWeekly(cache[date.getFullYear()][date.getMonth()],date,field);
 			case 'Daily':
+				r.checkCache(cache,date.getFullYear(),date.getMonth());
 				return r.getDataDaily(cache[date.getFullYear()][date.getMonth()],date,field);
 		}
-	}  
+	}
 	catch(e){
 		RSKYBOX.log.error(e, 'main.hs.getData');
 	}
   };
   
+  /*builds empty objects for the given year/month objects if they do not already exist*/
+  r.checkCache = function(cache,year,month){
+	  if(cache[year] === undefined){
+		  cache[year] = [];
+	  }
+	  if(month === undefined){
+		  for(var i = 0; i < 12; i++){
+			  if(cache[year][i] === undefined)
+				  cache[year][i] = [];
+		  }
+	  }
+	  else{
+		  if(cache[year][month] === undefined)
+			  cache[year][month] = [];
+		  for(var i = 0; i < 31; i++){
+			  if(cache[year][month][i] === undefined){
+				  cache[year][month][i] = {};
+			  }
+		  }
+	  }
+  };
+  
   r.getDataAllTime = function(cache,date,field){
-	  
+
 	  var res = [];
 	  for(var i = 2013; i <= date.getFullYear(); i++){
-		  if(cache[i].overview !== undefined)
-			  res.push(cache[i].overview[field]);
-		  else{
-			  continue;//Ajax call to get down data
+		  if(cache[i].overview === undefined){
+			  r.requestCacheData('AllTime', 'Elms', cache);
 		  }
+
+		  res.push(cache[i].overview[field]);
 	  }
 	  return res;
   };
   
-  r.getDataYearly = function(cache,field){
+  r.getDataYearly = function(cache,date,field){
 	  var res = [];
 	  for(var i = 0; i < 12; i++){
+		  if(cache[i].overview === undefined){
+			  r.requestCacheData('Yearly', 'Elms', cache, date.getFullYear());
+		  }
 		  res.push(cache[i].overview[field]);
 	  }
 	  return res;
@@ -1674,10 +1727,12 @@ var EXELON = (function (r, $) {
   
   r.getDataMonthly = function(cache,date,field){
 	  
-	  var high = new Date(date.getFullYear(),date.getMonth()+1,0).getDate()
+	  var high = new Date(date.getFullYear(),date.getMonth(),0).getDate()
 	  var res = [];
 	  for(var i = 0; i < high; i++){
-		  if(cache[i] !== undefined)
+		  if(cache[i].overview === undefined){
+			  r.requestCacheData('Monthly','Elms',cache,date.getFullYear(), date.getMonth());
+		  }
 			  res.push(cache[i].overview[field]);
 	  }
 	  return res;
@@ -1685,14 +1740,70 @@ var EXELON = (function (r, $) {
   
   r.getDataWeekly = function(cache,date,field){
 	  var res = [];
-	  var start = r.getSunday(date)-1;
+	  var start = r.getSunday(date).getDate()-1;
 	  for(var i = start; i < start+7; i++){
-		  res.push(cache[i].overview[field])
+		  if(cache[i].overview === undefined){
+			  r.requestCacheData('Monthly','Elms',cache,date.getFullYear(),date.getMonth());
+		  }
+		  res.push(cache[i].overview[field]);
 	  }
+	  return res;
   };
   
   r.getDataDaily = function(cache,date,field){
+	  if(cache[date.getDate].overview === undefined){
+		  r.requestCacheData('Monthly','Elms',cache,date.getFullYear(),date.getMonth());
+	  }
 	  return cache[date.getDate].overview[field];
+  };
+  
+  r.requestCacheData = function(timescale,type,cache,year,month){
+	  try{
+		  RSKYBOX.log.info('entering', 'main.js.requestCacheData');
+		  RSKYBOX.log.info('No API-- Currently using randomly generated data')
+		  switch(timescale){
+		  	case 'AllTime':
+		  		if(type === "Elms"){
+		  			cache[2013].overview = r.genRandomData(1)[0];
+		  		}
+		  		return;
+		  	case 'Yearly':
+		  		if(type === "Elms"){
+		  			var res = r.genRandomData(12);
+		  			for(var i = 0; i < 12; i++){
+		  				cache[i].overview = res[i]
+		  			}
+		  		}
+		  		return;
+		  	case 'Monthly':
+		  		if(type === "Elms"){
+		  			var res = r.genRandomData(31);
+		  			for(var i = 0; i < 31; i++){
+		  				cache[i].overview = res[i]
+		  			}
+		  		}
+		  		return;
+
+		  }
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.requestCacheData');
+	  }
+  };
+  
+  r.genRandomData = function(n){
+	  var res = [];
+	  for(var i = 0; i < n; i++){
+		  res.push({
+			  'AmountProcessed' : Math.random() * 30,
+			  'PaidCredit': Math.random() * 30,
+			  'PaidDebit' : Math.random() * 30,
+			  'PaidDwolla' : Math.random() * 30,
+			  'RepeatCustomer' : Math.random() * 30,
+			  'PaidErrors' : Math.random() * 30
+		  });
+	  }
+	  return res;
   };
   
   r.constructTestCache = function(){
@@ -1757,19 +1868,37 @@ var EXELON = (function (r, $) {
 	}
   };
   
-  r.cohortReportShiftFocus = function(to){
+  r.cacheCohortReportScreens = function(){
 	  if(!r.cohortReport.Screens){
 		  r.cohortReport.Screens = {
 			'Overview' : $('#cohortReportOverview'),
 			'Itemview' : $('#cohortReportItemview'),
 			'Canvas' : $('#cohortReportCanvas'),
-			'Calendar' : $('cohortReportCalendar')
 		  };
 	  }
+  }
+  
+  r.cohortReportShiftFocus = function(to){
 	  
 	  r.cohortReport.Screens[r.cohortReport.currentFocus].hide();
 	  r.cohortReport.currentFocus = to;
 	  r.cohortReport.Screens[to].show();
+	  
+	  switch(r.cohortReport.currentFocus){
+	  	case 'Overview':
+	  		r.displayCohortReportOverview(r.cohortReport.activeDate)
+	  		break;
+	  	case 'Canvas':
+	  		r.drawGraph(r.cohortReport.Timescale,
+	  				    r.cohortReport.activeDate,
+	  				    r.cohortReport.activeField);
+	  		break;
+	  	case 'Itemview':
+	  		r.displayCohortReportItemview(r.cohortReport.Timescale,
+  				    					  r.cohortReport.activeDate,
+  				    					  r.cohortReport.activeField);
+	  		break;
+	  }
 	  
   };
   
@@ -1778,25 +1907,72 @@ var EXELON = (function (r, $) {
 	  
 	  switch(r.cohortReport.currentFocus){
 	  	case 'Overview':
-	  		r.displayCohortReportOverview(r.cohortReport.activeTime);
+	  		r.displayCohortReportOverview(r.cohortReport.activeDate);
 	  		break;
 	  	case 'Canvas':
 	  		r.drawGraph(
 	  				r.cohortReport.Timescale,
-	  				r.cohortReport.activeTime,
+	  				r.cohortReport.activeDate,
 	  				r.cohortReport.activeField);
 	  		break;
 	  	case 'Itemview':
 	  		r.displayCohortReportItemview(
 	  				r.cohortReport.Timescale,
-	  				r.cohortReport.activeTime,
+	  				r.cohortReport.activeDate,
 	  				r.cohortReport.activeField);
 	  		break;
 	  }
   };
   
+  r.getNextDate = function(timescale,date){
+	  switch(timescale){
+	  	case "Yearly":
+		  return new Date(date.getFullYear()+1,date.getMonth());
+	  	case "Monthly":
+	  		return new Date(date.getFullYear(),date.getMonth()+1);
+	  	case "Weekly":
+	  		return r.getSunday(new Date(date.getFullYear(),date.getMonth(),date.getDate()+7));
+	  	case "Daily":
+	  		return new Date(date.getFullYear(),date.getMonth(),date.getDate()+1);
+	  }
+  };
+  
+  r.getPrevDate = function(timescale,date){
+	  switch(timescale){
+	  	case "Yearly":
+		  return new Date(date.getFullYear()-1,date.getMonth());
+	  	case "Monthly":
+	  		return new Date(date.getFullYear(),date.getMonth()-1);
+	  	case "Weekly":
+	  		return r.getSunday(new Date(date.getFullYear(),date.getMonth(),date.getDate()-7));
+	  	case "Daily":
+	  		return new Date(date.getFullYear(),date.getMonth(),date.getDate()-1);
+	  }
+  };
+  
+  r.cohortReportChangeDate = function(date){
+	r.cohortReport.activeDate = date;
+	
+	switch(r.cohortReport.currentFocus){
+		case 'Overview':
+			r.displayCohortReportOverview(date);
+			return;
+		case 'Canvas':
+			r.drawGraph(
+					r.cohortReport.Timescale,
+				    r.cohortReport.activeDate,
+				    r.cohortReport.activeField);
+			return;
+		case 'Itemview':
+			r.displayCohortReportItemview(
+					r.cohortReport.Timescale,
+				    r.cohortReport.activeDate,
+				    r.cohortReport.activeField);
+			return;
+	}
+  };
+  
   r.displayCohortReportOverview = function(date){
-	  r.cohortReportShiftFocus('Overview');
 	  
 	  var overview = r.cohortReport.Screens['Overview'];
 	  
@@ -1804,7 +1980,7 @@ var EXELON = (function (r, $) {
 	  var templateData = r.getCohortOrverview(r.cohortReport.Timescale, 
 				  date, r.cohortReport.merchant);
 	  templateData.TimescaleDisplay = r.getTimescaleDisplay(r.cohortReport.Timescale,
-			                                                date);
+			                                                date, "Cohort report for ");
 	  
 	  var t = _.template($('#cohortReportOverviewTemplate').html());
 	  
@@ -1815,9 +1991,12 @@ var EXELON = (function (r, $) {
   
   r.displayCohortReportItemview = function(timescale,date,field){
 
-	  var t = _.template($('#cohortReportItemviewTemplate').html());
 	  var itemview = r.cohortReport.Screens['Itemview'];
 	  itemview.empty();
+	  var t = _.template($('#cohortReportHeadingTemplate').html());
+	  itemview.append(t({Title : r.getTimescaleDisplay(timescale,date,field + " for ")}));
+	  
+	  t = _.template($('#cohortReportItemviewTemplate').html());
 	  
 	  itemview.append(t({
 		  'Data' : r.getData(timescale,date,field),
@@ -1826,8 +2005,7 @@ var EXELON = (function (r, $) {
 	  
   };
   
-  r.getTimescaleDisplay = function(timescale,date){
-	  var disp = "Cohrot report for ";
+  r.getTimescaleDisplay = function(timescale,date,disp){
 	  if(timescale === "Daily")
 		  return disp + date.toDateString();
 	  if(timescale === "Weekly")
@@ -1841,7 +2019,7 @@ var EXELON = (function (r, $) {
   
   r.getSunday = function(date){
 	  var day = Math.max(1, date.getDate() - date.getDay());
-	  return new Date(date.getFullYear(),date.getMonth()+1,day);
+	  return new Date(date.getFullYear(),date.getMonth(),day);
   };
   /*End cohortReport helper functions #$%*/
 
