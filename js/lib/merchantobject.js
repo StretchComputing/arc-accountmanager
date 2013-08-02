@@ -113,14 +113,15 @@ var MERCHANT = (function($){
 	    		return dispString;
 	    	},
 	    	
+	       },
+	       
 	    	cohortReportFields : [
-	    	    'AmountProcessed',
-	    	    'PaidCredit',
-	    	    'PaidDebit',
-	    	    'PaidDwolla',
-	    	    'RepeatCustomer',
-	    	    'PaidErrors'
-	    	                      ],
-	       }
+	    	      	    	    'AmountProcessed',
+	    	      	    	    'PaidCredit',
+	    	      	    	    'PaidDebit',
+	    	      	    	    'PaidDwolla',
+	    	      	    	    'RepeatCustomer',
+	    	      	    	    'PaidErrors'
+	    	      	    	                      ],
 	}
 }(jQuery));

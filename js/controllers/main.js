@@ -656,21 +656,37 @@ var EXELON = (function (r, $) {
     			r.cohortReportShiftFocus('Canvas');
     		});
     		
-    		//--------Canvas handlers--------------
-    		content.on('swiperight', '.cohortReportDataDisplay', function(){
+    		content.on('swipeleft', '.cohortReportDataDisplay', function(){
     			if(r.cohortReport.Timescale === "AllTime")
     				return;
     			r.cohortReportChangeDate(r.getNextDate(r.cohortReport.Timescale,
     												   r.cohortReport.activeDate));
     		});
-    		content.on('swipeleft','.cohortReportDataDisplay', function(){
+    		content.on('swiperight','.cohortReportDataDisplay', function(){
     			if(r.cohortReport.Timescale === "AllTime")
     				return;
     			r.cohortReportChangeDate(r.getPrevDate(r.cohortReport.Timescale,
 						   r.cohortReport.activeDate));
     		});
     		
+    		content.on('swipeup', '.cohortReportDataDisplay', function(){
+    			if(r.cohortReport.currentFocus === "Overview")
+    				return;
+    			
+    			r.changeActiveField(r.nextActiveField(
+    					r.cohortReport.activeField));
+    		});
     		
+    		content.on('swipedown', '.cohortReportDataDisplay',function(){
+    			if(r.cohortReport.currentFocus === "Overview")
+    				return;
+    			
+    			r.changeActiveField(r.prevActiveField(
+    					r.cohortReport.activeField));
+    		});
+    		
+    		
+    		//------Dataview Handlers----------
     		content.on('click', '.cohortReportDataviewBack', function(){
     			r.cohortReportShiftFocus('Overview');
     		});
@@ -682,6 +698,13 @@ var EXELON = (function (r, $) {
     			else{
     				r.cohortReportShiftFocus('Canvas');
     			}
+    		});
+    		
+    		$('#cohortReportChangeDateButton').bind('click',function(){
+    			var d = new Date($('#cohortReportGoToForm').val() +' 00:00:00');
+    			if(d.toString() === "Invalid Date")
+    				return;
+    			r.cohortReportChangeDate(d);
     		});
     	}
     	catch(e){
@@ -1539,6 +1562,7 @@ var EXELON = (function (r, $) {
 	  var context = $('#cohortReportChart').get(0).getContext("2d");
 	  switch(timescale){
 		  case 'Daily':
+			  r.graphDaily(context,dataToGraph);
 			  break;
 		  case 'Weekly':
 			  r.graphWeekly(context,dataToGraph);
@@ -1553,6 +1577,12 @@ var EXELON = (function (r, $) {
 			  r.graphAllTime(context,dataToGraph);
 			  break;
 	  }
+  };
+  
+  r.graphDaily = function(chartContext,dataToGraph){
+	  r.cohortReportShiftFocus('Itemview');
+	  var k = $('.cohortReportDataviewSwitch').parent().hide()
+	  return;
   };
   
   r.graphWeekly = function(chartContext, dataToGraph){
@@ -1653,7 +1683,7 @@ var EXELON = (function (r, $) {
   r.getLabels = function(timescale, date){
 	  switch(timescale){
 	  case 'Daily':
-		  return date.toDateString();
+		  return [date.toDateString()];
 	  case 'Weekly':
 		  return ['Sun','Mon', 'Tue', 'Wed','Thr','Fir','Sat'];
 	  case 'Monthly':
@@ -1763,10 +1793,10 @@ var EXELON = (function (r, $) {
   };
   
   r.getDataDaily = function(cache,date,field){
-	  if(cache[date.getDate].overview === undefined){
+	  if(cache[date.getDate()].overview === undefined){
 		  r.requestCacheData('Monthly','Elms',cache,date.getFullYear(),date.getMonth());
 	  }
-	  return cache[date.getDate].overview[field];
+	  return [cache[date.getDate()].overview[field]];
   };
   
   r.requestCacheData = function(timescale,type,cache,year,month){
@@ -1896,44 +1926,13 @@ var EXELON = (function (r, $) {
 	  r.cohortReport.currentFocus = to;
 	  r.cohortReport.Screens[to].show();
 	  
-	  switch(r.cohortReport.currentFocus){
-	  	case 'Overview':
-	  		r.displayCohortReportOverview(r.cohortReport.activeDate)
-	  		break;
-	  	case 'Canvas':
-	  		r.drawGraph(r.cohortReport.Timescale,
-	  				    r.cohortReport.activeDate,
-	  				    r.cohortReport.activeField);
-	  		break;
-	  	case 'Itemview':
-	  		r.displayCohortReportItemview(r.cohortReport.Timescale,
-  				    					  r.cohortReport.activeDate,
-  				    					  r.cohortReport.activeField);
-	  		break;
-	  }
+	  r.cohortReportRedraw(r.cohortReport.currentFocus);
 	  
   };
   
   r.changeTimescale = function(newTimescale){
 	  r.cohortReport.Timescale = newTimescale;
-	  
-	  switch(r.cohortReport.currentFocus){
-	  	case 'Overview':
-	  		r.displayCohortReportOverview(r.cohortReport.activeDate);
-	  		break;
-	  	case 'Canvas':
-	  		r.drawGraph(
-	  				r.cohortReport.Timescale,
-	  				r.cohortReport.activeDate,
-	  				r.cohortReport.activeField);
-	  		break;
-	  	case 'Itemview':
-	  		r.displayCohortReportItemview(
-	  				r.cohortReport.Timescale,
-	  				r.cohortReport.activeDate,
-	  				r.cohortReport.activeField);
-	  		break;
-	  }
+	  r.cohortReportRedraw(r.cohortReport.currentFocus);
   };
   
   r.getNextDate = function(timescale,date){
@@ -1964,10 +1963,35 @@ var EXELON = (function (r, $) {
   
   r.cohortReportChangeDate = function(date){
 	r.cohortReport.activeDate = date;
-	
-	switch(r.cohortReport.currentFocus){
+	r.cohortReportRedraw(r.cohortReport.currentFocus);
+
+  };
+  
+  r.changeActiveField = function(field){
+	  r.cohortReport.activeField = field;
+	  r.cohortReportRedraw(r.cohortReport.currentFocus);
+  };
+  
+  r.nextActiveField = function(activeField){
+	  var len = MERCHANT.cohortReportFields.length;
+	  for(var i = 0; i < len; i++){
+		  if(MERCHANT.cohortReportFields[i] === activeField)
+			  return MERCHANT.cohortReportFields[(i+1) % len];
+	  }
+  };
+  
+  r.prevActiveField = function(activeField){
+	  var len = MERCHANT.cohortReportFields.length;
+	  for(var i = 0; i < len; i++){
+		  if(MERCHANT.cohortReportFields[i] === activeField)
+			  return MERCHANT.cohortReportFields[(i + len-1) % len];
+	  }
+  };
+  
+  r.cohortReportRedraw = function(focus){
+	  switch(focus){
 		case 'Overview':
-			r.displayCohortReportOverview(date);
+			r.displayCohortReportOverview(r.cohortReport.activeDate);
 			return;
 		case 'Canvas':
 			r.drawGraph(
