@@ -313,7 +313,11 @@ var EXELON = (function (r, $) {
     		$('#merchantDisplaySidebarEdit').bind('click', function(){
     			r.merchantToEdit = r.activeMerchant;
     			$.mobile.changePage('#editMerchant', {transition:'slide'});
-    		});
+		});
+
+		$('#merchantDisplaySidebarConfigure').bind('click',function(){
+			r.getMerchantConfigurationInfo(r.activeMerchant.Id);
+		});
     		
     		$('#merchantDisplayDeleteYes').bind('click', function(){
     			r.deleteMerchant(r.activeMerchant); //API Call
@@ -431,11 +435,20 @@ var EXELON = (function (r, $) {
     			}
 
     		});
-
+			
+			// I dont know what is causeing this swipe handler to trigger twice but it is messing stuff up.
+			// r.preventDoubleSwipe is a temporary solution for the demo
+			r.preventDoubleSwipe = 1;
     		var spec = $("#merchantDisplayStatusSpecific");
     		spec.bind('swipeleft', function(){
     			/*A long if/elif chain based on the different statuses*/
-    			$.mobile.changePage("#configure", {transition:"slide"});
+    			/* $.mobile.changePage("#configure", {transition:"slide"}); */
+				if(r.preventDoubleSwipe){
+					r.getMerchantConfigurationInfo(r.activeMerchant.Id);
+					r.preventDoubleSwipe--;
+				} else {
+					r.preventDoubleSwipe++;
+				}
     		});
 
     		spec.bind('swiperight', function(){
@@ -612,7 +625,6 @@ var EXELON = (function (r, $) {
     configureShow: function () {
       try {
         RSKYBOX.log.info('entering', 'main.js.configureShow');
-	r.setConfigurePage(r.merchantList);
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.configureShow');
       }
@@ -2038,16 +2050,16 @@ var EXELON = (function (r, $) {
 
   $(document).on('click', '.configure', function(e){
 		try {
-			if($.mobile.activePage.is('#configure')) {
-				$('#configure_leftPanel').panel("close");
-			} else {
-				$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
-			}
-			return false;
-    } catch (e) {
-      RSKYBOX.log.error(e, 'main.js.click.configure');
-    }
-  });
+		    if($.mobile.activePage.is('#configure')) {
+		    	$('#configure_leftPanel').panel("close");
+		    } else {
+		    	$.mobile.changePage( "#configure", { transition: "slideup", changeHash: true });
+		    }
+		    return false;
+		} catch (e) {
+		    RSKYBOX.log.error(e, 'main.js.click.configure');
+		}
+      });
   
   
   //Handlers for the meeting details popup
@@ -2121,48 +2133,7 @@ var EXELON = (function (r, $) {
 	 });
 	 
   });
-
-  r.setConfigurePage = function(merchants) {
-      try{
-	  RSKYBOX.log.info('entering','main.js.setConfigurePage');
-	  
-	  var configureMerchantListTemplate = _.template($('#ConfigureMerchantListTemplate').html());
-	  var configureMerchantListHtml = "";
-	  var nextMerchant;
-
-	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
-	      nextMerchant = configureMerchantListTemplate(merchants[merIndex]);
-	      nextMerchant = nextMerchant.replace("merchant_configSelect", "ConfigSelect" + merIndex);
-	      configureMerchantListHtml += nextMerchant;
-	  }
-
-	  $('#ConfigureMerchantSelect').html(configureMerchantListHtml);
-
-	  for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
-	      $('#' + 'ConfigSelect' + merIndex).attr('merNum',merIndex);
-	      $('#' + 'ConfigSelect' + merIndex).click(function() {
-		      var merIndex = $(this).attr('merNum');
-		      $('#StartConfigure').attr("merchantId",merchants[merIndex].Id);
-		      $('#StartConfigure>span').empty();
-		      $('#StartConfigure>span').text("Start Configure: " + merchants[merIndex].Name);
-		  });
-	  }
-	  
-	  $('#StartConfigure').off();
-	  $('#StartConfigure').click(function() {
-		  var merchantId = $(this).attr('merchantId'); 
-		  if(merchantId) {
-		      r.getMerchantConfigurationInfo(merchantId);
-		  }
-	      });
-	      
-	  $('#ConfigureMerchantSelect').listview('refresh');
-	  
-      } catch (e) {
-	  RSKYBOX.log.error(e, 'setConfigurePage');
-      }
-  };
-
+  
   r.getMerchantConfigurationInfo = function(merchantID) {
       try{
 	  RSKYBOX.log.info('entering','js.main.getMerchantConfigurationInfo');
@@ -2345,7 +2316,7 @@ var EXELON = (function (r, $) {
                           r.merchantNotes1 = data.Results;
 			  r.writeEmptyConfigureStepsPages();
                           var goToStep = $('#ConfigureStep_' + r.merchantBeingConfigured.Configuration[0].CurrentStep);
-                          $.mobile.changePage(goToStep,{transition:'slide', changeHash:true});
+                          $.mobile.changePage(goToStep,{changeHash:true, transition:'slide'});
 			  
                           var jtest = 5;
                       } catch (e) {
@@ -2414,7 +2385,7 @@ var EXELON = (function (r, $) {
 		  subStepsHtml += nextSubStepAdded;
 	      }
 
-	      //fix Screenshot URL Images/... -> images/...
+	      //fix Screenshot URL Images/... -> images/... , also .jpg -> .png
 	      for(var screenshotIndex = 0; screenshotIndex < cStep.Screenshots.length; screenshotIndex++) {
 		  cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('/Images','images');
 		   cStep.Screenshots[screenshotIndex].URL = cStep.Screenshots[screenshotIndex].URL.replace('JPG','png');
@@ -2474,9 +2445,9 @@ var EXELON = (function (r, $) {
 	      
 	      //set Navigation between Pages up
 	      if(stepIndex == 0){
-		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#configure');
+		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#merchantDisplay');
 		  $("#ConfigureStep_" + cStep.Number).on('swiperight',function() {
-			  $.mobile.changePage('#configure',{transition:'slide', reverse:true, changeHash:true});
+			  $.mobile.changePage('#merchantDisplay',{transition:'slide', reverse:true, changeHash:true});
 		      });
 	      } else { 
 		  $("#ConfigureStepBack_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number - 1));
@@ -2487,9 +2458,9 @@ var EXELON = (function (r, $) {
 	      }
 
 	      if(stepIndex == r.merchantBeingConfigured.Configuration[0].Steps.length - 1){
-		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#configure');
+		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#merchantDisplay');
 		  $("#ConfigureStep_" + cStep.Number).on('swipeleft',function() {
-                          $.mobile.changePage('#configure',{transition:'slide', changeHash:true});
+                          $.mobile.changePage('#merchantDisplay',{transition:'slide', changeHash:true});
                       });
 	      } else {
 		  $("#ConfigureStepForward_" + cStep.Number).attr('href','#ConfigureStep_' + (cStep.Number + 1));
