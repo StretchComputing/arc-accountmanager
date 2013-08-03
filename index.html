@@ -824,8 +824,9 @@
 
     <script type="text/template" id="ConfigureInsertNoteTemplate">
       <li id="ConfigureNote_Step_Id" data-icon="false" style="padding-top:20px; padding-bottom:0px">
-	<p><strong><%= "By: " + LastModifiedBy + "<br/>Time: " + LastUpdated.toString()%></strong></p>
-	<p><%= Note %></p>
+	<p><strong class="noteAuthor"><%= "By: " + LastModifiedBy %></strong></p>
+	<p><strong class="noteTime"><%=  "Time: " + LastUpdated.toString() %></strong></p>
+	<p class="noteContent"><%= Note %></p>
 	<a data-role="button" data-icon="gear" data-iconpos="notext" style="position:relative; bottom:40px; left:95%; padding:0px" id="ConfigureEditNote_Step_Id"></a>
       </li>
     </script>

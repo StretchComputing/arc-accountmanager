@@ -2173,7 +2173,26 @@ var EXELON = (function (r, $) {
 	  } 
 	  
 	  $('#ConfigurationInsertNotes_' + stepNumber).after(allNotesHtml);
-   
+
+	  for(var noteIndex = (r.merchantNotes1.length - 1); noteIndex >= 0; noteIndex--) {
+              cNote = r.merchantNotes1[noteIndex];
+
+	      if(cNote.Type == "NOTE_CONFIG") {
+		  $('#ConfigureEditNote_' + stepNumber + '_'+ cNote.Id).on('click',function(){
+			  var step_id_pattern = /\d+/g;
+			  var buttonId = $(this).attr('id');
+			  var step_id = buttonId.match(step_id_pattern);
+			  var stepnumber = step_id[0];
+			  var noteId = step_id[1];
+			  $('#ConfigureNewNote_' + stepnumber + ' h3').text('Update Configure Step Note');
+			  $('#ConfigureNewNoteContents_' + stepnumber).val($('#ConfigureNote_' + stepnumber + '_' + noteId).text());
+			  $('#ConfigureNewNoteSubmit_' + stepnumber).attr('noteId',noteId);
+			  $('#ConfigureNewNoteSubmit_' + stepnumber).addClass('noteUpdate');
+			  $('#ConfigureNewNoteCancel_' + stepnumber).addClass('noteUpdate');
+			  $('#ConfigureNewNote_' + stepnumber).popup('open',{transition:"slide"});
+		      }); 
+	      }
+	  }
       } catch(e) {
 	  RSKYBOX.log.error(e,'insertConfigurationNotes');
       }
@@ -2293,6 +2312,8 @@ var EXELON = (function (r, $) {
 	      }
 	      // ---
 	      
+	      
+
 	      //set handlers for entering Notes
 	      $('#ConfigureNewNoteSubmit_' + cStep.Number).attr('StepIndex',stepIndex);
 	      $('#ConfigureNewNoteCancel_' + cStep.Number).attr('StepIndex',stepIndex);
@@ -2305,15 +2326,37 @@ var EXELON = (function (r, $) {
 					   Note: $('#ConfigureNewNoteContents_' + cStep.Number).val(),
 					   Type: 'NOTE_CONFIG',
 					   MerchantConfigurationId: cStep.Id};
-		      r.createConfigurationNote(configNoteNew,cStep.Number);
+		      
+		      if($(this).hasClass('noteUpdate')){
+			  configNoteNew.Id = $(this).attr('noteId');
+			  r.updateConfigurationNote(configNoteNew,cStep.Number);
+		      } else {
+			  r.createConfigurationNote(configNoteNew,cStep.Number);
+		      }
+
 		      $('#ConfigureNewNoteContents_' + cStep.Number).val("");
 		      $('#ConfigureNewNote_' + cStep.Number).popup('close');
+
+		      if($(this).hasClass('noteUpdate')){
+			  $('#ConfigureNewNote_' + cStep.Number + ' h3').text('New Configure Step Note');
+			  $(this).removeClass('noteUpdate');
+			  $(this).removeAttr('noteId');
+			  $('#ConfigureNewNoteCancel_' + cStep.Number).removeClass('noteUpdate');
+		      }
 		  });
 	      $('#ConfigureNewNoteCancel_' + cStep.Number).on('click',function(){
 		      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
 		      $('#ConfigureNewNoteContents_' + cStep.Number).val("");
 		      $('#ConfigureNewNote_' + cStep.Number).popup('close');
+
+		      if($(this).hasClass('noteUpdate')){
+                          $('#ConfigureNewNote_' + cStep.Number + ' h3').text('New Configure Step Note');
+                          $(this).removeClass('noteUpdate');
+                          $('#ConfigureNewNoteSubmit_' + cStep.Number).removeClass('noteUpdate');
+			  $('#ConfigureNewNoteSubmit_' + cStep.Number).removeAttr('noteId');
+                      }
 		  });
+	      
 	      // ---
 
 	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++) {
@@ -2428,7 +2471,7 @@ var EXELON = (function (r, $) {
 	  var jsonobj = JSON.stringify({MerchantId : configNoteNew.MerchantId,
 					'Note' : configNoteNew.Note,
 					'Type' : configNoteNew.Type,
-					'MerchantConfigurationId' : configNoteNew.ConfigurationStepId});
+					'MerchantConfigurationId' : configNoteNew.MerchantConfigurationId});
 
 	  $.ajax({
 		  type: 'POST',
@@ -2496,6 +2539,52 @@ var EXELON = (function (r, $) {
               });
       } catch (e) {
           RSKYBOX.log.error(e, 'configureUpdateSubStep');
+      }
+  };
+
+  r.updateConfigurationNote = function(changedNote, stepnumber) {
+      try{
+	  RSKYBOX.log.info('entering','main.js.updateConfiugreNotes');
+
+	  var closeurl = baseUrl + 'merchants/notes/update/' + changedNote.Id;
+          var jsonobj = JSON.stringify({MerchantId : r.merchantBeingConfigured.Configuration[0].Id,
+                                        'Note' : changedNote.Note,
+                                        'Type' : changedNote.Type,
+                                        'MerchantConfigurationId' : changedNote.MerchantConfigurationId});
+
+          $.ajax({
+                  type: 'POST',
+                      datatype: 'json',
+                      data : jsonobj,
+                      contentType: 'application/json',
+                      url: closeurl,
+                      statuscode: r.statusCodeHandlers(),
+                      headers: {'Authorization' : r.getAuthorizationHeader()},
+                      success: function(data){
+                      try {
+                          RSKYBOX.log.info('finished','updateConfigurationNote');
+
+			  var updatedNote = data.Results[0];
+			  var noteSelector = '#ConfigureNote_' + stepnumber + '_' + changedNote.Id;
+
+			  $(noteSelector + ' .noteContent').text(updatedNote.Note);
+			  $(noteSelector + ' .noteAuthor').text('By: ' + updatedNote.LastModifiedBy);
+			  $(noteSelector + ' .noteTime').text('Time: ' + updatedNote.LastUpdated.toString());
+
+			  $('#ConfigurationNotesList_' + stepnumber).listview('refresh');
+			  
+			  
+
+                      } catch (e) {
+                          RSKYBOX.log.error(e,'updateConfigurationNote.success');
+                      }},
+                      error: function(error){
+                      alert('Could not update configuration note, error code:' + error.status);
+                  }
+              });
+
+      } catch (e) {
+	  RSKYBOX.log.error(e,'updateConfigureNote');
       }
   };
   
