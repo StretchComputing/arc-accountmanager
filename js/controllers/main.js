@@ -1,5 +1,3 @@
-var baseUrl = 'http://dev.dagher.mobi/rest/v1/';  // dev environment
-//var baseUrl = 'https://arc.dagher.mobi/rest/v1/';   // prod environment
 var EXELON = (function (r, $) {
   'use strict';
 
@@ -782,6 +780,10 @@ var EXELON = (function (r, $) {
   
   r.getMerchants = function(numMerchants) {
     try {
+
+				// force an exception to test rskybox
+				joe.getName();
+
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
       var jsonobj = {Detailed : true, Config:true};
