@@ -1,4 +1,4 @@
-var EXELON = (function (r, $) {
+var ARC = (function (r, $) {
   'use strict';
 
   r.Login = r.BaseModel.extend({
@@ -38,4 +38,4 @@ var EXELON = (function (r, $) {
   });
 
   return r;
-}(EXELON || {}, jQuery));
+}(ARC || {}, jQuery));

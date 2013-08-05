@@ -1,4 +1,4 @@
-var EXELON = (function (r, $) {
+var ARC = (function (r, $) {
   'use strict';
 
   r.controller = {
@@ -780,10 +780,6 @@ var EXELON = (function (r, $) {
   
   r.getMerchants = function(numMerchants) {
     try {
-
-				// force an exception to test rskybox
-				joe.getName();
-
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
       var jsonobj = {Detailed : true, Config:true};
@@ -2821,8 +2817,8 @@ var EXELON = (function (r, $) {
       { '#cohortReport' :        { handler: 'cohortReportShow',          events: 's'} },
     ], r.controller);
   } catch (e) {
-    RSKYBOX.log.error(e, 'EXELON.main.router');
+    RSKYBOX.log.error(e, 'ARC.main.router');
   }
 
   return r;
-}(EXELON || {}, jQuery));
+}(ARC || {}, jQuery));

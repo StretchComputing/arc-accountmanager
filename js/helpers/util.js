@@ -1,11 +1,11 @@
-var EXELON = (function(r, $) {
+var ARC = (function(r, $) {
   'use strict';
 
   r.dump = function(object) {
     try {
       RSKYBOX.log.local(JSON.stringify(object));
     } catch (e) {
-      RSKYBOX.log.error(e, 'EXELON.dump');
+      RSKYBOX.log.error(e, 'ARC.dump');
     }
   };
 
@@ -27,22 +27,22 @@ var EXELON = (function(r, $) {
   r.statusCodeHandlers = function(apiError) {
     var general = {
       304: function() {
-        RSKYBOX.log.warn('304', 'EXELON.statusCodeHandlers');
+        RSKYBOX.log.warn('304', 'ARC.statusCodeHandlers');
       },
       401: function(jqXHR) {
         try {
           r.unauthorized();
-          RSKYBOX.log.info('401 - unauthorized', 'EXELON.statusCodeHandlers');
+          RSKYBOX.log.info('401 - unauthorized', 'ARC.statusCodeHandlers');
         } catch (e) {
-          RSKYBOX.log.warn(e, 'EXELON.statusCodeHandlers:general:401');
+          RSKYBOX.log.warn(e, 'ARC.statusCodeHandlers:general:401');
         }
       },
       404: function() {
         r.flash.error("Server error, contact tech support");
-        RSKYBOX.log.warn('404 - not found', 'EXELON.statusCodeHandlers');
+        RSKYBOX.log.warn('404 - not found', 'ARC.statusCodeHandlers');
       },
       500: function() {
-        RSKYBOX.log.warn('500 - server error', 'EXELON.statusCodeHandlers');
+        RSKYBOX.log.warn('500 - server error', 'ARC.statusCodeHandlers');
       }
     };
 
@@ -52,7 +52,7 @@ var EXELON = (function(r, $) {
       }
       return general;
     } catch (e) {
-      RSKYBOX.log.error(e, 'EXELON.statusCodeHandlers');
+      RSKYBOX.log.error(e, 'ARC.statusCodeHandlers');
     }
   };
 
@@ -263,19 +263,19 @@ var EXELON = (function(r, $) {
   // param customer: a JavaScript object with the customer attributes, not a Backbone model.
   r.logIn = function (customer) {
     try {
-      RSKYBOX.log.info('entering', 'EXELON.logIn');
+      RSKYBOX.log.info('entering', 'ARC.logIn');
       r.store.setItem(CUSTOMER, customer);
     } catch (e) {
-      RSKYBOX.log.error(e, 'EXELON.logIn');
+      RSKYBOX.log.error(e, 'ARC.logIn');
     }
   };
 
   r.logOut = function () {
     try {
-      RSKYBOX.log.info('entering', 'EXELON.logOut');
+      RSKYBOX.log.info('entering', 'ARC.logOut');
       r.store.removeItem(CUSTOMER);
     } catch (e) {
-      RSKYBOX.log.error(e, 'EXELON.logOut');
+      RSKYBOX.log.error(e, 'ARC.logOut');
     }
   };
 
@@ -299,7 +299,7 @@ var EXELON = (function(r, $) {
       });  
       $("#leftPanel").trigger("updatelayout");
     } catch (e) {
-      RSKYBOX.log.error(e, 'EXELON.displayPanel');
+      RSKYBOX.log.error(e, 'ARC.displayPanel');
     }
   };
 
@@ -430,7 +430,7 @@ var EXELON = (function(r, $) {
 
 
   return r;
-}(EXELON || {}, jQuery));
+}(ARC || {}, jQuery));
 
 
 
