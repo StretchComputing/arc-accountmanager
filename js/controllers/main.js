@@ -2361,12 +2361,13 @@ var EXELON = (function (r, $) {
 	  var configureInsertNoteTemplate = _.template($('#ConfigureInsertNoteTemplate').html());
 	  var allNotesHtml = "";
 	  var noteHtml;
-	  var cNote;
+	  var cNote, cStepId;
 	  
 	  for(var noteIndex = (r.merchantNotes1.length - 1); noteIndex >= 0; noteIndex--) {
 	      cNote = r.merchantNotes1[noteIndex];
+	      cStepId = r.merchantBeingConfigured.Configuration[0].Steps[stepNumber - 1].Id;
 	      
-	      if(cNote.Type == "NOTE_CONFIG") {
+	      if(cNote.Type == "NOTE_CONFIG" && cNote.MerchantConfigurationId == cStepId) {
 		  noteHtml = configureInsertNoteTemplate(cNote);
 		  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + cNote.Id);
 		  noteHtml = noteHtml.replace("ConfigureEditNote_Step_Id","ConfigureEditNote_" + stepNumber + "_" +  cNote.Id);
@@ -2480,6 +2481,22 @@ var EXELON = (function (r, $) {
 	      $('#ConfigureCheckList').trigger('create');
 	  }
 	  r.configureListExists = true;
+
+	  /*for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
+	      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++){
+		  cSubStep = cStep.SubSteps[subStepIndex];
+		  $('ConfigureListCheck_' + cStep.Number + '_' + cSubStep.Number).off('swipeleft');
+		  $('ConfigureListCheck_' + cStep.Number + '_' + cSubStep.Number).on('swipeleft',function() {
+			  var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+                          var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+			  $.mobile.changePage($('#ConfigureStep_' + (cStep.Number - 1)), {transition:'slide', changeHash:true});
+		      });
+	      }
+	      }	*/  
 	  // --- 
 	  
 	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
