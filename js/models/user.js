@@ -1,4 +1,4 @@
-var EXELON = (function (r, $) {
+var ARC = (function (r, $) {
   'use strict';
 
 
@@ -57,4 +57,4 @@ var EXELON = (function (r, $) {
 
 
   return r;
-}(EXELON || {}, jQuery));
+}(ARC || {}, jQuery));

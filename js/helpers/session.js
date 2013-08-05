@@ -1,4 +1,4 @@
-var EXELON = (function (r, $) {
+var ARC = (function (r, $) {
   'use strict';
 
 
@@ -188,7 +188,7 @@ var EXELON = (function (r, $) {
 
     return r;
   } catch (e) {
-    RSKYBOX.log.error(e, 'EXELON.session.reset');
+    RSKYBOX.log.error(e, 'ARC.session.reset');
   }
-}(EXELON || {}, jQuery));
+}(ARC || {}, jQuery));
 

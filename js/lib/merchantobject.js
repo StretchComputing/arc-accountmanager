@@ -123,5 +123,12 @@ var MERCHANT = (function($){
 	    	      	    	    'RepeatCustomer',
 	    	      	    	    'PaidErrors'
 	    	      	    	                      ],
+	        cohortReportFieldToDisplay : {
+	        	'AmountProcessed' : "Amount Processed",
+	        	'PaidCredit' : "Number who paid with a credit card",
+	        	'PaidDwolla' : "Number who paid with Dwolla",
+	        	'Repeat Customer': 'Number of repeat customers',
+	        	'PaidErrors' : 'Number who paid but encountered an error'
+	        },
 	}
 }(jQuery));

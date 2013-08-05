@@ -1,6 +1,4 @@
-var baseUrl = 'http://dev.dagher.mobi/rest/v1/';  // dev environment
-//var baseUrl = 'https://arc.dagher.mobi/rest/v1/';   // prod environment
-var EXELON = (function (r, $) {
+var ARC = (function (r, $) {
   'use strict';
 
   r.controller = {
@@ -697,6 +695,28 @@ var EXELON = (function (r, $) {
     			}
     			else{
     				r.cohortReportShiftFocus('Canvas');
+    			}
+    		});
+    		
+    		content.on('click', '.cohortReportItemviewItem', function(){
+    			var index = $(this).attr('index');
+    			var d = r.cohortReport.activeDate;
+    			switch(r.cohortReport.Timescale){
+    				case 'AllTime':
+    					r.cohortReportChangeDate(new Date(2013+index,d.getMonth(),d.getDate()));
+    					r.changeTimescale('Yearly');
+    					break;
+    				case 'Yearly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),index,d.getDate()));
+    					r.changeTimescale('Monthly');
+    					break;
+    				case 'Monthly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),d.getMonth(),index));
+    					r.changeTimescale('Daily');
+    					break;
+    				case 'Weekly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),d.getMonth(), d.getDate()+index));
+    					r.changeTimescale('Daily');
     			}
     		});
     		
@@ -1932,6 +1952,8 @@ var EXELON = (function (r, $) {
   
   r.changeTimescale = function(newTimescale){
 	  r.cohortReport.Timescale = newTimescale;
+	  $('#cohortReport'+newTimescale+'Tab').prop("checked",true);
+	  $('#cohortReportFooter').trigger('create')
 	  r.cohortReportRedraw(r.cohortReport.currentFocus);
   };
   
@@ -2836,8 +2858,8 @@ var EXELON = (function (r, $) {
       { '#cohortReport' :        { handler: 'cohortReportShow',          events: 's'} },
     ], r.controller);
   } catch (e) {
-    RSKYBOX.log.error(e, 'EXELON.main.router');
+    RSKYBOX.log.error(e, 'ARC.main.router');
   }
 
   return r;
-}(EXELON || {}, jQuery));
+}(ARC || {}, jQuery));
