@@ -698,6 +698,28 @@ var ARC = (function (r, $) {
     			}
     		});
     		
+    		content.on('click', '.cohortReportItemviewItem', function(){
+    			var index = $(this).attr('index');
+    			var d = r.cohortReport.activeDate;
+    			switch(r.cohortReport.Timescale){
+    				case 'AllTime':
+    					r.cohortReportChangeDate(new Date(2013+index,d.getMonth(),d.getDate()));
+    					r.changeTimescale('Yearly');
+    					break;
+    				case 'Yearly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),index,d.getDate()));
+    					r.changeTimescale('Monthly');
+    					break;
+    				case 'Monthly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),d.getMonth(),index));
+    					r.changeTimescale('Daily');
+    					break;
+    				case 'Weekly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),d.getMonth(), d.getDate()+index));
+    					r.changeTimescale('Daily');
+    			}
+    		});
+    		
     		$('#cohortReportChangeDateButton').bind('click',function(){
     			var d = new Date($('#cohortReportGoToForm').val() +' 00:00:00');
     			if(d.toString() === "Invalid Date")
@@ -1930,6 +1952,8 @@ var ARC = (function (r, $) {
   
   r.changeTimescale = function(newTimescale){
 	  r.cohortReport.Timescale = newTimescale;
+	  $('#cohortReport'+newTimescale+'Tab').prop("checked",true);
+	  $('#cohortReportFooter').trigger('create')
 	  r.cohortReportRedraw(r.cohortReport.currentFocus);
   };
   
@@ -2359,12 +2383,13 @@ var ARC = (function (r, $) {
 	  var configureInsertNoteTemplate = _.template($('#ConfigureInsertNoteTemplate').html());
 	  var allNotesHtml = "";
 	  var noteHtml;
-	  var cNote;
+	  var cNote, cStepId;
 	  
 	  for(var noteIndex = (r.merchantNotes1.length - 1); noteIndex >= 0; noteIndex--) {
 	      cNote = r.merchantNotes1[noteIndex];
+	      cStepId = r.merchantBeingConfigured.Configuration[0].Steps[stepNumber - 1].Id;
 	      
-	      if(cNote.Type == "NOTE_CONFIG") {
+	      if(cNote.Type == "NOTE_CONFIG" && cNote.MerchantConfigurationId == cStepId) {
 		  noteHtml = configureInsertNoteTemplate(cNote);
 		  noteHtml = noteHtml.replace("ConfigureNote_Step_Id","ConfigureNote_" + stepNumber + "_" + cNote.Id);
 		  noteHtml = noteHtml.replace("ConfigureEditNote_Step_Id","ConfigureEditNote_" + stepNumber + "_" +  cNote.Id);
@@ -2478,6 +2503,22 @@ var ARC = (function (r, $) {
 	      $('#ConfigureCheckList').trigger('create');
 	  }
 	  r.configureListExists = true;
+
+	  /*for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
+	      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[stepIndex];
+
+	      for(var subStepIndex = 0; subStepIndex < cStep.SubSteps.length; subStepIndex++){
+		  cSubStep = cStep.SubSteps[subStepIndex];
+		  $('ConfigureListCheck_' + cStep.Number + '_' + cSubStep.Number).off('swipeleft');
+		  $('ConfigureListCheck_' + cStep.Number + '_' + cSubStep.Number).on('swipeleft',function() {
+			  var step_substep_pattern = /\d+/g;
+                          var checkBoxId = $(this).attr('id');
+                          var step_substep = checkBoxId.match(step_substep_pattern);
+                          var cStep = r.merchantBeingConfigured.Configuration[0].Steps[step_substep[0] - 1];
+			  $.mobile.changePage($('#ConfigureStep_' + (cStep.Number - 1)), {transition:'slide', changeHash:true});
+		      });
+	      }
+	      }	*/  
 	  // --- 
 	  
 	  for(var stepIndex = 0; stepIndex < r.merchantBeingConfigured.Configuration[0].Steps.length; stepIndex++){
@@ -2517,9 +2558,20 @@ var ARC = (function (r, $) {
 	      //set handlers for entering Notes
 	      $('#ConfigureNewNoteSubmit_' + cStep.Number).attr('StepIndex',stepIndex);
 	      $('#ConfigureNewNoteCancel_' + cStep.Number).attr('StepIndex',stepIndex);
-	      //$('#ConfigurationNotesAdd_' + cStep.Number).on('click',function(){
-	      //      $('#ConfigureNewNote_' + cStep.Number).popup('open',{transition:"slide", positionTo:"window"});
-	      //	  });
+		  $('#ConfigurationNotesAdd_' + cStep.Number).attr('StepIndex',stepIndex);
+	      
+		  $('#ConfigurationNotesAdd_' + cStep.Number).on('click',function(){
+	     	 var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
+			 var buttonSubmit = $('#ConfigureNewNoteSubmit_' + cStep.Number);
+			 $('#ConfigureNewNote_' + cStep.Number + ' h3').text('New Configure Step Note');
+			 if(buttonSubmit.hasClass('noteUpdate')){
+			 	$('#ConfigureNewNote_' + cStep.Number + ' h3').text('New Configure Step Note');
+				buttonSubmit.removeClass('noteUpdate');
+				buttonSubmit.removeAttr('noteId');
+				$('#ConfigureNewNoteCancel_' + cStep.Number).removeClass('noteUpdate');
+				$('#ConfigureNewNoteContents_' + cStep.Number).val("");
+			 }
+	      });
 	      $('#ConfigureNewNoteSubmit_' + cStep.Number).on('click',function(){
 		      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
 		      var configNoteNew = {MerchantId: r.merchantBeingConfigured.Id,

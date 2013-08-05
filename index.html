@@ -767,7 +767,9 @@
 	<script type="text/template" id="cohortReportItemviewTemplate">
 		<ul data-role="listview" data-inset="true" class="cohortReportDataDisplay">
 			<% for(var i = 0; i < Data.length; i++){ %>
-				<li><%= Labels[i] %> : <%= Data[i] %></li>
+				<li><a href="#" index="<%=i %>" class="cohortReportItemviewItem"> 
+					<%= Labels[i] %> : <%= Data[i] %>
+				</a></li>
 			<% } %>
 		</ul>
 	</script>
@@ -804,7 +806,7 @@
 	       <li>
 		 <div data-role="fieldcontain">
 		   <h3><%= Screenshots[imgIndex].Name %></h3>
-		   <img src="<%= Screenshots[imgIndex].URL %>"/>
+		   <img src="<%= Screenshots[imgIndex].URL %>" style="width:100%" />
 		 </div>
 	       </li>
 	       <% } %>
