@@ -5,7 +5,7 @@ var ARC = (function (r, $) {
   r.LoginView = Backbone.View.extend({
     initialize: function () {
       try {
-        _.bindAll(this, 'apiError');
+        _.bindAll(this, 'apiError', 'success');
         this.model.on('change', this.render, this);
         this.model.on('error', this.error, this);
         this.template = _.template($('#loginTemplate').html());
@@ -63,6 +63,8 @@ var ARC = (function (r, $) {
     success: function (model, response) {
       try {
         RSKYBOX.log.info('entering', 'Login.success');
+				// Login not part of the results returned by server, so add it in so it gets stored and can be used for rskybox later
+				model.Results.Login = this.model.get('Login');
         r.logIn(model.Results);
         $.mobile.changePage( "#selectMerchant", { transition: "slideup", changeHash: true});
       } catch (e) {

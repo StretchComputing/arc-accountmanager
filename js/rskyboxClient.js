@@ -13,7 +13,6 @@ var RSKYBOX = (function (r) {
       applicationVersion: 'mvp',
       applicationId: 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24YgPYvDA',
       authHeader: 'Basic ' + 'dG9rZW46ZWtva3ExNjdrNDZnYnJtcjZodmJodDlsYWI=',
-      userId: 'not set',
       userName: 'not set',
 			localEndpoint: 'dev.accountmanager.html5',
 			remoteEndpoint: serverUrl
@@ -23,6 +22,7 @@ var RSKYBOX = (function (r) {
     base = function (level, message, name) {
       rskyboxConfig.appActions = getAppActions(),
       rskyboxConfig.instanceUrl = window.location.hash;
+      rskyboxConfig.userId = ARC.getLogin();
       rskyboxConfig.summary = navigator.userAgent;
 
       function later() {

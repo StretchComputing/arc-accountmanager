@@ -230,6 +230,15 @@ var ARC = (function(r, $) {
 		}
     return authHeader;
   };
+	
+  r.getLogin = function() {
+    var login = 'not set';
+		var customer = r.store.getItem(CUSTOMER, true);
+		if(customer) {
+    	login = customer.Login;
+		}
+    return login;
+  };
 
   r.getUserName = function() {
     var userName = '';

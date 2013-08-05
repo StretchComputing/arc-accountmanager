@@ -23,10 +23,10 @@ var ARC = (function (r, $) {
       }
     },
 
-    getItem: function (item) {
+    getItem: function (item, isLoggingDisabled) {
       try {
         var results;
-        RSKYBOX.log.info(item, 'store.getItem');
+        if(!isLoggingDisabled) RSKYBOX.log.info(item, 'store.getItem');
 
         results = JSON.parse(localStorage.getItem(item));
         if (!results || results === '') {
@@ -34,7 +34,7 @@ var ARC = (function (r, $) {
         }
         return results;
       } catch (e) {
-        RSKYBOX.log.error(e, 'store.getItem');
+        if(!isLoggingDisabled) RSKYBOX.log.error(e, 'store.getItem');
       }
     },
 
