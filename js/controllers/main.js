@@ -2558,9 +2558,20 @@ var ARC = (function (r, $) {
 	      //set handlers for entering Notes
 	      $('#ConfigureNewNoteSubmit_' + cStep.Number).attr('StepIndex',stepIndex);
 	      $('#ConfigureNewNoteCancel_' + cStep.Number).attr('StepIndex',stepIndex);
-	      //$('#ConfigurationNotesAdd_' + cStep.Number).on('click',function(){
-	      //      $('#ConfigureNewNote_' + cStep.Number).popup('open',{transition:"slide", positionTo:"window"});
-	      //	  });
+		  $('#ConfigurationNotesAdd_' + cStep.Number).attr('StepIndex',stepIndex);
+	      
+		  $('#ConfigurationNotesAdd_' + cStep.Number).on('click',function(){
+	     	 var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
+			 var buttonSubmit = $('#ConfigureNewNoteSubmit_' + cStep.Number);
+			 $('#ConfigureNewNote_' + cStep.Number + ' h3').text('New Configure Step Note');
+			 if(buttonSubmit.hasClass('noteUpdate')){
+			 	$('#ConfigureNewNote_' + cStep.Number + ' h3').text('New Configure Step Note');
+				buttonSubmit.removeClass('noteUpdate');
+				buttonSubmit.removeAttr('noteId');
+				$('#ConfigureNewNoteCancel_' + cStep.Number).removeClass('noteUpdate');
+				$('#ConfigureNewNoteContents_' + cStep.Number).val("");
+			 }
+	      });
 	      $('#ConfigureNewNoteSubmit_' + cStep.Number).on('click',function(){
 		      var cStep = r.merchantBeingConfigured.Configuration[0].Steps[$(this).attr('StepIndex')];
 		      var configNoteNew = {MerchantId: r.merchantBeingConfigured.Id,
