@@ -698,6 +698,28 @@ var ARC = (function (r, $) {
     			}
     		});
     		
+    		content.on('click', '.cohortReportItemviewItem', function(){
+    			var index = $(this).attr('index');
+    			var d = r.cohortReport.activeDate;
+    			switch(r.cohortReport.Timescale){
+    				case 'AllTime':
+    					r.cohortReportChangeDate(new Date(2013+index,d.getMonth(),d.getDate()));
+    					r.changeTimescale('Yearly');
+    					break;
+    				case 'Yearly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),index,d.getDate()));
+    					r.changeTimescale('Monthly');
+    					break;
+    				case 'Monthly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),d.getMonth(),index));
+    					r.changeTimescale('Daily');
+    					break;
+    				case 'Weekly':
+    					r.cohortReportChangeDate(new Date(d.getFullYear(),d.getMonth(), d.getDate()+index));
+    					r.changeTimescale('Daily');
+    			}
+    		});
+    		
     		$('#cohortReportChangeDateButton').bind('click',function(){
     			var d = new Date($('#cohortReportGoToForm').val() +' 00:00:00');
     			if(d.toString() === "Invalid Date")
@@ -1930,6 +1952,8 @@ var ARC = (function (r, $) {
   
   r.changeTimescale = function(newTimescale){
 	  r.cohortReport.Timescale = newTimescale;
+	  $('#cohortReport'+newTimescale+'Tab').prop("checked",true);
+	  $('#cohortReportFooter').trigger('create')
 	  r.cohortReportRedraw(r.cohortReport.currentFocus);
   };
   
