@@ -1,5 +1,5 @@
-var serverUrl = 'http://dev.dagher.mobi/';  // dev environment
-//var serverUrl = 'https://arc.dagher.mobi/';   // prod environment
+//var serverUrl = 'http://dev.dagher.mobi/';  // dev environment
+var serverUrl = 'https://arc.dagher.mobi/';   // prod environment
 var baseUrl = serverUrl + 'rest/v1/';
 
 var RSKYBOX = (function (r) {
