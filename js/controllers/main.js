@@ -813,7 +813,9 @@ var ARC = (function (r, $) {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
-      var jsonobj = {Detailed : true, Config:true};
+      var jsonobj = {Detailed : true, 
+    		         Config:true,
+    		         ShowAll:true};
 	  jsonobj.Top = numMerchants;
 	  
       if(r.currLoc){
