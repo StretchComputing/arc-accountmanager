@@ -36,11 +36,11 @@
       <script src="js/views/base.js"></script>
       <script src="js/views/login.js"></script>
 
+	  <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
+
       <script src="js/lib/merchantobject.js"></script>
       <script src="js/lib/Charts.js"></script>
       <script src="js/lib/jqm-datebox.comp.calbox.min.js"</script>
-
-     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
 
       <script>
           $( document ).on( "pageshow", function(){
@@ -419,6 +419,19 @@
 
 			<button data-icon="check" id="meetingStartButton">Start Meeting</button>
 		</div><!-- meetingStart -->
+		
+		<div data-role="popup" id="merchantDisplayConnectionTest" data-position-to="window" class="ui-content" data-dismissible="false">
+			<a class="ui-btn-right" data-icon="delete" data-iconpos="notext" data-rel="back" data-role="button">close</a>
+		
+			<div>
+				<div id="merchantDisplayConnectionTestResults"></div>
+				<h4>Average:</h4>
+				<div id="merchantDisplayConnectionTestAvg"></div>
+				<h3>Score:</h2>
+				<div id="merchantDisplayConnectionTestScore"></div>
+			</div>
+			<button id="merchantDisplayConnectionTestStart">Start</button>
+		</div>
 	
 	</div><!-- merchantDisplay -->
 	
@@ -574,6 +587,9 @@
 			</li>
 			<li data-icon="info" style="display:none" class="meetingDetailsButton" id="merchantDisplay_MeetingDetailsButton">
 				<a href="#merchantDisplay_MeetingDetails" data-rel="popup">Meeting in Progress</a>
+			</li>
+			<li data-icon="gear">
+				<a href="#merchantDisplayConnectionTest" data-rel="popup">Connection Test</a>
 			</li>
             <li data-icon="alert">
               <a href="#" class="logOut">Log Out</a>

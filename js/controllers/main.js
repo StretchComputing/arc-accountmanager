@@ -58,6 +58,7 @@ var ARC = (function (r, $) {
     // selectMerchant Screen
     selectMerchantBeforeCreate: function () {
       try {
+
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
         r.attachMeeting("selectMerchant");
         
@@ -236,34 +237,35 @@ var ARC = (function (r, $) {
     	try{
     		RSKYBOX.log.info('entering', 'main.js.merchantDisplayBeforeCreate');
     		var page = $('#merchantDisplay');
-    		
+
+    		/*Event handlers for the addition of notes*/
     		var noteSwipe = function(){
     			var index = $(this).attr('index');
     			$('#noteShow'+index).hide();
     			$('#noteMenu'+index).show();
     		};
-    		
+
     		var noteBack = function(){
     			var index = $(this).attr('index')
     			$('#noteMenu'+index).hide();
     			$('#noteShow'+index).show();
     		};
-    		
+
     		page.on('click', '#merchantDisplayMaps', function(){
     			var m = r.activeMerchant;
     			if(m.Latitude !== "" && m.Longitude !== "")
     				r.mapsCenter = new google.maps.LatLng(m.Latitude,
-    												  m.Longitude);
+    						m.Longitude);
     			$.mobile.changePage('#maps', {transition:'slide'});
     		});
-    		
+
     		page.on('swipeleft', '.noteSwipe', noteSwipe);
     		page.on('swiperight', '.noteSwipe', noteSwipe);
-    		
+
     		page.on('click', '.noteDelete', function(){
     			return; //No backend functionality yet?
     		});
-    		
+
     		page.on('click', '.noteEdit', function(){
     			var index = $(this).attr('index');
     			var note = r.activeMerchant.Notes[index]
@@ -271,109 +273,111 @@ var ARC = (function (r, $) {
     			var disp = $('#noteEditField'+index);
     			disp.show();
     		});
-    		
+
     		page.on('click', '.noteBack', noteBack);
     		page.on('swiperight', '.noteMenu', noteBack);
     		page.on('swipeleft', '.noteMenu', noteBack);
-    		
+
     		page.on('click', '.editNoteSave', function(){
     			var index = $(this).attr('index');
     			var note = r.activeMerchant.Notes[index]
     			note.Note = $('#noteEditForm'+index).val();
     			note.LastUpdated = new Date();
     			note.LastUpdatedBy = r.getUserName();
-    			
+
     			$('#noteEditField'+index).hide();
-    			
+
     			r.updateNote(note.Id, {Note : note.Note});
-    			
+
     			var disp = $('#noteShow'+index);
     			disp.empty();
     			var t = _.template($('#NoteShowInnerTemplate').html());
     			disp.append(t({n : note}));
-    			
+
     			$('#merchantDisplayNotesDisplay').listview('refresh');
-    			
+
     			disp.show();
-    			
+
     		});
-    		
+
     		page.on('click', '.editNoteBack', function(){
     			var index = $(this).attr('index');
     			$('#noteEditField'+index).hide();
     			$('#noteMenu'+index).show();
     		});
-    		
+
+
+    		/*Event Handlers for the sidebar*/
     		var template = _.template($('#merchantDisplaySidebarTemplate').html());
     		$('#merchantDisplay').append(template({UserName:r.getUserName(),
-    											   versionNum : r.versionNum}));
-    		
+    			versionNum : r.versionNum}));
+
     		$('#merchantDisplaySidebarEdit').bind('click', function(){
     			r.merchantToEdit = r.activeMerchant;
     			$.mobile.changePage('#editMerchant', {transition:'slide'});
-		});
+    		});
 
-		$('#merchantDisplaySidebarConfigure').bind('click',function(){
-			r.getMerchantConfigurationInfo(r.activeMerchant.Id);
-		});
-    		
+    		$('#merchantDisplaySidebarConfigure').bind('click',function(){
+    			r.getMerchantConfigurationInfo(r.activeMerchant.Id);
+    		});
+
     		$('#merchantDisplayDeleteYes').bind('click', function(){
     			r.deleteMerchant(r.activeMerchant); //API Call
-    			
+
     			$.mobile.changePage('#selectMerchant');
     		});
-    		
+
     		$('#merchantDisplayDeleteNo').bind('click', function(){
     			$('#merchantDisplayConfirmDelete').popup('close');
     		});
-    		
+
     		/*For the meetings popup*/
     		r.attachMeeting('merchantDisplay');
-    		
+
     		page.on('click', '.meetingStartDeleteMember', function(){
     			$(this).parent().remove()
     		});
-    		
-    		 $('#meetingStartButton').bind('click', function(){
-    			 if(!r.activeMeeting){
-    				 r.activeMeeting = {Members : [],
-    						            Notes : [],
-    						            deleteMode : false};
-    			 }
-    			 r.activeMeeting.Merchant = r.activeMerchant;
-    			 r.activeMeeting.Start = new Date();
-    			 r.activeMeeting.About = $('#meetingStartAbout').val();
-    			 
-    			 var mem = $('#meetingStartAddMemberField').val();
-    			 if(mem !== "")
-    				 r.activeMeeting.Members.push(mem);
-    			 $(':button', $('#meetingStartMembers')).each(function(){
-    				 r.activeMeeting.Members.push(this.innerText);
-    				 });
-    			 
-    			 $('#meetingStart').popup('close');
-    			 $('#meetingStartButton').hide();
-    			 r.handleMeetings('merchantDisplay');
-    			 
-    			 $('.merchantDetails', $.mobile.currentPage).panel('open')
-    			 /*Cleaning up*/
-    			 $('#meetingStartMembers').empty();
-    			 $('#meetingStartAbout').val('');
-    			 $('#meetingStartAddMemberField').val('');
-    		 });
-    		 
-    		 $('#meetingStartCancel').bind('click', function(){
-    			 if(r.activeMeeting)
-    				 delete r.activeMeeting;
-    			 $('#meetingStartMembers').empty();
-    			 $('#meetingStartAbout').val('');
-    			 $('#meetingStartAddMemberField').val('');
-    		 });
-    		 
-    		 $('#meetingStartAddMember').bind('click', function(){
-    			 var field = $('#meetingStartAddMemberField');
-    			 if(field.val() === "")
-    				 return;
+
+    		$('#meetingStartButton').bind('click', function(){
+    			if(!r.activeMeeting){
+    				r.activeMeeting = {Members : [],
+    						Notes : [],
+    						deleteMode : false};
+    			}
+    			r.activeMeeting.Merchant = r.activeMerchant;
+    			r.activeMeeting.Start = new Date();
+    			r.activeMeeting.About = $('#meetingStartAbout').val();
+
+    			var mem = $('#meetingStartAddMemberField').val();
+    			if(mem !== "")
+    				r.activeMeeting.Members.push(mem);
+    			$(':button', $('#meetingStartMembers')).each(function(){
+    				r.activeMeeting.Members.push(this.innerText);
+    			});
+
+    			$('#meetingStart').popup('close');
+    			$('#meetingStartButton').hide();
+    			r.handleMeetings('merchantDisplay');
+
+    			$('.merchantDetails', $.mobile.currentPage).panel('open')
+    			/*Cleaning up*/
+    			$('#meetingStartMembers').empty();
+    			$('#meetingStartAbout').val('');
+    			$('#meetingStartAddMemberField').val('');
+    		});
+
+    		$('#meetingStartCancel').bind('click', function(){
+    			if(r.activeMeeting)
+    				delete r.activeMeeting;
+    			$('#meetingStartMembers').empty();
+    			$('#meetingStartAbout').val('');
+    			$('#meetingStartAddMemberField').val('');
+    		});
+
+    		$('#meetingStartAddMember').bind('click', function(){
+    			var field = $('#meetingStartAddMemberField');
+    			if(field.val() === "")
+    				return;
     			$('#meetingStartMembers').append($('<button />', {
     				'data-icon' : 'delete',
     				'data-inline' : 'true',
@@ -382,10 +386,15 @@ var ARC = (function (r, $) {
     				'text' : field.val()
     			}));
     			field.val('');
-    			
+
     			$('#meetingStart').trigger('create');
-    		 });
+    		});
     		
+    		/*Event handlers for the signal test popup*/
+    		$('#merchantDisplayConnectionTestStart').bind('click', function(){
+    			r.pingTest();
+    		});
+
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.merchantDisplayBeforeCreate');
@@ -804,7 +813,9 @@ var ARC = (function (r, $) {
     try {
       RSKYBOX.log.info('entering', 'main.js.getMerchants');
       var closeurl = baseUrl + 'merchants/list';
-      var jsonobj = {Detailed : true, Config:true};
+      var jsonobj = {Detailed : true, 
+    		         Config:true,
+    		         ShowAll:true};
 	  jsonobj.Top = numMerchants;
 	  
       if(r.currLoc){
@@ -1427,6 +1438,8 @@ var ARC = (function (r, $) {
 	  return 'a';
   };
   
+  /*Helper methods for the meetings feature*/
+  
   r.handleMeetings = function(pageName){
 	  if(r.activeMeeting !== undefined){
 		  $('.meetingDetailsButton', $.mobile.activePage).show();
@@ -1490,6 +1503,8 @@ var ARC = (function (r, $) {
       RSKYBOX.log.error(e, 'main.js.click.logOut');
     }
   });
+  
+  /* Helper Methods for Maps Screen*/
 
   r.displayGeoLocation = function(position) {
     try {
@@ -2180,6 +2195,70 @@ var ARC = (function (r, $) {
 	 
   });
   
+  /*Connection Test helper methods*/
+  r.pingTest = function(){
+	  r.pingTestData = [];
+	  r.sendTimedPing(15)
+  }
+  
+  r.sendTimedPing = function(n){
+	  try{
+		  RSKYBOX.log.info('entering','js.main.sendTimedPing');
+		  var sendUrl = baseUrl + 'tools/ping';
+		  var t = new Date();
+		  
+		  $.ajax({
+			  datatype : 'json',
+			  url : sendUrl,
+			  method: 'GET',
+			  success: function(){
+				  var nt = new Date()
+				  r.pingTestData.push(nt - t);
+				  if(n != 0){
+					  r.sendTimedPing(n-1);
+				  }
+				  else{//Test over, display data
+					  r.displayPingTestResults();
+				  }
+			  },
+			  error : function(){
+				  alert('error sending ping')
+				  
+			  }
+		  });
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'js.main.sendTimedPing');
+	  }
+  };
+  
+  r.displayPingTestResults = function(){
+	  r.clearConnectionTestScreen();
+	  var str = "";
+	  var col = 0;
+	  for(var i = 0; i < r.pingTestData.length; i++){
+		  col += r.pingTestData[i];
+		  str += r.pingTestData[i].toString();
+		  str += " ";
+	  }
+	  var avg = col/r.pingTestData.length;
+	  $('#merchantDisplayConnectionTestResults').append(str);
+	  $('#merchantDisplayConnectionTestAvg').append(avg);
+	  $('#merchantDisplayConnectionTestScore').append(r.getPingTestScore(avg) +'/ 100');
+  };
+  
+  r.clearConnectionTestScreen = function(){
+	  $('#merchantDisplayConnectionTestResults').empty();
+	  $('#merchantDisplayConnectionTestAvg').empty();
+	  $('#merchantDisplayConnectionTestScore').empty();
+  };
+  
+  r.getPingTestScore = function(avg){
+	  return Math.floor( Math.sqrt((60 / avg)) * 100);
+  };
+  
+  /*Configuration Helper Methgods*/
+  
   r.getMerchantConfigurationInfo = function(merchantID) {
       try{
 	  RSKYBOX.log.info('entering','js.main.getMerchantConfigurationInfo');
@@ -2198,17 +2277,17 @@ var ARC = (function (r, $) {
 		      statuscode: r.statusCodeHandlers(),
 		      headers: {'Authorization' : r.getAuthorizationHeader()},
 		      success: function(data, status, jqXHR) {
-		      try {
-			  if(r.merchantBeingConfigured)
-			      r.clearExistingConfigureStepsPages();
-			  r.merchantBeingConfigured = data.Results[0];
-			  r.currentNumberOfSteps = r.merchantBeingConfigured.Configuration[0].Steps.length;
-			  if(!r.numberOfConfigureStepsPages)
-			      r.numberOfConfigureStepsPages = 0;
-			  r.fixMerchantBeingConfigured();
-			  r.getMerchantConfigurationNotes(r.merchantBeingConfigured.Id);
-			  var jtest = 5;
-		      } catch (e) {
+		    	  try {
+		    		  if(r.merchantBeingConfigured)
+		    			  r.clearExistingConfigureStepsPages();
+		    		  r.merchantBeingConfigured = data.Results[0];
+		    		  r.currentNumberOfSteps = r.merchantBeingConfigured.Configuration[0].Steps.length;
+		    		  if(!r.numberOfConfigureStepsPages)
+		    			  r.numberOfConfigureStepsPages = 0;
+		    		  r.fixMerchantBeingConfigured();
+		    		  r.getMerchantConfigurationNotes(r.merchantBeingConfigured.Id);
+		    		  var jtest = 5;
+		    	  } catch (e) {
 			  RSKYBOX.log.error(e, 'getMerchantConfigurationInfo.success');
 		      }
 		  }
