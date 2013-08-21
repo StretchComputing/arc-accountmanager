@@ -214,7 +214,7 @@ var ARC = (function (r, $) {
     createNewMerchantShow : function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.createNewMerchantShow');
-    		r.merchantForm("createNewMerchant", true);
+    		r.merchantForm("createNewMerchant", true, r.newMerchant);
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.createNewMerchantShow');
@@ -542,6 +542,24 @@ var ARC = (function (r, $) {
     			});
     		});
     		
+    		$('#mapsDropPin').bind('change', function(){
+    			if($(this).val() === 'on'){
+    				r.mapsDropPinModeOn();
+    			}
+    			else{
+    				r.mapsDropPinModeOff();
+    			}
+    		});
+    		
+    		$('#mapsCreateNewMerchant').bind('click', function(){
+    			var latLng = r.mapsDropPinMarker.getPosition()
+    			r.newMerchant = {
+    					Longitude : latLng.lng(),
+    					Latitude : latLng.lat()
+    			}
+    			$.mobile.changePage('#createNewMerchant')
+    		});
+    		
     		$("input[type='radio']", $('#mapsSearch')).bind('change', function(){
     			var buttonVal = $(this).val();
     			$('.searchTabContent', $('#mapsSearch')).each(function(){
@@ -560,6 +578,9 @@ var ARC = (function (r, $) {
     mapsShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
+    		
+    		var p = $('#mapsDropPin').val('off').slider('refresh')
+    		$('#mapsCreateNewMerchantLI').hide()
     		
     		/*populates the list for merchant search*/
     		var search = $('#mapsMerchantSearch');
@@ -1174,11 +1195,15 @@ var ARC = (function (r, $) {
   /*builds either the editMerchant or createNewMerchant page depending on the
    * given pageId and value of newMerchant (true for createNewMerchant, false for editMerhcant
    */
-  r.merchantForm = function(pageId, newMerchant){
+  r.merchantForm = function(pageId, newMerchant, initialData){
 
 	  var merchant;
 	  if(newMerchant){
-		  merchant = {};
+		  
+		  if(initialData)
+			  merchant = initialData;
+		  else
+			  merchant = {};
 		  r.fixMerchants([merchant]);//create the necessary properties
 		  //Do not modify the header
 	  }
@@ -1582,7 +1607,38 @@ var ARC = (function (r, $) {
 	$('#mapsPanel').panel('open');
   };
   
+  r.mapsDropPinModeOn = function(){
+	  r.mapsDropPinListener = google.maps.event.addListener(r.map,'click',function(e){
+		  $('#mapsCreateNewMerchantLI').show();
+		  
+		  if(!r.mapsDropPinMarker){
+			  r.mapsDropPinMarker = new google.maps.Marker({
+				  'position' : e.latLng,
+				  'map' : r.map,
+				  'title' : 'new'
+			  });
+		  }
+		  else{
+			  r.mapsDropPinMarker.setPosition(e.latLng)
+		  }
+	  });
+  }
+  
+  r.mapsDropPinModeOff = function(){
+	  $('#mapsCreateNewMerchantLI').hide();
+	  
+	  google.maps.event.removeListener(r.mapsDropPinListener);
+	  delete r.mapsDropPinListener;
+	  
+	  if(r.mapsDropPinMarker){
+		  r.mapsDropPinMarker.setMap(null);
+		  delete r.mapsDropPinMarker;
+	  }
+	  
+  }
+  
   /*Helper methods for cohortReport #$%*/
+  
   r.drawGraph = function(timescale,date,field){
 	  //Modify the title
 	  
@@ -2219,10 +2275,11 @@ var ARC = (function (r, $) {
 				  }
 				  else{//Test over, display data
 					  r.displayPingTestResults();
+					  r.sendPingTestResults();
 				  }
 			  },
 			  error : function(){
-				  alert('error sending ping')
+				  r.displayPingTestFailure();
 				  
 			  }
 		  });
@@ -2247,11 +2304,22 @@ var ARC = (function (r, $) {
 	  $('#merchantDisplayConnectionTestScore').append(r.getPingTestScore(avg) +'/ 100');
   };
   
+  r.displayPingTestFailure = function(){
+	  r.clearConnectionTestScreen();
+	  $('#merchantDisplayConnectionTestResults').append('failed');
+	  $('#merchantDisplayConnectionTestAvg').append('failed');
+	  $('#merchantDisplayConnectionTestScore').append('0 / 100');
+  }
+  
   r.clearConnectionTestScreen = function(){
 	  $('#merchantDisplayConnectionTestResults').empty();
 	  $('#merchantDisplayConnectionTestAvg').empty();
 	  $('#merchantDisplayConnectionTestScore').empty();
   };
+  
+  r.sendPingTestResults = function(){
+	  return;//Ajax call when implemented server-side
+  }
   
   r.getPingTestScore = function(avg){
 	  return Math.floor( Math.sqrt((60 / avg)) * 100);
