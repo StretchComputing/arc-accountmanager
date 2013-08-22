@@ -143,6 +143,10 @@ var ARC = (function (r, $) {
         if(r.currLoc)
         	r.mapsCenter = new google.maps.LatLng(r.currLoc.Latitude,
         										  r.currLoc.Longitude);
+        
+        $('#placesButton').bind('click', function(){
+        	r.placesLocationSearch(new google.maps.LatLng(41.787871,-87.589935));
+        })
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.selectMerchantShow');
       }
@@ -826,7 +830,12 @@ var ARC = (function (r, $) {
 				        Latitude : location.coords.latitude };
 		  r.getMerchants(numMerchants);
 	  }
-	  var failure = function(){ r.getMerchants(numMerchants);};
+	  var failure = function(){ 
+		  r.currLoc = {
+				  Longitude : -87.589935,
+				  Latitude : 41.787871
+		  };
+		  r.getMerchants(numMerchants);};
 	  navigator.geolocation.getCurrentPosition(success,failure);
   };
   
@@ -857,7 +866,14 @@ var ARC = (function (r, $) {
                     	r.merchantList = data.Results;
                     	r.merchantList.numExpected = numMerchants;
                     	r.fixMerchants(r.merchantList);
-                    	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
+                    	if(r.currLoc){
+                    		var loc = new google.maps.LatLng(r.currLoc.Latitude,
+                    										 r.currLoc.Longitude);
+                    		r.placesLocationSearch(loc, r.displayMerchantsAndPlaces)
+                    	}
+                    	else{
+                    		r.writeMerchantList($('#selectMerchantList'), r.merchantList);
+                    	}
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
                     }
@@ -1110,20 +1126,29 @@ var ARC = (function (r, $) {
 		  location.empty();
 		  
 		  var merchantTemplate = _.template($('#selectMerchantTemplate').html());
+		  var placeTemplate = _.template($('#selectPlaceTemplate').html());
 		  
 		  var templateData = {};
 		  
 		  for(var i = 0; i < merchantList.length; i++){
 			  var m = merchantList[i];
-			  templateData.Name = m.Name;
-			  templateData.Status = m.Status;
-			  templateData.Street = m.Street;
-			  templateData.City = m.City;
-			  templateData.State = m.State;
-			  templateData.ZipCode = m.ZipCode;
-			  templateData.index = i.toString();
-			
-			  location.append(merchantTemplate(templateData));
+			  if(r.isMerchant(m)){//Use the merchantTemplate
+				  templateData.Name = m.Name;
+				  templateData.Status = m.Status;
+				  templateData.Street = m.Street;
+				  templateData.City = m.City;
+				  templateData.State = m.State;
+				  templateData.ZipCode = m.ZipCode;
+				  templateData.index = i.toString();
+				  location.append(merchantTemplate(templateData));
+			  }
+			  else{//Use the placeTemplate
+				  templateData.Name = m.name;
+				  templateData.Vicinity = m.vicinity;
+				  templateData.index = i.toString();
+				  location.append(placeTemplate(templateData));
+			  }
+			  
 		  }
 		  
 		  //i.e. if there are more to merchants to be recieved
@@ -1166,30 +1191,6 @@ var ARC = (function (r, $) {
 		  if( !(merchantList[merchIndex].Activities))
 			  merchantList[merchIndex].Activities = [];
 	  }
-  };
-  
-
-	// merchants param:  an array of merchant javascript objects to be displayed
-  r.displayMerchants = function(merchants) {
-    try {
-      RSKYBOX.log.info('entering', 'main.js.displayMerchants');
-
-			// Creates the template object from the index.html <script> definition
-			var merchantEntryTemplate = _.template($('#merchantEntryTemplate').html());
-
-			var listHtmlContent = "";
-			for(var merIndex = 0; merIndex < merchants.length; merIndex++) {
-				// Call the template passing the merchant object.  This is where the fields in the merchant object are
-				// substituted into the  <%= xyzField  %> constructs in the template. The template returns HTML ready
-				// to be placed into the Document Object Model (DOM)
-				listHtmlContent += merchantEntryTemplate(merchants[merIndex]);
-			}
-
-			// ok, now put the concatenated HTML from the for loop above into the DOM
-			$('#merchantList').html(listHtmlContent);
-    } catch (e) {
-      RSKYBOX.log.error(e, 'displayMerchants');
-    }
   };
   
   /*builds either the editMerchant or createNewMerchant page depending on the
@@ -1635,7 +1636,61 @@ var ARC = (function (r, $) {
 		  delete r.mapsDropPinMarker;
 	  }
 	  
-  }
+  };
+  
+  /*Google Places integration -----------------------!*/
+  r.placesLocationSearch = function(location,callback){
+	  try{
+		  RSKYBOX.log.info('entering', 'placesLocationSearch');
+		  if(!r.placeHolderMap)
+			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"))
+		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
+		 
+		  var req = {
+			  'location' : location,
+			  radius : 1000,
+			  types : ['restaurant']
+		  };
+		  
+		  place.nearbySearch(req,callback)
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'placesLocationSearch')
+	  }
+	  
+  };
+  
+  /*filters out the places which are already in the database (as merchants)*/
+  r.filterDuplicatePlaces= function(places,merchants){
+	  for(var merIndex = 0; merIndex < merchants.length; merIndex++){
+		  for(var plaIndex = 0; plaIndex < places.length; plaIndex++){
+			  if(merchants[merIndex].Name.toLowerCase() === places[plaIndex].name.toLowerCase()){//Find better matching algorithm
+				  places.splice(plaIndex,1);//Remove said element
+				  break;
+			  }
+		  }
+	  }
+  };
+  
+  /*eventually this will sort by distance, for now just append one to the other*/ 
+  r.mergePlacesAndMerchants = function(places,merchants){
+	  return merchants.concat(places);
+  };
+  
+  /*given either a merchant or a place, determines the type*/
+  r.isMerchant = function(m){
+	  return m.POS !== undefined
+  };
+  
+  /*merges the places and the merchants and then calls a method to display
+   * the combined list.
+   */
+  r.displayMerchantsAndPlaces = function(places,status){
+	  //TODO: check status
+	  r.filterDuplicatePlaces(places, r.merchantList);
+	  r.merchantsPlaces = r.mergePlacesAndMerchants(places,r.merchantList);
+	  r.writeMerchantList($('#selectMerchantList'),r.merchantsPlaces);
+  };
   
   /*Helper methods for cohortReport #$%*/
   

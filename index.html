@@ -36,7 +36,7 @@
       <script src="js/views/base.js"></script>
       <script src="js/views/login.js"></script>
 
-	  <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
+	  <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization,places&key=AIzaSyCHAeqstOVgajgeTAuK_P61GVSyPQYGkvc&sensor=false"></script>
 
       <script src="js/lib/merchantobject.js"></script>
       <script src="js/lib/Charts.js"></script>
@@ -316,6 +316,21 @@
 		</li>
 	</script>
 	
+<script type="script/template" id="selectPlaceTemplate">
+	<li id="selectMerchantListElm<%=index%>">
+		<a index="<%=index%>" id="selectMerchantListElm<%=index%>" class="selectPlaceLI">
+			<h1><%=Name%></h1>
+			<h2>Status: U</h2>
+			<h3><%= Vicinity %></h3>
+		</a>
+	</li>
+	<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu" index="<%=index%>">
+			<button data-incon="grid" data-iconpos="notext" data-inline="true" class="mapButton" index="<%=index%>"></button>
+			<button data-incon="gear" data-iconpos="notext" data-inline="true" class="newPlaceButton" index="<%=index%>"></button>
+			<button data-icon="back" data-iconpos="notext" data-inline="true" class="backButton" index="<%=index%>"></button>
+	</li>
+</script>
+	
 <script type="script/template" id="selectMerchantListMoreTemplate">
 	<li data-icon="plus"><a id="selectMerchantListMore">More</a></li>
 </script>
@@ -337,6 +352,9 @@
 			<li><a href="#maps">Maps</a></li>
 			<li data-icon="info" style="display:none" class="meetingDetailsButton" id="selectMerchant_MeetingDetailsButton">
 				<a href="#selectMerchant_MeetingDetails" data-rel="popup">Meeting in Progress</a>
+			</li>
+			<li>
+				<a id="placesButton">Places</a>
 			</li>
           </ul>
 		Version: <%= versionNum %>
