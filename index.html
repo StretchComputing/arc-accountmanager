@@ -263,6 +263,23 @@
       </div>
 
       <div data-role="content" id="selectMerchantContent">
+      
+      	<fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain" id="selectMerchantFilter">
+      		<input type="radio" name="selectMerchantFilter" value="All" id="selectMerchantFilterAll" checked>
+      		<label for="selectMerchantFilterAll">All</label>
+      	
+      		<input type="radio" name="selectMerchantFilter" value="Surveyed" id="selectMerchantFilterSurveyed">
+      		<label for="selectMerchantFilterSurveyed">Surveyed</label>
+      		
+      		<input type="radio" name="selectMerchantFilter" value="Active" id="selectMerchantFilterActive">
+      		<label for="selectMerchantFilterActive">Active</label>
+      		
+      		<input type="radio" name="selectMerchantFilter" value="Configure" id="selectMerchantFilterConfigure">
+      		<label for="selectMerchantFilterConfigure">Configure</label>
+      		
+      		<input type="radio" name="selectMerchantFilter" value="Sales" id="selectMerchantFilterSales">
+      		<label for="selectMerchantFilterSales">Sales</label>
+      	</fieldset>
       	<ul data-role="listview" data-inset="true">
       		<li data-icon="plus" data-theme="b">
       			<a href="#createNewMerchant" data-transition="slide"><h1>Merchants</h1></a>
@@ -300,7 +317,7 @@
     </div><!-- /page -->
 
 <script type="script/template" id="selectMerchantTemplate">
-		<li id="selectMerchantListElm<%=index%>">
+		<li id="selectMerchantListElm<%=index%>" class="selectMerchantInfo <%=Status%>">
 			<a index="<%=index%>" id="selectMerchantList<%=index%>" class="selectMerchantLI">
 				<h1><%=Name%></h1>
 				<h2>Status: <%=Status%></h2>
@@ -308,7 +325,7 @@
 			</a>
 		</li>
 
-		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu" index="<%=index%>">
+		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu <%=Status%>" index="<%=index%>">
 				<button data-icon="info" data-iconpos="notext" data-inline="true" class="selectButton" index="<%=index%>"></button>
 				<button data-icon="gear" data-iconpos="notext" data-inline="true" class="editButton" index="<%=index%>"></button>
 				<button data-icon="delete" data-iconpos="notext" data-inline="true" class="deleteButton" index="<%=index%>"></button>
@@ -317,14 +334,14 @@
 	</script>
 	
 <script type="script/template" id="selectPlaceTemplate">
-	<li id="selectMerchantListElm<%=index%>">
+	<li id="selectMerchantListElm<%=index%>" class="selectMerchantInfo U">
 		<a index="<%=index%>" id="selectMerchantListElm<%=index%>" class="selectPlaceLI">
 			<h1><%=Name%></h1>
 			<h2>Status: U</h2>
 			<h3><%= Vicinity %></h3>
 		</a>
 	</li>
-	<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu" index="<%=index%>">
+	<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu U" index="<%=index%>">
 			<button data-incon="grid" data-iconpos="notext" data-inline="true" class="mapButton" index="<%=index%>"></button>
 			<button data-incon="gear" data-iconpos="notext" data-inline="true" class="newPlaceButton" index="<%=index%>"></button>
 			<button data-icon="back" data-iconpos="notext" data-inline="true" class="backButton" index="<%=index%>"></button>

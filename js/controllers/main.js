@@ -76,6 +76,10 @@ var ARC = (function (r, $) {
         	$("#selectMerchantList").prev("form.ui-listview-filter").toggle();
         });
         
+        $("input[type='radio']", $('#selectMerchantFilter')).bind('change', function(){
+        	r.changeSelectMerchantFilter($(this).val());
+        });
+        
         var content =  $("#selectMerchantContent");
         
         content.on('click', '.selectMerchantLI', r.merchantSelectTap);
@@ -85,11 +89,11 @@ var ARC = (function (r, $) {
         content.on("swiperight", '.selectMerchantMenu', r.merchantSelectMenuBack);
 
         $('#selectMerchantDeleteYes').bind('click', function(){
-        	var merchant = r.merchantList[r.tempIndex];
+        	var merchant = r.selectMerchantList[r.tempIndex];
         	r.deleteMerchant(merchant);
         	var loc = $('#selectMerchantList');
         	loc.empty();
-        	r.writeMerchantList(loc, r.merchantList);
+        	r.writeMerchantList(loc);
         	$('#selectMerchantConfirmDelete').popup('close');
         });
         
@@ -99,13 +103,13 @@ var ARC = (function (r, $) {
         
        content.on("click", ".editButton", function(e){
         	var index = $(this).attr("index");
-        	r.merchantToEdit = r.merchantList[index];
+        	r.merchantToEdit = r.selectMerchantList[index];
         	$.mobile.changePage("#editMerchant", {transition : "slide"});
         });
         
         content.on("click", ".selectButton", function(e){
         	var index = $(this).attr("index");
-        	r.activeMerchant = r.merchantList[index];
+        	r.activeMerchant = r.selectMerchantList[index];
         	$.mobile.changePage("#merchantDisplay", {transition:"slide"});
         });
         
@@ -134,19 +138,17 @@ var ARC = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantShow');
         r.handleMeetings("selectMerchant")
         
-        if(!r.merchantList)
+        if(!r.selectMerchantList)
         	r.getMerchantsLoc(10);
         else
-        	r.writeMerchantList($('#selectMerchantList'), r.merchantList);
+        	r.writeMerchantList($('#selectMerchantList'));
         
         /*Sets the default location for the maps page*/
         if(r.currLoc)
         	r.mapsCenter = new google.maps.LatLng(r.currLoc.Latitude,
         										  r.currLoc.Longitude);
         
-        $('#placesButton').bind('click', function(){
-        	r.placesLocationSearch(new google.maps.LatLng(41.787871,-87.589935));
-        })
+        $("input[type='radio']", $('#selectMerchantFilter'));
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.selectMerchantShow');
       }
@@ -866,13 +868,14 @@ var ARC = (function (r, $) {
                     	r.merchantList = data.Results;
                     	r.merchantList.numExpected = numMerchants;
                     	r.fixMerchants(r.merchantList);
+                    	r.selectMerchantList = r.merchantList;
                     	if(r.currLoc){
                     		var loc = new google.maps.LatLng(r.currLoc.Latitude,
                     										 r.currLoc.Longitude);
                     		r.placesLocationSearch(loc, r.displayMerchantsAndPlaces)
                     	}
                     	else{
-                    		r.writeMerchantList($('#selectMerchantList'), r.merchantList);
+                    		r.writeMerchantList($('#selectMerchantList'));
                     	}
                     } catch (e) {
                       RSKYBOX.log.error(e, 'getMerchants.success');
@@ -1119,11 +1122,16 @@ var ARC = (function (r, $) {
 	  return newMerchant;
   };
   
-  r.writeMerchantList = function(location, merchantList){
+  r.writeMerchantList = function(location){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
 		  
 		  location.empty();
+		  
+		  if(r.placesList)
+			  r.selectMerchantList = r.mergePlacesAndMerchants(r.placesList,r.merchantList);
+		  
+		  var merchantList = r.selectMerchantList;
 		  
 		  var merchantTemplate = _.template($('#selectMerchantTemplate').html());
 		  var placeTemplate = _.template($('#selectPlaceTemplate').html());
@@ -1687,10 +1695,40 @@ var ARC = (function (r, $) {
    */
   r.displayMerchantsAndPlaces = function(places,status){
 	  //TODO: check status
+	  r.placesList = places;
 	  r.filterDuplicatePlaces(places, r.merchantList);
-	  r.merchantsPlaces = r.mergePlacesAndMerchants(places,r.merchantList);
-	  r.writeMerchantList($('#selectMerchantList'),r.merchantsPlaces);
+	  r.writeMerchantList($('#selectMerchantList'));
   };
+  
+  r.changeSelectMerchantFilter = function(val){
+	  var loc = $('#selectMerchantList')
+	  switch(val){
+	  	case 'All':
+		  $('.selectMerchantInfo', loc).show();
+		  $('.selectMerchantMenu', loc).hide();
+		  break;
+	  	case 'Surveyed':
+			$('.selectMerchantInfo', loc).hide();
+	  		$('.selectMerchantMenu', loc).hide();
+	  		$('.selectMerchantInfo:not(.U)',loc).show();
+			break;
+	  	case 'Active':
+	  		$('.selectMerchantInfo', loc).hide();
+	  		$('.selectMerchantMenu', loc).hide();
+	  		$('.selectMerchantInfo.A',loc).show();
+	  		break;
+	  	case 'Configure':
+	  		$('.selectMerchantInfo', loc).hide();
+	  		$('.selectMerchantMenu', loc).hide();
+	  		$('.selectMerchantInfo.C',loc).show();
+	  		break;
+	  	case 'Sales':
+	  		$('.selectMerchantInfo', loc).hide();
+	  		$('.selectMerchantMenu', loc).hide();
+	  		$('.selectMerchantInfo.S',loc).show();
+	  		break;
+	  }
+  }
   
   /*Helper methods for cohortReport #$%*/
   
