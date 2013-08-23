@@ -264,7 +264,13 @@
 
       <div data-role="content" id="selectMerchantContent">
       
-      	<fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain" id="selectMerchantFilter">
+      	<ul data-role="listview" data-inset="true">
+      		<li data-icon="plus" data-theme="b">
+      			<a href="#createNewMerchant" data-transition="slide"><h1>Merchants</h1></a>
+      		</li>
+      	</ul>
+      	
+      	<fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain" id="selectMerchantFilter" style="display:none">
       		<input type="radio" name="selectMerchantFilter" value="All" id="selectMerchantFilterAll" checked>
       		<label for="selectMerchantFilterAll">All</label>
       	
@@ -280,11 +286,6 @@
       		<input type="radio" name="selectMerchantFilter" value="Sales" id="selectMerchantFilterSales">
       		<label for="selectMerchantFilterSales">Sales</label>
       	</fieldset>
-      	<ul data-role="listview" data-inset="true">
-      		<li data-icon="plus" data-theme="b">
-      			<a href="#createNewMerchant" data-transition="slide"><h1>Merchants</h1></a>
-      		</li>
-      	</ul>
       	
       	<ul data-role="listview" data-filter="true" id="selectMerchantList" data-inset="true">
       		
@@ -342,8 +343,8 @@
 		</a>
 	</li>
 	<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu U" index="<%=index%>">
-			<button data-incon="grid" data-iconpos="notext" data-inline="true" class="mapButton" index="<%=index%>"></button>
-			<button data-incon="gear" data-iconpos="notext" data-inline="true" class="newPlaceButton" index="<%=index%>"></button>
+			<button data-icon="grid" data-iconpos="notext" data-inline="true" class="mapButton" index="<%=index%>"></button>
+			<button data-icon="gear" data-iconpos="notext" data-inline="true" class="newPlaceButton" index="<%=index%>"></button>
 			<button data-icon="back" data-iconpos="notext" data-inline="true" class="backButton" index="<%=index%>"></button>
 	</li>
 </script>

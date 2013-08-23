@@ -74,6 +74,7 @@ var ARC = (function (r, $) {
         
         $("#selectMerchantSearch").bind('click', function(e){
         	$("#selectMerchantList").prev("form.ui-listview-filter").toggle();
+        	$('#selectMerchantFilter').toggle();
         });
         
         $("input[type='radio']", $('#selectMerchantFilter')).bind('change', function(){
@@ -83,10 +84,9 @@ var ARC = (function (r, $) {
         var content =  $("#selectMerchantContent");
         
         content.on('click', '.selectMerchantLI', r.merchantSelectTap);
-        content.on("swipeleft", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
-        content.on("swiperight", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
-        content.on("swipeleft", '.selectMerchantMenu', r.merchantSelectMenuBack);
-        content.on("swiperight", '.selectMerchantMenu', r.merchantSelectMenuBack);
+        content.on("swipe", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
+        content.on("swipe", '.selectMerchantMenu', r.merchantSelectMenuBack);
+        content.on('swipe', '.selectPlaceLI', r.merchantSelectHorizontalSwipe);
 
         $('#selectMerchantDeleteYes').bind('click', function(){
         	var merchant = r.selectMerchantList[r.tempIndex];
@@ -99,6 +99,14 @@ var ARC = (function (r, $) {
         
         $('#selectMerchantDeleteNo').bind('click', function(){
         	$('#selectMerchantConfirmDelete').popup('close');
+        });
+        
+        content.on('click','.selectPlaceLI', r.merchantSelectPlaceTap);
+        content.on('click', '.newPlaceButton', r.merchantSelectPlaceTap);
+        content.on('click', '.mapButton', function(){
+        	var place = r.selectMerchantList[$(this).attr('index')];
+        	r.mapsCenter = place.geometry.location;
+        	$.mobile.changePage('#maps');
         });
         
        content.on("click", ".editButton", function(e){
@@ -220,7 +228,7 @@ var ARC = (function (r, $) {
     createNewMerchantShow : function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.createNewMerchantShow');
-    		r.merchantForm("createNewMerchant", true, r.newMerchant);
+    		r.merchantForm("createNewMerchant", true, r.newMerchant,r.newPlace);
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.createNewMerchantShow');
@@ -1204,7 +1212,7 @@ var ARC = (function (r, $) {
   /*builds either the editMerchant or createNewMerchant page depending on the
    * given pageId and value of newMerchant (true for createNewMerchant, false for editMerhcant
    */
-  r.merchantForm = function(pageId, newMerchant, initialData){
+  r.merchantForm = function(pageId, newMerchant, initialData, place){
 
 	  var merchant;
 	  if(newMerchant){
@@ -1326,12 +1334,16 @@ var ARC = (function (r, $) {
 		  merchant.Activities = merchant.Activities.concat(activitiesToAdd);
 		  
 		  if(newMerchant){//createNewMerchant
-			  r.createMerchant(merchant, function(){
+			  r.createMerchant(merchant, function(){//Callback for when the update completes
 				  for(var i = 0; i < notesToAdd.length; i++){
 					  r.createNote(merchant.Id, notesToAdd[i])
 				  }
 			  });
+			  merchant.Status = 'S';//Default assigned by the server
 			  r.merchantList.push(merchant);
+			  if(place){
+				  r.removePlace(place);
+			  }
 		  }
 		  
 		  else{//editMerchant
@@ -1452,6 +1464,21 @@ var ARC = (function (r, $) {
 	  var index = $(this).attr('index');
 	  $("#selectMerchantListSwipeMenuElm"+index).hide();
 	  $("#selectMerchantListElm"+index).show();
+  };
+  
+  r.merchantSelectPlaceTap = function(){
+  	var place = r.selectMerchantList[$(this).attr('index')];
+  	var addr = place.vicinity.split(',');
+  	r.newMerchant = {
+  			Name : place.name,
+  			Longitude : place.geometry.location.lng(),
+  			Latitude : place.geometry.location.lat(),
+  			Street : addr[0],
+  			City : addr[1]
+  	};
+  	r.newPlace = place;
+  	$.mobile.changePage('#createNewMerchant');
+  	
   };
   
   /*Writes the 'notes' protion into merchantDisplay*/
@@ -1676,6 +1703,16 @@ var ARC = (function (r, $) {
 				  places.splice(plaIndex,1);//Remove said element
 				  break;
 			  }
+		  }
+	  }
+  };
+  
+  /*Reomves the place with the given reference from the global places list*/
+  r.removePlace = function(place){
+	  for(var i = 0; i < r.placesList.length; i++){
+		  if(r.placesList[i] === place){
+			  r.placesList.splice(i,1);
+			  return;
 		  }
 	  }
   };
