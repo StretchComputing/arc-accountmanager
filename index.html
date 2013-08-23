@@ -678,6 +678,9 @@
 			
 				<label for="mapsLocationSearchTab">Locations</label>
 				<input id="mapsLocationSearchTab"  type="radio" value="mapsLocationSearch"  name="searchTab" class="mapsSearchTab" />
+				
+				<label for="mapsPlacesSearchTab">Places</label>
+				<input id="mapsPlacesSearchTab" type="radio" value="mapsPlacesSearch" name="searchTab" class="mapsSearchTab" />
 			</fieldset>
 		
 			<div id="mapsMerchantSearch" class="searchTabContent"></div>
@@ -689,8 +692,17 @@
 					<button data-icon="search" data-iconpos="notext" 
 				        id="mapsLocationSearchGo" data-inline="true">Search</button>
 				</div>
-
-			</div></li>
+			</div>
+			
+			<div id="mapsPlacesSearch" class="searchTabContent" style="display:none">
+				<div data-role="fieldcontain">
+					<input name="search" id="mapsPlacesSearchField" 
+				   	 	  placeholder="Enter a place keyword" data-inline="true" />
+					<button data-icon="search" data-iconpos="notext" 
+				     	  id="mapsPlacesSearchGo" data-inline="true">Search</button>
+				</div>
+			</div>
+			</li>
 		
 			<li data-role="list-divider"></li>
 			<li id="mapsMerchantSelect" style="display:none" data-icon="arrow-r"></li>
@@ -710,13 +722,12 @@
 	
 	</div>
 	
-	<script type="text/template" id="mapsMerchantPopupTemplate">
-		<a class="mapsMerchantDisplay" merchantName="<%= Name %>" >
+	<script type="text/template" id="mapsMerchantSelectedTemplate">
+		<a class="<%= Class %>" index="<%=Index %>" >
 			<h1><%= Name %></h1>
-			<h1><%= Street %> <%= City %> <%= State %>, <%= ZipCode %></h1>
+			<h1><%= Address %></h1>
 			<h1>Status: <%= Status %></h1>
-			<h1>POS: <% if(POS === 'POS_OTHER') { %> <%= OtherPOS %> 
-				<% } else { %> <%= MERCHANT.POSNames[POS] %> <% } %></h1>
+			<% if(hasPOS){ %> <h1><%= POS %></h1> <% } %>
 		</a>
 	</script>
 	
@@ -725,10 +736,11 @@
 		    data-filter-reveal="true" id="mapsMerchantSearchList"
 			data-filter-placeholder="Find a merchant"
 			data-inset="true">
-		<% for(var i = 0; i < merchantList.length; i++) { %>
+		<% for(var i = 0; i < mapsList.length; i++) { %>
 			<li index="<%= i %>" >
 				<a index="<%= i %>" class="mapsMerchantSearchLI" >
-				<%= merchantList[i].Name %>
+				<%= mapsList[i].Name %>
+				<%= mapsList[i].name %>
 				</a>
 			</li>
 		<% } %>

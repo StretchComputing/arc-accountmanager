@@ -151,11 +151,6 @@ var ARC = (function (r, $) {
         else
         	r.writeMerchantList($('#selectMerchantList'));
         
-        /*Sets the default location for the maps page*/
-        if(r.currLoc)
-        	r.mapsCenter = new google.maps.LatLng(r.currLoc.Latitude,
-        										  r.currLoc.Longitude);
-        
         $("input[type='radio']", $('#selectMerchantFilter'));
       } catch (e) {
         RSKYBOX.log.error(e, 'main.js.selectMerchantShow');
@@ -530,17 +525,39 @@ var ARC = (function (r, $) {
     mapsBeforeCreate: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.mapsBeforeCreate');
-    		$('#maps').on('click', '.mapsMerchantDisplay', function(){
-    			r.activeMerchant = r.getMerchantByName($(this).attr('merchantName'));
+    		var page = $('#maps');
+    		
+    		page.on('click', '.mapsMerchantDisplay', function(){
+    			r.activeMerchant = r.mapsList[$(this).attr('index')];
     			$.mobile.changePage('#merchantDisplay', {transition:'slide'});
     		});
     		
-    		$('#maps').on('click', '.mapsMerchantSearchLI', function(){
+    		page.on('click', '.mapsPlaceDisplay', function(){
+    			var place = r.mapsList[$(this).attr('index')];
+    		  	var addr = place.vicinity.split(',');
+    		  	r.newMerchant = {
+    		  			Name : place.name,
+    		  			Longitude : place.geometry.location.lng(),
+    		  			Latitude : place.geometry.location.lat(),
+    		  			Street : addr[0],
+    		  			City : addr[1]
+    		  	};
+    		  	r.newPlace = place;
+    		  	$.mobile.changePage('#createNewMerchant');
+    		});
+    		
+    		page.on('click', '.mapsMerchantSearchLI', function(){
     			var index = $(this).attr('index');
-    			var merchant = r.merchantList[index];
-    			r.map.setCenter( new google.maps.LatLng(merchant.Latitude,
-    													merchant.Longitude));
-    			r.mapsSelectMerchant(merchant);
+    			var merchant = r.mapsList[index];
+    			if(r.isMerchant(merchant)){
+    				r.map.setCenter( new google.maps.LatLng(merchant.Latitude,
+					                 merchant.Longitude));
+    			}
+    			else{
+    				r.map.setCenter(merchant.geometry.location)
+    			}
+    			
+    			r.mapsSelectMerchant(merchant,index);
     		});
     		
     		$('#mapsLocationSearchGo').bind('click', function(){
@@ -592,6 +609,7 @@ var ARC = (function (r, $) {
     mapsShow: function(){
     	try{
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
+    		r.mapsList = r.selectMerchantList//The list used by all asynchronous calls
     		
     		var p = $('#mapsDropPin').val('off').slider('refresh')
     		$('#mapsCreateNewMerchantLI').hide()
@@ -603,10 +621,17 @@ var ARC = (function (r, $) {
     		search.append(t(r));
     		search.trigger('create')
     		
-    		var chartsURL = 'https://chart.googleapis.com/chart?'
-    		
-    		if(!r.mapsCenter)
-    			r.mapsCenter = new google.maps.LatLng(41.8500, -87.6500);
+    		if(r.currLoc)
+    			r.currLocLatLng = new google.maps.LatLng(r.currLoc.Latitude,
+                        r.currLoc.Longitude);
+    			
+    		if(!r.mapsCenter){
+    	        if(r.currLoc){
+    	        	r.mapsCenter = r.currLocLatLng;
+    	        }
+    	        else
+    	        	r.mapsCenter = new google.maps.LatLng(41.8500, -87.6500);//Some default
+    		}
     		
     		var mapOptions = {
     				center : r.mapsCenter,
@@ -614,31 +639,17 @@ var ARC = (function (r, $) {
     				mapTypeId : google.maps.MapTypeId.ROADMAP
     		};
     		
+    		
     		$('#mapCanvas').css({height: $(window).height() - $('#mapsHeader').height()});
     		var map = new google.maps.Map(document.getElementById("mapCanvas"),
     	            mapOptions);
     		r.map = map; //For access in pagewide registrations
     		
-    		var markerClick = function(e){//Called when a marker is clicked
-    			if(this.title !== 'You Are Here')
-    				r.mapsSelectMerchant( r.merchantList[this.title]);
-    		};
     		
-    		for(var i = 0; i < r.merchantList.length; i++){
-    			var LatLng = new google.maps.LatLng(r.merchantList[i].Latitude,
-    												r.merchantList[i].Longitude);
-    			var color = r.getColor(r.getPos(r.merchantList[i]));
-    			var chld = 'chld=|'+color+'|'
-    			var iconURL = chartsURL + 'chst=d_map_pin_letter_withshadow&' + chld;
-    			
-    			var marker = new google.maps.Marker({
-    				'position' : LatLng,
-    				'map' : map,
-    				'title' : i.toString(),
-    				'icon' : iconURL
-    			});
-    			google.maps.event.addListener(marker, 'click', markerClick);
-    		}
+    		if(r.currLoc)//You are here
+    			r.mapsAddCurrLocMarker();
+    		/*Add pins*/
+    		r.mapsAddMarkers();
     		
     	}
     	catch(e){
@@ -1633,14 +1644,50 @@ var ARC = (function (r, $) {
 	  return rgb;
   };
   
-  r.mapsSelectMerchant = function(merchant){
-  	var content = $('#mapsMerchantSelect');
-	content.empty();
-	var t = _.template($('#mapsMerchantPopupTemplate').html());
-	content.append(t(merchant));
-	content.show();
-	$('#mapsPanelList').listview('refresh');
-	$('#mapsPanel').panel('open');
+  r.mapsSelectMerchant = function(marker, index){
+	try{
+		RSKYBOX.log.info('entering', 'main.js.mapsSelectMerchant');
+		var content = $('#mapsMerchantSelect');
+		content.empty();
+		var t = _.template($('#mapsMerchantSelectedTemplate').html());
+
+		if(r.isMerchant(marker)){
+
+			if(marker.POS === 'POS_OTHER')
+				var pos = r.OtherPOS;
+			else
+				var pos = MERCHANT.POSNames[marker.POS];
+
+			var params = {
+					Class : 'mapsMerchantDisplay',
+					Index : index,
+					Name : marker.Name,
+					Status : marker.Status,
+					Address : marker.Street + ' ' + marker.City + ', ' + marker.State + ' ' + marker.Zipcode,
+					POS : pos,
+					hasPOS : true
+			}
+		}
+
+		else{//Use alternative template for places
+			var params = {
+					Class : 'mapsPlaceDisplay',
+					Index : index,
+					Name : marker.name,
+					Status : 'U',
+					Address : marker.vicinity,
+					hasPOS : false
+			}
+		}
+
+		content.append(t(params));
+		content.show();
+		$('#mapsPanelList').listview('refresh');
+		$('#mapsPanel').panel('open');
+		
+	} catch(e){
+		RSKYBOX.log.error(e,'main.js.mapsSelectMerchant')
+	}
   };
   
   r.mapsDropPinModeOn = function(){
@@ -1673,6 +1720,48 @@ var ARC = (function (r, $) {
 	  
   };
   
+  r.mapsAddMarkers = function(){
+	  for(var i = 0; i < r.mapsList.length; i++){
+		  var chartsURL = 'https://chart.googleapis.com/chart?'
+		  	if(r.isMerchant(r.mapsList[i])){
+		  		var LatLng = new google.maps.LatLng(r.mapsList[i].Latitude,
+													r.mapsList[i].Longitude);
+		  		var color = r.getColor(r.getPos(r.mapsList[i]));
+		  	}
+		  	else{
+		  		var LatLng = r.mapsList[i].geometry.location;
+		  		var color = '6c7893';
+		  	}
+		  	
+			var chld = 'chld=|'+color+'|'
+			var iconURL = chartsURL + 'chst=d_map_pin_letter_withshadow&' + chld;
+			
+			var marker = new google.maps.Marker({
+				'position' : LatLng,
+				'map' : r.map,
+				'title' : i.toString(),
+				'icon' : iconURL
+			});
+			google.maps.event.addListener(marker, 'click', r.markerClick);
+		}
+  };
+  
+  r.mapsAddCurrLocMarker = function(){
+	  var iconURL = './images/mapsCircleMarker.png';
+	  var marker = new google.maps.Marker({
+		  position : r.currLocLatLng,
+		  map : r.map,
+		  'icon' : iconURL 
+	  });
+	  
+  };
+  
+  r.markerClick = function(e){//Called when a marker is clicked
+	  var title = this.title;
+	  if(title !== 'You Are Here')
+		  r.mapsSelectMerchant(r.mapsList[title],title);
+  };
+  
   /*Google Places integration -----------------------!*/
   r.placesLocationSearch = function(location,callback){
 	  try{
@@ -1693,6 +1782,29 @@ var ARC = (function (r, $) {
 		  RSKYBOX.log.error(e,'placesLocationSearch')
 	  }
 	  
+  };
+  
+  /*performs a places search using a text string; location and radius
+   * are optional parameters to bias the search results near a location
+   * within a given radius
+   */
+  r.placesTextSearch = function(query,callback,location,radius){
+	  try{
+		  RSKYBOX.log.info('entering','main.js.placesTextSearch');
+		  if(!r.placeHolderMap)
+			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"));
+		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
+
+		  var req = {'query' : query};
+		  if(location && radius){
+			  req.location = location;\
+			  req.radius = radius;
+		  }
+		  
+		  place.textSearch(req,callback);
+	  }catch(e){
+		  RSKYBOX.log.error(e,'main.js.placesTextSearch')
+	  }
   };
   
   /*filters out the places which are already in the database (as merchants)*/
