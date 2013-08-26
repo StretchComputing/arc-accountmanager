@@ -573,6 +573,41 @@ var ARC = (function (r, $) {
     			});
     		});
     		
+    		$('#mapsPlacesSearchGo').bind('click',function(){
+    			var query = $('#mapsPlacesSearchField').val();
+    			r.placesTextSearch(query,r.mapsPlacesSearchSuccess,r.currLocLatLng,1000);
+    			
+    		});
+    		
+    		page.on('click', '#mapsPlacesSearchResultsMore',function(){
+    			var next = parseInt($(this).attr('nextIndex'));//make sure its actually a number
+    			var list = $('#mapsPlacesSearchResults');
+    			var listEnd = $('#mapsPlacesSearchResultsMoreLI');
+    			var results = r.mapsPlacesSearchResults
+    			
+    			
+    			var t = _.template($('#mapsPlacesSearchResultsTemplate').html());
+    			  for(var i = next; i < Math.min(results.length, next+5); i++){
+    				  var params = { 
+    						  index: i,
+    						  place : results[i]
+    				  };
+    				  listEnd.before($(t(params)));
+    			  }
+    			  if(i === results.length){
+    				  listEnd.hide();
+    			  }
+    			  else{
+    				  $(this).attr('nextIndex',i);
+    			  }
+    		  $('#mapsPanel').trigger('create');
+    		  list.listview('refresh')
+    		  list.show();
+    			
+    		});
+    		
+    		$('#')
+    		
     		$('#mapsDropPin').bind('change', function(){
     			if($(this).val() === 'on'){
     				r.mapsDropPinModeOn();
@@ -593,12 +628,13 @@ var ARC = (function (r, $) {
     		
     		$("input[type='radio']", $('#mapsSearch')).bind('change', function(){
     			var buttonVal = $(this).val();
-    			$('.searchTabContent', $('#mapsSearch')).each(function(){
-    				if($(this).attr('id') !== buttonVal)
+    			$('.searchTabContent', $('#mapsPanelList')).each(function(){
+    				if($(this).attr('searchTab') !== buttonVal)
     					$(this).hide();
     				else
     					$(this).show();
     			});
+    			$('#mapsPanel').trigger('create');
     		});
     	}
     	catch(e){
@@ -1720,6 +1756,34 @@ var ARC = (function (r, $) {
 	  
   };
   
+  r.mapsPlacesSearchSuccess = function(results,status){
+	  r.mapsPlacesSearchResults = results;
+	  
+	  var list = $('#mapsPlacesSearchResults');
+	  list.empty();
+	  if(results.length === 0)
+		  list.append($('<li/>', {text:'<p>No Results were found.</p>'}));
+	  
+	  else{
+		  var t = _.template($('#mapsPlacesSearchResultsTemplate').html());
+		  for(var i = 0; i < Math.min(results.length, 5); i++){
+			  var params = { 
+					  index: i,
+					  place : results[i]
+			  };
+				list.append(t(params));
+		  }
+		  if(i < results.length){
+			  list.append(_.template($('#mapsPlacesSearchMoreTemplate').html())({
+				  nextIndex : i
+			  }));
+		  }
+	  }
+	  $('#mapsPanel').trigger('create');
+	  list.listview()
+	  list.show();
+  };
+  
   r.mapsAddMarkers = function(){
 	  for(var i = 0; i < r.mapsList.length; i++){
 		  var chartsURL = 'https://chart.googleapis.com/chart?'
@@ -1795,9 +1859,12 @@ var ARC = (function (r, $) {
 			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"));
 		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
 
-		  var req = {'query' : query};
+		  var req = {
+				  'query' : query,
+				  types : ['restaurant']
+		  };
 		  if(location && radius){
-			  req.location = location;\
+			  req.location = location;
 			  req.radius = radius;
 		  }
 		  

@@ -371,9 +371,6 @@
 			<li data-icon="info" style="display:none" class="meetingDetailsButton" id="selectMerchant_MeetingDetailsButton">
 				<a href="#selectMerchant_MeetingDetails" data-rel="popup">Meeting in Progress</a>
 			</li>
-			<li>
-				<a id="placesButton">Places</a>
-			</li>
           </ul>
 		Version: <%= versionNum %>
       </div><!-- /panel -->
@@ -672,6 +669,8 @@
 		<div data-role="panel" data-position="right" data-display="push" id="mapsPanel" data-dismissible="false" data-position-fixed="true">
 	
 		<ul data-role="listview" id="mapsPanelList">
+			<li id="mapsMerchantSelect" style="display:none" data-icon="arrow-r"></li>
+		
 			<li id="mapsSearch"><fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
 				<label for="mapsMerchantSearchTab">Merchants</label>
 				<input id="mapsMerchantSearchTab" type="radio" checked="checked" value="mapsMerchantSearch" name="searchTab" class="mapsSearchTab" />
@@ -683,9 +682,9 @@
 				<input id="mapsPlacesSearchTab" type="radio" value="mapsPlacesSearch" name="searchTab" class="mapsSearchTab" />
 			</fieldset>
 		
-			<div id="mapsMerchantSearch" class="searchTabContent"></div>
+			<div id="mapsMerchantSearch" class="searchTabContent" searchTab="mapsMerchantSearch"></div>
 		
-			<div id="mapsLocationSearch" class="searchTabContent" style="display:none" >
+			<div id="mapsLocationSearch" class="searchTabContent" style="display:none" searchTab="mapsLocationSearch">
 				<div data-role="fieldcontain">
 					<input name="search" id="mapsLocationSearchField" 
 				   	   placeholder="Enter an address" data-inline="true" />
@@ -694,18 +693,19 @@
 				</div>
 			</div>
 			
-			<div id="mapsPlacesSearch" class="searchTabContent" style="display:none">
+			<div id="mapsPlacesSearch" class="searchTabContent" style="display:none" searchTab="mapsPlacesSearch">
 				<div data-role="fieldcontain">
 					<input name="search" id="mapsPlacesSearchField" 
 				   	 	  placeholder="Enter a place keyword" data-inline="true" />
 					<button data-icon="search" data-iconpos="notext" 
 				     	  id="mapsPlacesSearchGo" data-inline="true">Search</button>
+				    <button data-icon="delete" data-iconpos="notext"
+				    	  id="mapsPlacesSearchClear" data-inline="true">Clear</button>
 				</div>
 			</div>
 			</li>
 		
-			<li data-role="list-divider"></li>
-			<li id="mapsMerchantSelect" style="display:none" data-icon="arrow-r"></li>
+			<div id="mapsPlacesSearchResults" class="searchTabContent" searchTab="mapsPlacesSearch" style="display:none"></div>
 			
 			<li data-role="list-divider"></li>
 			<li><h1>Drop Pin:</h1>
@@ -745,6 +745,15 @@
 			</li>
 		<% } %>
 		</ul>
+	</script>
+	
+	<!-- whitespace removed to allow it to work with the jquery parser -->
+	<script type="text/template" id="mapsPlacesSearchResultsTemplate"><li><a class="mapsPlacesSearchResult" index="<%=index%>"><h1><%=place.name%></h1><p><%=place.formatted_address%></p></a></li></script>
+	
+	<script type="text/template" id="mapsPlacesSearchMoreTemplate">
+		<li id="mapsPlacesSearchResultsMoreLI">
+			<a id="mapsPlacesSearchResultsMore" nextIndex="<%=nextIndex%>">More</a>
+		</li>
 	</script>
 	
 	<div id="cohortReport" data-role="page">
