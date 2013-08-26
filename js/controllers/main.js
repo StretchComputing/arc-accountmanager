@@ -912,8 +912,8 @@ var ARC = (function (r, $) {
 	  }
 	  var failure = function(){ 
 		  r.currLoc = {
-				  Longitude : -87.589935,
-				  Latitude : 41.787871
+				  Longitude : -87.631667,
+				  Latitude : 41.889089
 		  };
 		  r.getMerchants(numMerchants);};
 	  navigator.geolocation.getCurrentPosition(success,failure);
@@ -1921,15 +1921,47 @@ var ARC = (function (r, $) {
 	  }
   };
   
-  /*eventually this will sort by distance, for now just append one to the other*/ 
+  /*eventually this will sort by distance, mergesort?*/
   r.mergePlacesAndMerchants = function(places,merchants){
-	  return merchants.concat(places);
+	  var out = [];
+	  var loc = r.latLng(r.currLoc);
+	  var plaIndex = 0;
+	  var merIndex = 0;
+	  while(plaIndex < places.length && merIndex < merchants.length){
+		  var d1 = google.maps.geometry.spherical.computeDistanceBetween(places[plaIndex].geometry.location,loc);
+		  var d2 = google.maps.geometry.spherical.computeDistanceBetween(r.latLng(merchants[merIndex]),loc);
+		  if(d1 < d2){
+			  out.push(places[plaIndex])
+			  plaIndex++;
+		  }
+		  else{
+			  out.push(merchants[merIndex]);
+			  merIndex++;
+		  }
+	  }
+	  
+	  if(plaIndex === places.length){
+		  for(;merIndex < merchants.length; merIndex++)
+			  out.push(merchants[merIndex])
+	  }
+	  else{
+		  for(;plaIndex < places.length;plaIndex++)
+			  out.push(places[plaIndex])
+	  }
+	  
+	  return out;
+	  
   };
   
   /*given either a merchant or a place, determines the type*/
   r.isMerchant = function(m){
 	  return m.POS !== undefined
   };
+  
+  /*returns the google maps latLng object given the merchant*/
+  r.latLng = function(merchant){
+	  return new google.maps.LatLng(merchant.Latitude,merchant.Longitude)
+  }
   
   r.getPlaceAddress = function(place){
 	  if(place.formatted_address)

@@ -188,3 +188,19 @@ li.reqAccountingli{
   .meetingDetailsNote .ui-icon{
   	display:none;
   }
+  
+  .selectMerchantInfo.S{
+  	background : hsl(58,100%,50%)
+  }
+  
+  .selectMerchantInfo.A{
+  	background : hsl(103,80%,55%)
+  }
+  
+  .selectMerchantInfo.C{
+  	background : hsl(185,80%,55%)
+  }
+  
+  .selectMerchantInfo.U{
+  	background : hsl(185,10%,84%)	
+  }
