@@ -631,17 +631,17 @@ var ARC = (function (r, $) {
     		
     		//-----------------Events related to the drop pin feature-------------
     		
-    		$('#mapsDropPin').bind('change', function(){
+    		$('#mapsRadar').bind('change', function(){
     			if($(this).val() === 'on'){
-    				r.mapsDropPinModeOn();
+    				r.mapsRadarModeOn();
     			}
     			else{
-    				r.mapsDropPinModeOff();
+    				r.mapsRadarModeOff();
     			}
     		});
     		
     		$('#mapsCreateNewMerchant').bind('click', function(){
-    			var latLng = r.mapsDropPinMarker.getPosition()
+    			var latLng = r.mapsRadarMarker.getPosition()
     			r.newMerchant = {
     					Longitude : latLng.lng(),
     					Latitude : latLng.lat()
@@ -670,7 +670,7 @@ var ARC = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
     		r.mapsList = r.selectMerchantList//The list used by all asynchronous calls;
     		
-    		var p = $('#mapsDropPin').val('off').slider('refresh')
+    		var p = $('#mapsRadar').val('off').slider('refresh')
     		$('#mapsCreateNewMerchantLI').hide()
     		
     		/*populates the list for merchant search*/
@@ -1749,35 +1749,31 @@ var ARC = (function (r, $) {
 	}
   };
   
-  r.mapsDropPinModeOn = function(){
-	  r.mapsDropPinListener = google.maps.event.addListener(r.map,'click',function(e){
-		  $('#mapsCreateNewMerchantLI').show();
-		  
-		  if(!r.mapsDropPinMarker){
-			  r.mapsDropPinMarker = new google.maps.Marker({
-				  'position' : e.latLng,
-				  'map' : r.map,
-				  'title' : 'new'
-			  });
-		  }
-		  else{
-			  r.mapsDropPinMarker.setPosition(e.latLng)
-		  }
+  r.mapsRadarModeOn = function(){
+	  $('#mapsRadarDescription').show();
+	  
+	  r.mapsRadarListener = google.maps.event.addListener(r.map,'click',function(e){
+		  r.placesLocationSearch(e.latLng,r.addLocationsToMap);
 	  });
   }
   
-  r.mapsDropPinModeOff = function(){
-	  $('#mapsCreateNewMerchantLI').hide();
+  r.mapsRadarModeOff = function(){
+	  $('#mapsRadarDescription').hide();
 	  
-	  google.maps.event.removeListener(r.mapsDropPinListener);
-	  delete r.mapsDropPinListener;
-	  
-	  if(r.mapsDropPinMarker){
-		  r.mapsDropPinMarker.setMap(null);
-		  delete r.mapsDropPinMarker;
-	  }
+	  google.maps.event.removeListener(r.mapsRadarListener);
+	  delete r.mapsRadarListener;
 	  
   };
+  
+  r.addLocationsToMap = function(results,status){
+	  r.filterDuplicatePlaces(results,r.mapsList);
+	  for(var i = 0; i < results.length; i++){
+		  r.mapsAddMarker(results[i],r.mapsList.length+i);
+	  }
+	  
+	  $.merge(r.mapsList,results);
+	  
+  }
   
   r.mapsPlacesSearchSuccess = function(results,status){
 	  r.mapsPlacesSearchResults = results;
@@ -1906,7 +1902,8 @@ var ARC = (function (r, $) {
   r.filterDuplicatePlaces= function(places,merchants){
 	  for(var merIndex = 0; merIndex < merchants.length; merIndex++){
 		  for(var plaIndex = 0; plaIndex < places.length; plaIndex++){
-			  if(merchants[merIndex].Name.toLowerCase() === places[plaIndex].name.toLowerCase()){//Find better matching algorithm
+			  if(merchants[merIndex].Name === places[plaIndex].name ||
+			     merchants[merIndex].name === places[plaIndex].name){//Find better matching algorithm
 				  places.splice(plaIndex,1);//Remove said element
 				  break;
 			  }
