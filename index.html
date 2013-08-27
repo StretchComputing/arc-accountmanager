@@ -690,6 +690,8 @@
 				   	   placeholder="Enter an address" data-inline="true" />
 					<button data-icon="search" data-iconpos="notext" 
 				        id="mapsLocationSearchGo" data-inline="true">Search</button>
+				    <button data-icon="delete" data-iconpos="notext"
+				    	id="mapsLocationSearchClear" data-inline="true">Clear</button>
 				</div>
 			</div>
 			
@@ -704,6 +706,8 @@
 				</div>
 			</div>
 			</li>
+		
+			<div id="mapsLocationSearchResults" class="searchTabContent" searchTab="mapsLocationSearch" style="display:none"></div>
 		
 			<div id="mapsPlacesSearchResults" class="searchTabContent" searchTab="mapsPlacesSearch" style="display:none"></div>
 			
@@ -749,11 +753,11 @@
 	</script>
 	
 	<!-- whitespace removed to allow it to work with the jquery parser -->
-	<script type="text/template" id="mapsPlacesSearchResultsTemplate"><li><a class="mapsPlacesSearchResult" index="<%=index%>"><h1><%=place.name%></h1><p><%=place.formatted_address%></p></a></li></script>
+	<script type="text/template" id="mapsPlacesSearchResultsTemplate"><li><a class="maps<%=searchType%>SearchResult" index="<%=index%>"><h1><%=place.name%></h1><p><%=place.formatted_address%><%=place.vicinity%></p></a></li></script>
 	
 	<script type="text/template" id="mapsPlacesSearchMoreTemplate">
-		<li id="mapsPlacesSearchResultsMoreLI">
-			<a id="mapsPlacesSearchResultsMore" nextIndex="<%=nextIndex%>">More</a>
+		<li id="maps<%=searchType%>SearchResultsMoreLI">
+			<a id="maps<%=searchType%>SearchResultsMore" nextIndex="<%=nextIndex%>">More</a>
 		</li>
 	</script>
 	

@@ -527,6 +527,7 @@ var ARC = (function (r, $) {
     		RSKYBOX.log.info('entering', 'main.js.mapsBeforeCreate');
     		var page = $('#maps');
     		
+    		/* -------------- UI Events------------------------------*/
     		page.on('click', '.mapsMerchantDisplay', function(){
     			r.activeMerchant = r.mapsList[$(this).attr('index')];
     			$.mobile.changePage('#merchantDisplay', {transition:'slide'});
@@ -561,7 +562,7 @@ var ARC = (function (r, $) {
     			r.mapsSelectMerchant(merchant,index);
     		});
     		
-    		//------------Events for the maps places search----------------
+    		/*------------Events for Location Search --------------------*/
     		
     		$('#mapsLocationSearchGo').bind('click', function(){
     			$('#mapsLocationFailText').hide()
@@ -572,9 +573,37 @@ var ARC = (function (r, $) {
     					return;
     				}
     				
-    				r.map.setCenter(results[0].geometry.location);
+    				r.placesLocationSearch(results[0].geometry.location,
+    						               r.mapsLocationSearchSuccess);
     			});
     		});
+    		
+    		page.on('click', '#mapsLocationSearchResultsMore',function(){
+    			var next = parseInt($(this).attr('nextIndex'));//make sure its actually a number
+    			var anchor = $('#mapsLocationSearchResults');
+    			var listEnd = $('#mapsLocationSearchResultsMoreLI');
+    			var results = r.mapsLocationSearchResults;
+    			var moreButton = $(this);
+    			r.displayMorePlacesSearchResults(anchor,listEnd,results,'Location',5,next,moreButton)
+    		});
+    		
+    		page.on('click', '.mapsLocationSearchResult', function(){
+    			var index = $(this).attr('index');
+    			var place = r.mapsLocationSearchResults[index];
+    			
+    			r.mapsSelectMerchant(place, r.getMerchantIndex(r.mapsList,place));
+    			
+    			r.map.setCenter(place.geometry.location);
+    			
+    		});
+    		
+    		$('#mapsLocationSearchClear').bind('click', function(){
+    			$('#mapsLocationSearchResults').empty();
+    			$('#mapsLocationSearchField').val('')
+    		});
+    			
+    		
+    		//------------Events for the maps places search----------------
     		
     		$('#mapsPlacesSearchGo').bind('click',function(){
     			var query = $('#mapsPlacesSearchField').val();
@@ -584,28 +613,11 @@ var ARC = (function (r, $) {
     		
     		page.on('click', '#mapsPlacesSearchResultsMore',function(){
     			var next = parseInt($(this).attr('nextIndex'));//make sure its actually a number
-    			var list = $('#mapsPlacesSearchResults');
+    			var anchor = $('#mapsPlacesSearchResults');
     			var listEnd = $('#mapsPlacesSearchResultsMoreLI');
-    			var results = r.mapsPlacesSearchResults
-
-
-    			var t = _.template($('#mapsPlacesSearchResultsTemplate').html());
-    			for(var i = next; i < Math.min(results.length, next+5); i++){
-    				var params = { 
-    						index: i,
-    						place : results[i]
-    				};
-    				listEnd.before($(t(params)));
-    			}
-    			if(i === results.length){
-    				listEnd.hide();
-    			}
-    			else{
-    				$(this).attr('nextIndex',i);
-    			}
-    			$('#mapsPanel').trigger('create');
-    			list.listview('refresh')
-    			list.show();
+    			var results = r.mapsPlacesSearchResults;
+    			var moreButton = $(this);
+    			r.displayMorePlacesSearchResults(anchor,listEnd,results,'Places',5,next,moreButton)
 
     		});
     		
@@ -1263,6 +1275,13 @@ var ARC = (function (r, $) {
 	  return undefined;
   };
   
+  r.getMerchantIndex = function(list,merchant){
+	  for(var i = 0; i < list.length; i++){
+		  if(merchant === list[i])
+			  return i;
+	  }
+  };
+  
   r.fixMerchants = function(merchantList){
 	  var propList = MERCHANT.merchantDisplay;
 	  for(var merchIndex = 0; merchIndex < merchantList.length; merchIndex++){
@@ -1775,33 +1794,67 @@ var ARC = (function (r, $) {
 	  
   }
   
-  r.mapsPlacesSearchSuccess = function(results,status){
-	  r.mapsPlacesSearchResults = results;
-	  
-	  var list = $('#mapsPlacesSearchResults');
-	  list.empty();
+  /*Writes the results from a places search into the jquery container given by 'anchor'*/
+  r.displayPlacesSearchResults = function(anchor,results,searchType){
+	  anchor.empty();
 	  if(results.length === 0)
-		  list.append($('<li/>', {text:'No Results were found.'}));
+		  anchor.append($('<li/>', {text:'No Results were found.'}));
 	  
 	  else{
 		  var t = _.template($('#mapsPlacesSearchResultsTemplate').html());
 		  for(var i = 0; i < Math.min(results.length, 5); i++){
-			  var params = { 
+			  var params = {
+					  'searchType' : searchType,
 					  index: i,
 					  place : results[i]
 			  };
-				list.append(t(params));
+				anchor.append(t(params));
 		  }
 		  if(i < results.length){
-			  list.append(_.template($('#mapsPlacesSearchMoreTemplate').html())({
+			  anchor.append(_.template($('#mapsPlacesSearchMoreTemplate').html())({
+				  'searchType' : searchType,
 				  nextIndex : i
 			  }));
 		  }
 	  }
+	  
 	  $('#mapsPanel').trigger('create');
-	  list.listview()
-	  list.listview('refresh')
-	  list.show();
+	  anchor.listview()
+	  anchor.listview('refresh')
+	  anchor.show();
+  };
+  
+  r.displayMorePlacesSearchResults = function(anchor,listEnd,results,searchType,nMore,next,moreButton){
+		var t = _.template($('#mapsPlacesSearchResultsTemplate').html());
+		for(var i = next; i < Math.min(results.length, next+nMore); i++){
+			var params = { 
+					'searchType' : searchType,
+					index: i,
+					place : results[i]
+			};
+			listEnd.before($(t(params)));
+		}
+		if(i === results.length){
+			listEnd.hide();
+		}
+		else{
+			moreButton.attr('nextIndex',i);
+		}
+		$('#mapsPanel').trigger('create');
+		anchor.listview('refresh')
+		anchor.show();
+  };
+  
+  r.mapsPlacesSearchSuccess = function(results,status){
+	  r.mapsPlacesSearchResults = results;
+	  r.displayPlacesSearchResults($('#mapsPlacesSearchResults'),results,'Places');
+  };
+  
+  r.mapsLocationSearchSuccess = function(results,status){
+	  r.mapsLocationSearchResults = results;
+	  r.displayPlacesSearchResults($('#mapsLocationSearchResults'),results,'Location');
+	  r.addLocationsToMap(results);
+	  r.map.setCenter(results[0].geometry.location);
   };
   
   r.mapsAddMarker = function(merchant,index){
