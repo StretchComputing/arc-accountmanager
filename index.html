@@ -77,7 +77,7 @@
     <div data-role="page" id="editMerchant">
     	<div data-role="header" data-position="fixed" data-tap-toggle="false" id="editMerchantHeader">
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-left">
-    			<a href="#selectMerchant" data-rel="back" data-icon="arrow-l" data-role="button" data-iconpos="notext"></a>
+    			<a data-rel="back" data-icon="arrow-l" data-role="button" data-iconpos="notext">Back</a>
     		</div>
     		<h1 id="editMerchantHead">Editing </h1>
     		<div data-type="horizontal" data-role="controlgroup" class="ui-btn-right">
@@ -266,7 +266,7 @@
       
       	<ul data-role="listview" data-inset="true">
       		<li data-icon="plus" data-theme="b">
-      			<a href="#createNewMerchant" data-transition="slide"><h1>Merchants</h1></a>
+      			<a href="#newMerchantOptions" data-transition="slide"><h1>Merchants Near You</h1></a>
       		</li>
       	</ul>
       	
@@ -287,6 +287,11 @@
       		<label for="selectMerchantFilterSales">Sales</label>
       	</fieldset>
       	
+      	<div id="selectMerchantRadius" style="display:none">
+      		<label for="selectMerchantRadiusSlider">Radius (in meters):</label>
+      		<input type="range" name="selectMerchantRadiusSlider" id="selectMerchantRadiusSlider"
+      			value="1000" min="50" max="10000" data-highlight="true" />
+      	</div>
       	<ul data-role="listview" data-filter="true" id="selectMerchantList" data-inset="true">
       		
       	</ul>
@@ -318,7 +323,7 @@
     </div><!-- /page -->
 
 <script type="script/template" id="selectMerchantTemplate">
-		<li id="selectMerchantListElm<%=index%>" class="selectMerchantInfo <%=Status%>">
+		<li id="selectMerchantListElm<%=index%>" class="selectMerchantInfo <%=Status%>" radius="<%=radius%>" >
 			<a index="<%=index%>" id="selectMerchantList<%=index%>" class="selectMerchantLI">
 				<h1><%=Name%></h1>
 				<h2>Status: <%=Status%></h2>
@@ -326,7 +331,7 @@
 			</a>
 		</li>
 
-		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu <%=Status%>" index="<%=index%>">
+		<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu <%=Status%>" index="<%=index%>" radius="<%=radius%>">
 				<button data-icon="info" data-iconpos="notext" data-inline="true" class="selectButton" index="<%=index%>"></button>
 				<button data-icon="gear" data-iconpos="notext" data-inline="true" class="editButton" index="<%=index%>"></button>
 				<button data-icon="delete" data-iconpos="notext" data-inline="true" class="deleteButton" index="<%=index%>"></button>
@@ -335,14 +340,14 @@
 	</script>
 	
 <script type="script/template" id="selectPlaceTemplate">
-	<li id="selectMerchantListElm<%=index%>" class="selectMerchantInfo U">
+	<li id="selectMerchantListElm<%=index%>" class="selectMerchantInfo U" radius="<%=radius%>">
 		<a index="<%=index%>" id="selectMerchantListElm<%=index%>" class="selectPlaceLI">
 			<h1><%=Name%></h1>
 			<h2>Status: U</h2>
 			<h3><%= Vicinity %></h3>
 		</a>
 	</li>
-	<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu U" index="<%=index%>">
+	<li id="selectMerchantListSwipeMenuElm<%=index%>" style="display:none; padding:30px" class="selectMerchantMenu U" index="<%=index%>" radius="<%=radius%>" >
 			<button data-icon="grid" data-iconpos="notext" data-inline="true" class="mapButton" index="<%=index%>"></button>
 			<button data-icon="gear" data-iconpos="notext" data-inline="true" class="newPlaceButton" index="<%=index%>"></button>
 			<button data-icon="back" data-iconpos="notext" data-inline="true" class="backButton" index="<%=index%>"></button>
@@ -374,6 +379,64 @@
           </ul>
 		Version: <%= versionNum %>
       </div><!-- /panel -->
+	</script>
+	
+	<div data-role="page" id="newMerchantOptions">
+		<div data-role="header" data-position="fixed" data-tap-toggle="false" id="newMerchantOptionsHeader">
+			<button data-rel="back" data-icon="arrow-l" data-iconpos="notext">Back</button>
+			<h1>How would you like to create the merchant?</h1>
+		</div>
+		
+		<div data-role="content" id="newMerchantOptionsContent">
+			<ul data-role="listview" id="newMerchantOptionsList">
+				<li><a href="#createNewMerchant">Create Merchant from Scratch</a></li>
+				<li><a href="#maps">From a selection on the map</a></li>
+				<li><div data-role="collapsible">
+					<h1>From a place search</h1>
+						<ul data-role="listview" data-inset="true">
+							<li>
+								<input type="text" id="newMerchantOptionsKeywordField" placeholder="Merchant name">
+							</li>
+							
+							<li>
+								<h1>Near: </h1>
+								<fieldset data-role="controlgroup" data-type="horizontal" 
+										  data-role="fieldcontain" id="newMerchantOptionsLocationFilter">
+										  
+										  <input type="radio" value="here" id="newMerchantOptionsLocationHere" name="newMerchantOptionsLocation" checked="true">
+										  <label for="newMerchantOptionsLocationHere">Here</label>
+										  
+										  <input type="radio" value="address" id="newMerchantOptionsLocationAddress" name="newMerchantOptionsLocation">
+										  <label for="newMerchantOptionsLocationAddress">An Address</label>
+										  
+								</fieldset>
+							</li>
+							
+							<li id="newMerchantOptionsLocationFieldLI" style="display:none">
+								<input id="newMerchantOptionsLocationField" type="text" placeholder="Enter an address">
+							</li>
+							
+							<li>
+								<a id="newMerchantOptionsSearchGo" data-icon="search">Go</a>
+							</li>
+						</ul>
+						
+						<ul data-role="listview" data-inset="true" data-filter="true" id="newMerchantOptionsSearchResults">
+							
+						</ul>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+	<script type="text/template" id="newMerchantOptionsSearchResultsTempalte">
+		<li>
+			<a class="newMerchantOptionsSearchResult" index="<%=index%>" >
+			<h1><%= name %></h1>
+			<h1><%= address %> </h1>
+			</a>
+		</li>
 	</script>
 
 	<div data-role="page" id="createNewMerchant">

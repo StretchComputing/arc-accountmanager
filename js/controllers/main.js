@@ -60,11 +60,10 @@ var ARC = (function (r, $) {
       try {
 
         RSKYBOX.log.info('entering', 'main.js.selectMerchantBeforeCreate');
-        r.attachMeeting("selectMerchant");
         
         /*Global operations*/
+        r.attachMeeting("selectMerchant");
         $.mobile.popup.prototype.options.history = false;
-        
         
         /*Operations specifically for the selectMerchant page*/
         var template = _.template($('#selectMerchantSidebarTemplate').html());
@@ -75,6 +74,7 @@ var ARC = (function (r, $) {
         $("#selectMerchantSearch").bind('click', function(e){
         	$("#selectMerchantList").prev("form.ui-listview-filter").toggle();
         	$('#selectMerchantFilter').toggle();
+        	$('#selectMerchantRadius').toggle();
         });
         
         $("input[type='radio']", $('#selectMerchantFilter')).bind('change', function(){
@@ -82,6 +82,33 @@ var ARC = (function (r, $) {
         });
         
         var content =  $("#selectMerchantContent");
+        
+        content.on('slidestop','#selectMerchantRadiusSlider',function(){
+        	var newRadius = parseInt($(this).val());
+        	
+        	if(newRadius > r.selectMerchantMaxRadius){
+        		r.selectMerchantMaxRadius = newRadius;
+        		r.filterInByRadius(newRadius);
+        		
+        		r.selectMerchantRadius = newRadius
+        		return;
+        		
+        		
+        		/*API calls*/
+        	}
+        	
+        	if(newRadius > r.selectMerchantRadius){
+        		r.filterInByRadius(newRadius);
+        	}
+        	else if(newRadius < r.selectMerchantRadius){
+        		r.filterOutByRadius(newRadius);
+        	}
+        	
+        	r.selectMerchantRadius = newRadius
+        });
+        
+        content.on('click', '#selectMerchantListMore', r.selectMerchantGetMoreResults);
+        
         
         content.on('click', '.selectMerchantLI', r.merchantSelectTap);
         content.on("swipe", '.selectMerchantLI', r.merchantSelectHorizontalSwipe);
@@ -146,6 +173,8 @@ var ARC = (function (r, $) {
         RSKYBOX.log.info('entering', 'main.js.selectMerchantShow');
         r.handleMeetings("selectMerchant")
         
+        r.selectMerchantMaxRadius = r.selectMerchantRadius = parseInt($('#selectMerchantRadiusSlider').val());
+        
         if(!r.selectMerchantList)
         	r.getMerchantsLoc(10);
         else
@@ -204,6 +233,69 @@ var ARC = (function (r, $) {
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.editMerchantHide');
+    	}
+    },
+    
+    newMerchantOptionsBeforeCreate : function(){
+    	try{
+    		RSKYBOX.log.info('entering', 'main.js.newMerchantOptionsBeforeCreate');
+    		
+    		var page = $('#newMerchantOptions');
+    		
+    		page.on('click', '.newMerchantOptionsSearchResult', function(){
+    			var index = $(this).attr('index');
+    			var merchant = r.newMerchantOptionsSearchResults[index];
+    			var addr = r.parseAddress(r.getPlaceAddress(merchant));
+    			r.newMerchant = {
+    					Name : merchant.name,
+    					Street : addr[0],
+    					City : addr[1],
+    					State : addr[2]
+    			};
+    			$.mobile.changePage('#createNewMerchant');
+    		});
+    		
+    		$("#newMerchantOptionsSearchResults").prev("form.ui-listview-filter").hide();
+    		
+    		/*Shows or hides the location bar when the radio buttons are clicked*/
+    		 $("input[type='radio']", $('#newMerchantOptionsLocationFilter')).bind('change', function(){
+    			 var field = $('#newMerchantOptionsLocationFieldLI');
+    			 
+    			 if($(this).val() === 'here'){
+    				 field.hide();
+    				 r.newMerchantOptionsAddressChecked = false;
+    			 }
+    			 else{
+    				 field.show();
+    				 r.newMerchantOptionsAddressChecked = true;
+    			 }
+    		 });
+    		 
+    		 $('#newMerchantOptionsSearchGo').bind('click', function(){
+    			 
+    			 var keyword = $("#newMerchantOptionsKeywordField").val()
+    			 
+    			 if(keyword == "")
+    				 return;
+    			 
+    			 var addr = $('#newMerchantOptionsLocationField').val();
+    			 
+    			 /*dont use geolocation lookup*/
+    			 if(addr == "" || !r.newMerchantOptionsAddressChecked){
+    				 r.newMerchantOptionsPlacesSearch(keyword,r.currLoc);
+    			 }
+    			 else{
+    				 r.newMerchantOptionsLocationSearch(keyword,addr);
+    			 }
+    			 
+    		 });
+    		 
+    		 
+    		 
+    		 
+    	}
+    	catch(e){
+    		RSKYBOX.log.error(e,'main.js.newMerchantOptionsBeforeCreate')
     	}
     },
     
@@ -601,13 +693,14 @@ var ARC = (function (r, $) {
     			$('#mapsLocationSearchResults').empty();
     			$('#mapsLocationSearchField').val('')
     		});
-    			
+    		
+    		
     		
     		//------------Events for the maps places search----------------
     		
     		$('#mapsPlacesSearchGo').bind('click',function(){
     			var query = $('#mapsPlacesSearchField').val();
-    			r.placesTextSearch(query,r.mapsPlacesSearchSuccess,r.currLocLatLng,1000);
+    			r.placesTextSearch(query,r.mapsPlacesSearchSuccess,r.currLoc,1000);
     			
     		});
     		
@@ -691,14 +784,10 @@ var ARC = (function (r, $) {
     		var t = _.template($('#mapsMerchantSearchTemplate').html());
     		search.append(t(r));
     		search.trigger('create')
-    		
-    		if(r.currLoc)
-    			r.currLocLatLng = new google.maps.LatLng(r.currLoc.Latitude,
-                        r.currLoc.Longitude);
     			
     		if(!r.mapsCenter){
     	        if(r.currLoc){
-    	        	r.mapsCenter = r.currLocLatLng;
+    	        	r.mapsCenter = r.currLoc;
     	        }
     	        else
     	        	r.mapsCenter = new google.maps.LatLng(41.8500, -87.6500);//Some default
@@ -918,15 +1007,12 @@ var ARC = (function (r, $) {
   /*Attempts to get the current location and then calls getMerchants*/
   r.getMerchantsLoc = function(numMerchants){
 	  var success = function(location){
-		  r.currLoc = { Longitude : location.coords.longitude,
-				        Latitude : location.coords.latitude };
+		  r.currLoc = new google.maps.LatLng(
+				  location.coords.latitude,location.coords.longitude );
 		  r.getMerchants(numMerchants);
 	  }
 	  var failure = function(){ 
-		  r.currLoc = {
-				  Longitude : -87.631667,
-				  Latitude : 41.889089
-		  };
+		  r.currLoc = new google.maps.LatLng(41.889089,-87.631667);
 		  r.getMerchants(numMerchants);};
 	  navigator.geolocation.getCurrentPosition(success,failure);
   };
@@ -941,8 +1027,8 @@ var ARC = (function (r, $) {
 	  jsonobj.Top = numMerchants;
 	  
       if(r.currLoc){
-    	  jsonobj.Latitude = r.currLoc.Latitude;
-    	  jsonobj.Longitude = r.currLoc.Longitude;
+    	  jsonobj.Latitude = r.currLoc.lat();
+    	  jsonobj.Longitude = r.currLoc.lng();
       }
 
       $.ajax({
@@ -960,9 +1046,7 @@ var ARC = (function (r, $) {
                     	r.fixMerchants(r.merchantList);
                     	r.selectMerchantList = r.merchantList;
                     	if(r.currLoc){
-                    		var loc = new google.maps.LatLng(r.currLoc.Latitude,
-                    										 r.currLoc.Longitude);
-                    		r.placesLocationSearch(loc, r.displayMerchantsAndPlaces)
+                    		r.placesLocationSearch(r.currLoc, r.displayMerchantsAndPlaces,r.selectMerchantRadius)
                     	}
                     	else{
                     		r.writeMerchantList($('#selectMerchantList'));
@@ -1212,6 +1296,8 @@ var ARC = (function (r, $) {
 	  return newMerchant;
   };
   
+  /* ----------------- selectMerchant Helper Methods ----------------)*/
+  
   r.writeMerchantList = function(location){
 	  try{
 		  RSKYBOX.log.info('entering', 'main.js.writeMerchantList');
@@ -1223,40 +1309,28 @@ var ARC = (function (r, $) {
 		  
 		  var merchantList = r.selectMerchantList;
 		  
-		  var merchantTemplate = _.template($('#selectMerchantTemplate').html());
-		  var placeTemplate = _.template($('#selectPlaceTemplate').html());
-		  
-		  var templateData = {};
-		  
 		  for(var i = 0; i < merchantList.length; i++){
 			  var m = merchantList[i];
-			  if(r.isMerchant(m)){//Use the merchantTemplate
-				  templateData.Name = m.Name;
-				  templateData.Status = m.Status;
-				  templateData.Street = m.Street;
-				  templateData.City = m.City;
-				  templateData.State = m.State;
-				  templateData.ZipCode = m.ZipCode;
-				  templateData.index = i.toString();
-				  location.append(merchantTemplate(templateData));
-			  }
-			  else{//Use the placeTemplate
-				  templateData.Name = m.name;
-				  templateData.Vicinity = m.vicinity;
-				  templateData.index = i.toString();
-				  location.append(placeTemplate(templateData));
+			  if(r.getRadius(m) > r.selectMerchantRadius){
+				  //All other merchants are outside the radius
+				  break;
 			  }
 			  
+			  r.selectMerchantWriteMerchant(m,location,i);
+		  }
+		  
+		  if(i < merchantList.length && !r.isMerchant(m))
+			  merchantList.hasMore = false;
+		  else{
+			  merchantList.hasMore = true
 		  }
 		  
 		  //i.e. if there are more to merchants to be recieved
-		  if( merchantList.numExpected === merchantList.length){
+		  
+		  if( merchantList.numExpected === merchantList.length || 
+				  (r.placesList.pagination.hasNextPage && merchantList.hasMore)){
 			  var t = _.template($('#selectMerchantListMoreTemplate').html())
 			  location.append(t());
-			  
-			  $('#selectMerchantListMore').bind('click', function(){
-				  r.getMerchants(merchantList.numExpected+10);
-			  });
 		  }
 		  
 		  $('#selectMerchantContent').trigger('create');
@@ -1264,6 +1338,115 @@ var ARC = (function (r, $) {
 	  }
 	  catch(e){
 		  RSKYBOX.log.error(e,'main.js.writeMerchantList');
+	  }
+  };
+  
+  r.selectMerchantWriteMerchant = function(m,location,i){
+	  var radius = r.getRadius(m)
+	  if(r.isMerchant(m)){//Use the merchantTemplate
+		  var merchantTemplate = _.template($('#selectMerchantTemplate').html());
+		  var templateData = {
+				  Name : m.Name,
+				  Status : m.Status,
+				  Street : m.Street,
+				  City : m.City,
+				  State : m.State,
+				  ZipCode : m.ZipCode,
+				  index : i.toString(),
+				  radius : radius
+		  }
+		  location.append(merchantTemplate(templateData));
+
+	  }
+	  else{//Use the placeTemplate
+		  var placeTemplate = _.template($('#selectPlaceTemplate').html());
+		  var templateData = {
+				  Name : m.name,
+				  Vicinity : m.vicinity,
+				  index : i.toString(),
+				  radius : radius
+		  }
+		  location.append(placeTemplate(templateData));
+	  }
+  };
+  
+  r.filterOutByRadius = function(newRadius){
+	  $('li', $('#selectMerchantList')).each(function(){
+		  
+		  if($(this).attr('radius') > newRadius){
+			  $(this).remove();
+		  }
+	  });
+	  if(r.getPaginationRadius(r.selectMerchantList) >= newRadius){
+		  $('#selectMerchantListMore').remove();
+	  }
+  };
+  
+  r.filterInByRadius = function(newRadius){
+	  var start = r.radiusSearch(r.selectMerchantRadius,r.selectMerchantList)
+	  var anchor = $('#selectMerchantList');
+	  for(var i = start; i < r.selectMerchantList.length; i++){
+		  var m = r.selectMerchantList[i]
+		  if(r.getRadius(m) > newRadius){
+			  break;
+		  }
+		 
+		  r.selectMerchantWriteMerchant(m,anchor,i)
+		  
+	  }
+	  
+	  if(i < r.selectMerchantList.length && !r.isMerchant(m))
+		  var hasMore = false;
+	  else{
+		  var hasMore = true
+	  }
+	  
+	  var btn;
+	  if( (btn = $('#selectMerchantListMore').length) !== 0){
+		  anchor.append(btn);//move the button to the bottom of the list
+	  }
+	  else if(hasMore && r.placesList.pagination.hasNextPage){//No button, but there should be
+		  var t = _.template($('#selectMerchantListMoreTemplate').html());
+		  anchor.append(t());
+	  }
+	  
+	  $('#selectMerchantContent').trigger('create');
+	  anchor.listview('refresh');
+  };
+  
+  /*returns the index of the first element which is greater than the given radius
+   * Should be a binary search, will update later
+   */
+  r.radiusSearch = function(radius,merchantList){
+	  for(var i = 0; i < merchantList.length; i++){
+		  var distance = r.getRadius(merchantList[i]);
+		  
+		  if(distance > radius)
+			  return i;
+	  }
+	  return i;
+  };
+  
+  r.getPaginationRadius = function(list){
+	  for(var i = list.length-1; i >= 0; i--){
+		  if(!r.isMerchant(list[i]))
+			  return r.getRadius(list[i])
+	  };
+	  return 500000;
+  };
+  
+  r.selectMerchantGetMoreResults = function(){
+	  r.placesList.pagination.nextPage();
+  };
+  
+  r.getRadius = function(m){
+	  if(r.isMerchant(m)){
+		  return google.maps.geometry.spherical.computeDistanceBetween(
+				  r.currLoc, new google.maps.LatLng(m.Latitude,m.Longitude) );
+	  }
+	  else{
+		  return google.maps.geometry.spherical.computeDistanceBetween(
+				  r.currLoc,m.geometry.location);
 	  }
   };
   
@@ -1654,7 +1837,7 @@ var ARC = (function (r, $) {
     }
   });
   
-  /*----------- Helper Methods for Maps Screen------------------*/
+  /*---------------- Helper Methods for Maps Screen------------------*/
 
   r.displayGeoLocation = function(position) {
     try {
@@ -1890,7 +2073,7 @@ var ARC = (function (r, $) {
   r.mapsAddCurrLocMarker = function(){
 	  var iconURL = './images/mapsCircleMarker.png';
 	  var marker = new google.maps.Marker({
-		  position : r.currLocLatLng,
+		  position : r.currLoc,
 		  map : r.map,
 		  'icon' : iconURL 
 	  });
@@ -1904,16 +2087,20 @@ var ARC = (function (r, $) {
   };
   
   /*-----------------Google Places integration -----------------------!*/
-  r.placesLocationSearch = function(location,callback){
+  r.placesLocationSearch = function(location,callback,radius){
 	  try{
 		  RSKYBOX.log.info('entering', 'placesLocationSearch');
+		  if(!radius){
+			  radius = 1000;
+		  }
+		  
 		  if(!r.placeHolderMap)
 			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"))
 		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
 		 
 		  var req = {
 			  'location' : location,
-			  radius : 1000,
+			  'rankBy' : google.maps.places.RankBy.DISTANCE,
 			  types : ['restaurant']
 		  };
 		  
@@ -1977,12 +2164,11 @@ var ARC = (function (r, $) {
   /*eventually this will sort by distance, mergesort?*/
   r.mergePlacesAndMerchants = function(places,merchants){
 	  var out = [];
-	  var loc = r.latLng(r.currLoc);
 	  var plaIndex = 0;
 	  var merIndex = 0;
 	  while(plaIndex < places.length && merIndex < merchants.length){
-		  var d1 = google.maps.geometry.spherical.computeDistanceBetween(places[plaIndex].geometry.location,loc);
-		  var d2 = google.maps.geometry.spherical.computeDistanceBetween(r.latLng(merchants[merIndex]),loc);
+		  var d1 = r.getRadius(places[plaIndex]);
+		  var d2 = r.getRadius(merchants[merIndex]);
 		  if(d1 < d2){
 			  out.push(places[plaIndex])
 			  plaIndex++;
@@ -2040,10 +2226,19 @@ var ARC = (function (r, $) {
   /*merges the places and the merchants and then calls a method to display
    * the combined list.
    */
-  r.displayMerchantsAndPlaces = function(places,status){
+  r.displayMerchantsAndPlaces = function(places,status,pagination){
 	  //TODO: check status
-	  r.placesList = places;
 	  r.filterDuplicatePlaces(places, r.merchantList);
+	  
+	  if(r.placesList){
+		  $.merge(r.placesList,places)
+	  }
+	  
+	  else{
+		  r.placesList = places;
+	  }
+	  
+	  r.placesList.pagination = pagination;
 	  r.writeMerchantList($('#selectMerchantList'));
   };
   
@@ -2076,6 +2271,39 @@ var ARC = (function (r, $) {
 	  		break;
 	  }
   }
+  
+  /*--------------------Helper methods for newMerchantOptions--------------^*/
+  
+  r.newMerchantOptionsSearchWriteResults = function(results,status){
+	  r.newMerchantOptionsSearchResults = results;
+	  var t = _.template($('#newMerchantOptionsSearchResultsTempalte').html());
+	  var anchor = $('#newMerchantOptionsSearchResults')
+	  anchor.empty()
+	  for(var i = 0; i < results.length; i++){
+		  var args = {
+				  index : i,
+				  name : results[i].name,
+				  address : r.getPlaceAddress(results[i])
+		  };
+		  anchor.append(t(args));
+	  }
+	  
+	  anchor.listview('refresh');
+  };
+  
+  r.newMerchantOptionsLocationSearch= function(keyword,address){
+	  r.getGeocode(address, function(results, status){
+			if(status !== google.maps.GeocoderStatus.OK){
+				return;
+			}
+			
+			r.newMerchantOptionsPlacesSearch(keyword,results[0].geometry.location);
+	  });
+  };
+  
+  r.newMerchantOptionsPlacesSearch = function(keyword,location){
+	  r.placesTextSearch(keyword,r.newMerchantOptionsSearchWriteResults,location,1000);
+  };
   
   /*--------------------Helper methods for cohortReport-------------------- #$%*/
   
@@ -3441,6 +3669,8 @@ var ARC = (function (r, $) {
       { '#editMerchant':         { handler: 'editMerchantBeforeCreate',  events: 'bc' } },
       { '#editMerchant':         { handler: 'editMerchantShow',          events: 's'  } },
       { '#editMerchant':         { handler: 'editMerchantHide',          events: 'h'  } },
+      { '#newMerchantOptions':   { handler: 'newMerchantOptionsBeforeCreate', events: 'bc' } },
+      { '#newMerchantOptions':   { handler: 'newMerchantOptionsShow',         events: 's'  } },
       { '#createNewMerchant':    { handler: 'createNewMerchantBeforeCreate', events: 'bc'} },
       { '#createNewMerchant':    { handler: 'createNewMerchantShow',         events: 's' } },
       { '#createNewMerchant':    { handler: 'createNewMerchantHide',         events: 'h' } },
