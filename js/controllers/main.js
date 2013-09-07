@@ -764,6 +764,16 @@ var ARC = (function (r, $) {
     			});
     			$('#mapsPanel').trigger('create');
     		});
+    		
+    		/*-------------Events for the mapsFilter ---------------------*/
+    		$("input[type='radio']", $('#mapsFilterButtons')).bind('change', function(){
+    			r.mapsFilterMarkers($(this).val());
+    		});
+    		
+    		page.on('change','#mapsFilterRadiusBar',function(){
+    			var rad = parseInt($(this).val());
+    			r.mapsAddCircle(undefined,rad);
+    		});
     	}
     	catch(e){
     		RSKYBOX.log.error(e, 'main.js.mapsBeforeCreate');
@@ -1837,7 +1847,7 @@ var ARC = (function (r, $) {
     }
   });
   
-  /*---------------- Helper Methods for Maps Screen------------------*/
+  /*---------------- Helper Methods for Maps Screen------------------@*/
 
   r.displayGeoLocation = function(position) {
     try {
@@ -1975,7 +1985,7 @@ var ARC = (function (r, $) {
 	  
 	  $.merge(r.mapsList,results);
 	  
-  }
+  };
   
   /*Writes the results from a places search into the jquery container given by 'anchor'*/
   r.displayPlacesSearchResults = function(anchor,results,searchType){
@@ -2052,17 +2062,40 @@ var ARC = (function (r, $) {
 			  var color = '6c7893';
 		  }
 
-	  var chld = 'chld=|'+color+'|'
-	  var iconURL = chartsURL + 'chst=d_map_pin_letter_withshadow&' + chld;
-
 	  var marker = new google.maps.Marker({
 		  'position' : LatLng,
 		  'map' : r.map,
 		  'title' : index.toString(),
-		  'icon' : iconURL
+		  'icon' : r.mapsBuildMarkerIconURL(color,false)
 	  });
+	  marker.color = color; //used later for recreating a given marker
+	  marker.index = index;
+	  if(!r.mapsMarkerList)
+		  r.mapsMarkerList = [];
+	  
+	  r.mapsMarkerList.push(marker);
+	  marker.markerActive = true;
+	  
 	  google.maps.event.addListener(marker, 'click', r.markerClick);
   };
+  
+  r.mapsBuildMarkerIconURL = function(color, selected){
+	  var chartsURL = 'https://chart.googleapis.com/chart?';
+	  var chld = 'chld='
+	  
+	  if(selected){
+		  var iconURL = 'chst=d_map_pin_icon_withshadow&';
+		  chld += 'glyphish_eye'
+	  }
+	  else{
+		  var iconURL = 'chst=d_map_pin_letter_withshadow&';
+	  }
+	  
+	  chld += '|' + color + '|'
+	  
+	  return chartsURL + iconURL + chld;
+	  
+  }
   
   r.mapsAddMarkers = function(){
 	  for(var i = 0; i < r.mapsList.length; i++){
@@ -2082,8 +2115,128 @@ var ARC = (function (r, $) {
   
   r.markerClick = function(e){//Called when a marker is clicked
 	  var title = this.title;
-	  if(title !== 'You Are Here')
-		  r.mapsSelectMerchant(r.mapsList[title],title);
+	  var index = this.index;
+	  
+	  if(title !== 'You Are Here'){
+		  r.mapsSelectMerchant(r.mapsList[title],index);
+		  r.changeSelectedMarker(this);
+	  }
+  };
+  
+  /*changes the image on the active marker 
+   * and returns the old active marker to an unselected state
+   */ 
+  r.changeSelectedMarker = function(marker){
+	  if(r.mapsSelectedMarker === marker)
+		  return;//no need to change
+	  
+	  if(r.mapsSelectedMarker){
+		  r.mapsSelectedMarker.setIcon(r.mapsSelectedMarker.prevIcon);
+	  }
+	  
+	  marker.prevIcon = marker.getIcon()
+	  marker.setIcon(r.mapsBuildMarkerIconURL(marker.color,true));
+	  r.mapsSelectedMarker = marker;
+	  
+  };
+  
+  r.mapsFilterMarkers = function(filterType){
+	  var radiusLI = $('#mapsFilterRadiusBarLI');
+	  radiusLI.hide();
+	  
+	  switch(filterType){
+		  case 'All':
+			  r.mapsFilterAll();
+			  break;
+		  case 'Surveyed':
+			  r.mapsFilterSurveyed();
+			  break;
+		  case 'Unsurveyed':
+			  r.mapsFilterUnsurveyed();
+			  break;
+		  case 'Active':
+			  r.mapsFilterActive();
+			  break;
+		  case 'Radius':
+			  r.mapsFilterAll();
+			  radiusLI.show();
+			  var rad = $('#mapsFilterRadiusBar').val();
+			  r.mapsAddCircle(r.currLoc,rad);
+			  break;
+	  }
+  };
+  
+  r.mapsFilterAll = function(){
+	  for(var i = 0; i < r.mapsMarkerList.length; i++){
+		  var m = r.mapsMarkerList[i];
+		  r.displayMarker(m);
+	  }
+  };
+  
+  r.mapsFilterSurveyed = function(){
+	  for(var i = 0; i < r.mapsMarkerList.length; i++){
+		  var m = r.mapsMarkerList[i];
+		  if(r.isMerchant(r.mapsList[m.index])){
+			  r.displayMarker(m);
+		  }
+		  else{
+			  r.removeMarker(m);
+		  }
+	  }
+  };
+  
+  r.mapsFilterUnsurveyed = function(){
+	  for(var i = 0; i < r.mapsMarkerList.length; i++){
+		  var m = r.mapsMarkerList[i];
+		  if(!r.isMerchant(r.mapsList[m.index])){
+			  r.displayMarker(m);
+		  }
+		  else{
+			  r.removeMarker(m);
+		  }
+	  }
+  };
+  
+  r.mapsFilterActive = function(){
+	  for(var i = 0; i < r.mapsMarkerList.length; i++){
+		  var m = r.mapsMarkerList[i];
+		  var merchant = r.mapsList[m.index];
+		  if(r.isMerchant(merchant) && merchant.Status === 'A'){
+			  r.displayMarker(m);
+		  }
+		  else{
+			  r.removeMarker(m);
+		  }
+	  }
+  };
+  
+  r.displayMarker = function(marker){
+	  marker.setMap(r.map);
+  };
+  
+  r.removeMarker = function(marker){
+	  marker.setMap(null);
+  };
+  
+  /*Draw or update the circle*/
+  r.mapsAddCircle = function(loc,radius){
+	  if(!r.mapsCircle){
+		  var circOpts = {
+				  'radius' : parseInt(radius),
+				  center : loc,
+				  clickable : false,
+				  draggable : false,
+				  fillOpacity : 0,
+				  map : r.map,
+				  strokeWeight : 3
+		  }
+		  r.mapsCircle = new google.maps.Circle(circOpts);
+	  }
+	  else{
+		  var circ = r.mapsCircle;
+		  circ.setRadius(radius);
+		  circ.setMap(r.map);
+	  }
   };
   
   /*-----------------Google Places integration -----------------------!*/

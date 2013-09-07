@@ -734,47 +734,89 @@
 		<ul data-role="listview" id="mapsPanelList">
 			<li id="mapsMerchantSelect" style="display:none" data-icon="arrow-r"></li>
 		
-			<li id="mapsSearch"><fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
-				<label for="mapsMerchantSearchTab">Merchants</label>
-				<input id="mapsMerchantSearchTab" type="radio" checked="checked" value="mapsMerchantSearch" name="searchTab" class="mapsSearchTab" />
+			<div data-role="collapsible">
+				<h1>Search</h1>
+				<li id="mapsSearch"><fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
+					<label for="mapsMerchantSearchTab">Merchants</label>
+					<input id="mapsMerchantSearchTab" type="radio" checked="checked" value="mapsMerchantSearch" name="searchTab" class="mapsSearchTab" />
 			
-				<label for="mapsLocationSearchTab">Locations</label>
-				<input id="mapsLocationSearchTab"  type="radio" value="mapsLocationSearch"  name="searchTab" class="mapsSearchTab" />
+					<label for="mapsLocationSearchTab">Locations</label>
+					<input id="mapsLocationSearchTab"  type="radio" value="mapsLocationSearch"  name="searchTab" class="mapsSearchTab" />
 				
-				<label for="mapsPlacesSearchTab">Places</label>
-				<input id="mapsPlacesSearchTab" type="radio" value="mapsPlacesSearch" name="searchTab" class="mapsSearchTab" />
-			</fieldset>
+					<label for="mapsPlacesSearchTab">Places</label>
+					<input id="mapsPlacesSearchTab" type="radio" value="mapsPlacesSearch" name="searchTab" class="mapsSearchTab" />
+				</fieldset>
 		
-			<div id="mapsMerchantSearch" class="searchTabContent" searchTab="mapsMerchantSearch"></div>
+				<div id="mapsMerchantSearch" class="searchTabContent" searchTab="mapsMerchantSearch"></div>
 		
-			<div id="mapsLocationSearch" class="searchTabContent" style="display:none" searchTab="mapsLocationSearch">
-				<div data-role="fieldcontain">
-					<input name="search" id="mapsLocationSearchField" 
-				   	   placeholder="Enter an address" data-inline="true" />
-					<button data-icon="search" data-iconpos="notext" 
-				        id="mapsLocationSearchGo" data-inline="true">Search</button>
-				    <button data-icon="delete" data-iconpos="notext"
-				    	id="mapsLocationSearchClear" data-inline="true">Clear</button>
+				<div id="mapsLocationSearch" class="searchTabContent" style="display:none" searchTab="mapsLocationSearch">
+					<div data-role="fieldcontain">
+						<input name="search" id="mapsLocationSearchField" 
+				   	  	 placeholder="Enter an address" data-inline="true" />
+						<button data-icon="search" data-iconpos="notext" 
+				        	id="mapsLocationSearchGo" data-inline="true">Search</button>
+				    	<button data-icon="delete" data-iconpos="notext"
+				    		id="mapsLocationSearchClear" data-inline="true">Clear</button>
+					</div>
 				</div>
+			
+				<div id="mapsPlacesSearch" class="searchTabContent" style="display:none" searchTab="mapsPlacesSearch">
+					<div data-role="fieldcontain">
+						<input name="search" id="mapsPlacesSearchField" 
+					   	 	  placeholder="Enter a place keyword" data-inline="true" />
+						<button data-icon="search" data-iconpos="notext" 
+					     	  id="mapsPlacesSearchGo" data-inline="true">Search</button>
+					    <button data-icon="delete" data-iconpos="notext"
+					    	  id="mapsPlacesSearchClear" data-inline="true">Clear</button>
+					</div>
+				</div>
+				</li>
+			
+				<div id="mapsLocationSearchResults" class="searchTabContent" searchTab="mapsLocationSearch" style="display:none"></div>
+			
+				<div id="mapsPlacesSearchResults" class="searchTabContent" searchTab="mapsPlacesSearch" style="display:none"></div>
 			</div>
 			
-			<div id="mapsPlacesSearch" class="searchTabContent" style="display:none" searchTab="mapsPlacesSearch">
-				<div data-role="fieldcontain">
-					<input name="search" id="mapsPlacesSearchField" 
-				   	 	  placeholder="Enter a place keyword" data-inline="true" />
-					<button data-icon="search" data-iconpos="notext" 
-				     	  id="mapsPlacesSearchGo" data-inline="true">Search</button>
-				    <button data-icon="delete" data-iconpos="notext"
-				    	  id="mapsPlacesSearchClear" data-inline="true">Clear</button>
-				</div>
-			</div>
-			</li>
-		
-			<div id="mapsLocationSearchResults" class="searchTabContent" searchTab="mapsLocationSearch" style="display:none"></div>
-		
-			<div id="mapsPlacesSearchResults" class="searchTabContent" searchTab="mapsPlacesSearch" style="display:none"></div>
-			
-			<li data-role="list-divider"></li>
+			<div data-role="collapsible">
+				<h1>Filters</h1>
+				
+				<li>
+					<div data-role="fieldcontain">
+						<fieldset data-role="controlgroup" id="mapsFilterButtons">
+							<label for="mapsFilterAll">All</label>
+							<input type="radio" name="mapsFilter" id="mapsFilterAll" checked="true" value="All" />
+							
+							<label for="mapsFilterSurveyed">Surveyed</label>
+							<input type="radio" name="mapsFilter" id="mapsFilterSurveyed" value="Surveyed" />
+							
+							<label for="mapsFilterUnsurveyed">Unsurveyed</label>
+							<input type="radio" name="mapsFilter" id="mapsFilterUnsurveyed" value="Unsurveyed" />
+							
+							<label for="mapsFilterActive">Active</label>
+							<input type="radio" name="mapsFilter" id="mapsFilterActive" value="Active" />
+							
+							<label for="mapsFilterRadius">Radius</label>
+							<input type="radio" name="mapsFilter" id="mapsFilterRadius" value="Radius" />
+							
+						</fieldset>
+					</div>
+				</li>
+				
+				<li id="mapsFilterRadiusBarLI" style="display:none" >
+					<div data-role="filedcontain">
+						<label for="mapsFilterRadiusBar">Radius</label>
+						<input type="range" name="mapsFilterRadiusBar" value="50"
+							min="50" max="5000" id="mapsFilterRadiusBar" />
+					</div>
+							
+					<div data-role="fieldcontain">
+						<label for="mapsFilterDiscoveryCheck">Discovery Mode</label>
+						<input type="checkbox" id="mapsFilterDiscoveryCheck" data-inline="true" />
+						
+						<a data-role="button" data-icon="info" data-iconpos="notext" id="mapsFilterDiscoveryInfo" data-inline="true">info</a>
+					</div>
+				</li>
+			</div><!-- Filters Collapsible -->
 			<li><h1>Radar Mode:</h1>
 			    <select id="mapsRadar" data-role="slider">
 			    	<option value="off">Off</option>
