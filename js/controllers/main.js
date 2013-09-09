@@ -724,7 +724,7 @@ var ARC = (function (r, $) {
     			var place = r.mapsPlacesSearchResults[index];
     			
     			if(r.isNewPlace(r.mapsList,place)){
-    				r.mapsAddMarker(place,r.mapsList.length);
+    				r.mapsAddMarker(place,r.mapsList.length,r.mapsMarkerList);
     				r.mapsSelectMerchant(place, r.mapsList.length);
     			
     				r.mapsList.push(place);
@@ -772,7 +772,9 @@ var ARC = (function (r, $) {
     		
     		page.on('change','#mapsFilterRadiusBar',function(){
     			var rad = parseInt($(this).val());
+    			var discovery = $('#mapsFilterRadiusBar').attr('checked') === 'true';
     			r.mapsAddCircle(undefined,rad);
+    			r.mapsFilterRadius(rad,discovery);
     		});
     	}
     	catch(e){
@@ -819,7 +821,8 @@ var ARC = (function (r, $) {
     		if(r.currLoc)//You are here
     			r.mapsAddCurrLocMarker();
     		/*Add pins*/
-    		r.mapsAddMarkers();
+    		r.mapsMarkerList = [];
+    		r.mapsAddMarkers(r.mapsList,r.mapsMarkerList);
     		
     	}
     	catch(e){
@@ -1449,6 +1452,7 @@ var ARC = (function (r, $) {
 	  r.placesList.pagination.nextPage();
   };
   
+  /*Get radius from r.currLoc to the position of merchant or place m.*/
   r.getRadius = function(m){
 	  if(r.isMerchant(m)){
 		  return google.maps.geometry.spherical.computeDistanceBetween(
@@ -1980,7 +1984,7 @@ var ARC = (function (r, $) {
   r.addLocationsToMap = function(results,status){
 	  r.filterDuplicatePlaces(results,r.mapsList);
 	  for(var i = 0; i < results.length; i++){
-		  r.mapsAddMarker(results[i],r.mapsList.length+i);
+		  r.mapsAddMarker(results[i],r.mapsList.length+i,r.mapsMarkerList);
 	  }
 	  
 	  $.merge(r.mapsList,results);
@@ -2050,7 +2054,7 @@ var ARC = (function (r, $) {
 	  r.map.setCenter(results[0].geometry.location);
   };
   
-  r.mapsAddMarker = function(merchant,index){
+  r.mapsAddMarker = function(merchant,index,markerList){
 	  var chartsURL = 'https://chart.googleapis.com/chart?'
 		  if(r.isMerchant(merchant)){
 			  var LatLng = new google.maps.LatLng(merchant.Latitude,
@@ -2070,10 +2074,8 @@ var ARC = (function (r, $) {
 	  });
 	  marker.color = color; //used later for recreating a given marker
 	  marker.index = index;
-	  if(!r.mapsMarkerList)
-		  r.mapsMarkerList = [];
 	  
-	  r.mapsMarkerList.push(marker);
+	  markerList.push(marker);
 	  marker.markerActive = true;
 	  
 	  google.maps.event.addListener(marker, 'click', r.markerClick);
@@ -2097,9 +2099,9 @@ var ARC = (function (r, $) {
 	  
   }
   
-  r.mapsAddMarkers = function(){
-	  for(var i = 0; i < r.mapsList.length; i++){
-		  r.mapsAddMarker(r.mapsList[i],i)
+  r.mapsAddMarkers = function(mapsList,markerList){
+	  for(var i = 0; i < mapsList.length; i++){
+		  r.mapsAddMarker(mapsList[i],i,markerList)
 		}
   };
   
@@ -2143,6 +2145,7 @@ var ARC = (function (r, $) {
   r.mapsFilterMarkers = function(filterType){
 	  var radiusLI = $('#mapsFilterRadiusBarLI');
 	  radiusLI.hide();
+	  r.mapsRemoveCircle();
 	  
 	  switch(filterType){
 		  case 'All':
@@ -2160,7 +2163,9 @@ var ARC = (function (r, $) {
 		  case 'Radius':
 			  r.mapsFilterAll();
 			  radiusLI.show();
-			  var rad = $('#mapsFilterRadiusBar').val();
+			  
+			  var rad = parseInt($('#mapsFilterRadiusBar').val());
+			  r.mapsFilterMarkersRadius(rad,r.mapsMarkerList,r.currLoc,true);
 			  r.mapsAddCircle(r.currLoc,rad);
 			  break;
 	  }
@@ -2239,6 +2244,65 @@ var ARC = (function (r, $) {
 	  }
   };
   
+  r.mapsRemoveCircle = function(){
+	  if(r.mapsCircle){
+		  r.mapsCircle.setMap(null);
+	  }
+  };
+  
+  r.mapsFilterMarkersRadius = function(radius,list,loc,filterAll){
+	  if(list.leftOff && !filterAll){
+		  var i = list.leftOff;
+	  }
+	  else{
+		  i = list.length;
+	  }
+	  if(radius < r.mapsCurrRadius || filterAll){//Filter Out
+		  for( i = i-1; i >= 0; i--){
+			  if(r.getMarkerRadius(loc,list[i]) >= radius ){
+				  list[i].setMap(null);
+			  }
+			  else{
+				  break;
+			  }
+		  }
+		  list.leftOff = i+1;//The last marker outside the radius
+	  }
+	  
+	  else{//filter in
+		  for( ; i < list.length; i++){
+			  if(r.getMarkerRadius(loc,list[i]) <= radius){
+				  list[i].setMap(r.map)
+			  }
+			  else{
+				  break;
+			  }
+		  }
+		  list.leftOff = i;
+	  }
+	  
+	  r.mapsCurrRadius = radius;
+	  
+  };
+  
+  r.getMarkerRadius = function(center,point){
+	  return google.maps.geometry.spherical.computeDistanceBetween(center,point.getPosition());
+  };
+  
+  r.mapsFilterRadius = function(radius, discoveryMode){
+	  if(discoveryMode){
+		  return; //Get from a radar shearch etc
+	  }
+	  
+	  else{
+		  r.mapsFilterMarkersRadius(radius,r.mapsMarkerList,r.currLoc);
+	  }
+  };
+  
+  r.addPlacesRadarMarkers = function(results,status,pagination){
+	  r.mapsRadarList = results;
+  };
+  
   /*-----------------Google Places integration -----------------------!*/
   r.placesLocationSearch = function(location,callback,radius){
 	  try{
@@ -2288,6 +2352,26 @@ var ARC = (function (r, $) {
 		  place.textSearch(req,callback);
 	  }catch(e){
 		  RSKYBOX.log.error(e,'main.js.placesTextSearch')
+	  }
+  };
+  
+  r.placesRadarSearch = function(location,callback){
+	  try{
+		  RSKYBOX.log.info('entering','main.js.placesRadarSearch');
+		  if(!r.placeHolderMap)
+			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"));
+		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
+		  
+		  var req = {
+				  'location' : location,
+				  radius : 50000,
+				  types: ['restaurant']
+		  }
+		  
+		  place.radarSearch(req,callback);
+	  }
+	  catch(e){
+		  RSKYBOX.log.info(e,'main.js.placesRadarSearch');
 	  }
   };
   
