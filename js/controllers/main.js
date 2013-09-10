@@ -626,7 +626,10 @@ var ARC = (function (r, $) {
     		});
     		
     		page.on('click', '.mapsPlaceDisplay', function(){
-    			var place = r.mapsList[$(this).attr('index')];
+    			if($('#mapsFilterDiscoveryCheck').is(':checked'))
+    				var place = r.mapsRadarList[$(this).attr('index')];
+    			else
+    				var place = r.mapsList[$(this).attr('index')];
     			var addr = r.parseAddress(r.getPlaceAddress(place));
     		  	r.newMerchant = {
     		  			Name : place.name,
@@ -772,9 +775,21 @@ var ARC = (function (r, $) {
     		
     		page.on('change','#mapsFilterRadiusBar',function(){
     			var rad = parseInt($(this).val());
-    			var discovery = $('#mapsFilterRadiusBar').attr('checked') === 'true';
+    			var discovery = $('#mapsFilterDiscoveryCheck').is(':checked');
     			r.mapsAddCircle(undefined,rad);
     			r.mapsFilterRadius(rad,discovery);
+    		});
+    		
+    		$('#mapsFilterDiscoveryCheck').bind('change',function(){
+    			if($(this).is(':checked')){
+    				r.mapsFilterOutAllMarkers(r.mapsMarkerList);
+    				r.placesRadarSearch(r.currLoc,r.addPlacesRadarMarkers);
+    			}
+    			else{
+    				r.mapsFilterOutAllMarkers(r.mapsRadarMarkerList);
+    				r.mapsFilterAll();
+    				r.mapsFilterMarkersRadius(r.mapsCurrRadius,r.mapsMarkerList,r.currLoc,true)
+    			}
     		});
     	}
     	catch(e){
@@ -786,6 +801,8 @@ var ARC = (function (r, $) {
     	try{
     		RSKYBOX.log.info('entering', 'main.js.mapsShow');
     		r.mapsList = r.selectMerchantList//The list used by all asynchronous calls;
+    		
+    		r.mapsResetFilters();
     		
     		var p = $('#mapsRadar').val('off').slider('refresh')
     		$('#mapsCreateNewMerchantLI').hide()
@@ -2072,6 +2089,7 @@ var ARC = (function (r, $) {
 		  'title' : index.toString(),
 		  'icon' : r.mapsBuildMarkerIconURL(color,false)
 	  });
+	  
 	  marker.color = color; //used later for recreating a given marker
 	  marker.index = index;
 	  
@@ -2110,7 +2128,8 @@ var ARC = (function (r, $) {
 	  var marker = new google.maps.Marker({
 		  position : r.currLoc,
 		  map : r.map,
-		  'icon' : iconURL 
+		  'icon' : iconURL ,
+		  draggable : true
 	  });
 	  
   };
@@ -2120,9 +2139,27 @@ var ARC = (function (r, $) {
 	  var index = this.index;
 	  
 	  if(title !== 'You Are Here'){
-		  r.mapsSelectMerchant(r.mapsList[title],index);
 		  r.changeSelectedMarker(this);
+		  if($('#mapsFilterDiscoveryCheck').is(':checked')){
+			  if(r.placesHasData(r.mapsRadarList[index])){
+				  r.mapsSelectMerchant(r.mapsRadarList[index],index);
+			  }
+			  else{
+				  r.placesGetData(r.mapsRadarList[index],r.mapsSelectMerchantRadar(index))
+			  }
+
+		  }
+		  else{
+			  r.mapsSelectMerchant(r.mapsList[index],index);
+		  }
 	  }
+  };
+  
+  r.mapsSelectMerchantRadar = function(index){
+	  return function(result,status){
+		  r.mapsRadarList[index] = result;
+		  r.mapsSelectMerchant(result,index);
+	  };
   };
   
   /*changes the image on the active marker 
@@ -2165,6 +2202,7 @@ var ARC = (function (r, $) {
 			  radiusLI.show();
 			  
 			  var rad = parseInt($('#mapsFilterRadiusBar').val());
+			  r.mapsCurrRadius = rad;
 			  r.mapsFilterMarkersRadius(rad,r.mapsMarkerList,r.currLoc,true);
 			  r.mapsAddCircle(r.currLoc,rad);
 			  break;
@@ -2215,6 +2253,14 @@ var ARC = (function (r, $) {
 	  }
   };
   
+  r.mapsResetFilters = function(){
+	  $('#mapsFilterDiscoveryCheck').attr('checked',false).checkboxradio("refresh");
+	  $('#mapsFilterRadiusBar').val(50);
+	  $("input[type='radio']", mapsFilterButtons).attr('checked',false).checkboxradio("refresh");
+	  $('#mapsFilterAll').attr('checked',true).checkboxradio("refresh");
+	  $('#mapsFilterRadiusBarLI').hide();
+  };
+  
   r.displayMarker = function(marker){
 	  marker.setMap(r.map);
   };
@@ -2255,7 +2301,7 @@ var ARC = (function (r, $) {
 		  var i = list.leftOff;
 	  }
 	  else{
-		  i = list.length;
+		  var i = list.length;
 	  }
 	  if(radius < r.mapsCurrRadius || filterAll){//Filter Out
 		  for( i = i-1; i >= 0; i--){
@@ -2291,7 +2337,7 @@ var ARC = (function (r, $) {
   
   r.mapsFilterRadius = function(radius, discoveryMode){
 	  if(discoveryMode){
-		  return; //Get from a radar shearch etc
+		  r.mapsFilterMarkersRadius(radius,r.mapsRadarMarkerList,r.currLoc)
 	  }
 	  
 	  else{
@@ -2300,7 +2346,28 @@ var ARC = (function (r, $) {
   };
   
   r.addPlacesRadarMarkers = function(results,status,pagination){
-	  r.mapsRadarList = results;
+	  r.mapsRadarList = r.radiusSort(results);
+	  r.mapsRadarList.pagination = pagination;
+	  r.mapsRadarMarkerList = [];
+	  r.mapsAddMarkers(r.mapsRadarList,r.mapsRadarMarkerList);
+	  
+	  r.mapsFilterMarkersRadius(r.mapsCurrRadius,r.mapsRadarMarkerList,r.currLoc,true);
+  };
+  
+  r.mapsFilterOutAllMarkers = function(markerList){
+	  for(var i = 0; i < markerList.length; i++){
+		  markerList[i].setMap(null)
+	  }
+  };
+  
+  r.radiusSort = function(places){
+	  var sortfn = function(a,b){
+		  var d1 = r.getRadius(a)
+		  var d2 = r.getRadius(b)
+		  return d1-d2
+	  };
+	  
+	  return places.sort(sortfn)
   };
   
   /*-----------------Google Places integration -----------------------!*/
@@ -2313,7 +2380,7 @@ var ARC = (function (r, $) {
 		  
 		  if(!r.placeHolderMap)
 			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"))
-		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
+		  var service = new google.maps.places.PlacesService(r.placeHolderMap);
 		 
 		  var req = {
 			  'location' : location,
@@ -2321,7 +2388,7 @@ var ARC = (function (r, $) {
 			  types : ['restaurant']
 		  };
 		  
-		  place.nearbySearch(req,callback)
+		  service.nearbySearch(req,callback)
 	  }
 	  catch(e){
 		  RSKYBOX.log.error(e,'placesLocationSearch')
@@ -2338,7 +2405,7 @@ var ARC = (function (r, $) {
 		  RSKYBOX.log.info('entering','main.js.placesTextSearch');
 		  if(!r.placeHolderMap)
 			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"));
-		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
+		  var service = new google.maps.places.PlacesService(r.placeHolderMap);
 
 		  var req = {
 				  'query' : query,
@@ -2349,7 +2416,7 @@ var ARC = (function (r, $) {
 			  req.radius = radius;
 		  }
 		  
-		  place.textSearch(req,callback);
+		  service.textSearch(req,callback);
 	  }catch(e){
 		  RSKYBOX.log.error(e,'main.js.placesTextSearch')
 	  }
@@ -2360,7 +2427,7 @@ var ARC = (function (r, $) {
 		  RSKYBOX.log.info('entering','main.js.placesRadarSearch');
 		  if(!r.placeHolderMap)
 			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"));
-		  var place = new google.maps.places.PlacesService(r.placeHolderMap);
+		  var service = new google.maps.places.PlacesService(r.placeHolderMap);
 		  
 		  var req = {
 				  'location' : location,
@@ -2368,11 +2435,35 @@ var ARC = (function (r, $) {
 				  types: ['restaurant']
 		  }
 		  
-		  place.radarSearch(req,callback);
+		  service.radarSearch(req,callback);
 	  }
 	  catch(e){
 		  RSKYBOX.log.info(e,'main.js.placesRadarSearch');
 	  }
+  };
+  
+  /*querys for data from a places returned form radar mode */
+  r.placesGetData = function(place, callback){
+	  try{
+		  RSKYBOX.log.info('entering','main.js.placesGetData')
+		  if(!r.placeHolderMap)
+			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"));
+		  var service = new google.maps.places.PlacesService(r.placeHolderMap);
+		  
+		  var req = {
+				  reference : place.reference
+		  };
+		  
+		  service.getDetails(req,callback);
+		  
+	  }
+	  catch(e){
+		  RSKYBOX.log.error(e,'main.js.placesGetData')
+	  }
+  };
+  
+  r.placesHasData = function(place){
+	  return place.name !== undefined;
   };
   
   /*filters out the places which are already in the database (as merchants)*/
