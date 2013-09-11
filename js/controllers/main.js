@@ -703,7 +703,7 @@ var ARC = (function (r, $) {
     		
     		$('#mapsPlacesSearchGo').bind('click',function(){
     			var query = $('#mapsPlacesSearchField').val();
-    			r.placesTextSearch(query,r.mapsPlacesSearchSuccess,r.currLoc,1000);
+    			r.placesTextSearch(query,r.mapsPlacesSearchSuccess,r.mapsCurrLoc,1000);
     			
     		});
     		
@@ -783,12 +783,12 @@ var ARC = (function (r, $) {
     		$('#mapsFilterDiscoveryCheck').bind('change',function(){
     			if($(this).is(':checked')){
     				r.mapsFilterOutAllMarkers(r.mapsMarkerList);
-    				r.placesRadarSearch(r.currLoc,r.addPlacesRadarMarkers);
+    				r.placesRadarSearch(r.mapsCurrLoc,r.addPlacesRadarMarkers);
     			}
     			else{
     				r.mapsFilterOutAllMarkers(r.mapsRadarMarkerList);
     				r.mapsFilterAll();
-    				r.mapsFilterMarkersRadius(r.mapsCurrRadius,r.mapsMarkerList,r.currLoc,true)
+    				r.mapsFilterMarkersRadius(r.mapsCurrRadius,r.mapsMarkerList,r.mapsCurrLoc,true)
     			}
     		});
     	}
@@ -821,6 +821,7 @@ var ARC = (function (r, $) {
     	        else
     	        	r.mapsCenter = new google.maps.LatLng(41.8500, -87.6500);//Some default
     		}
+    		r.mapsCurrLoc = r.mapsCenter;
     		
     		var mapOptions = {
     				center : r.mapsCenter,
@@ -835,8 +836,7 @@ var ARC = (function (r, $) {
     		r.map = map; //For access in pagewide registrations
     		
     		
-    		if(r.currLoc)//You are here
-    			r.mapsAddCurrLocMarker();
+    		r.mapsAddCurrLocMarker();
     		/*Add pins*/
     		r.mapsMarkerList = [];
     		r.mapsAddMarkers(r.mapsList,r.mapsMarkerList);
@@ -1043,6 +1043,7 @@ var ARC = (function (r, $) {
 	  }
 	  var failure = function(){ 
 		  r.currLoc = new google.maps.LatLng(41.889089,-87.631667);
+		  //r.currLoc = new google.maps.LatLng(41.788686,-87.588093)
 		  r.getMerchants(numMerchants);};
 	  navigator.geolocation.getCurrentPosition(success,failure);
   };
@@ -1480,6 +1481,17 @@ var ARC = (function (r, $) {
 				  r.currLoc,m.geometry.location);
 	  }
   };
+  
+  r.getRadiusFrom = function(m,loc){
+	  if(r.isMerchant(m)){
+		  return google.maps.geometry.spherical.computeDistanceBetween(
+				  loc, new google.maps.LatLng(m.Latitude,m.Longitude) );
+	  }
+	  else{
+		  return google.maps.geometry.spherical.computeDistanceBetween(
+				  loc,m.geometry.location);
+	  }
+  }
   
   r.getMerchantByName = function(name){
 	  for(var i = 0; i < r.merchantList.length; i++){
@@ -2126,12 +2138,38 @@ var ARC = (function (r, $) {
   r.mapsAddCurrLocMarker = function(){
 	  var iconURL = './images/mapsCircleMarker.png';
 	  var marker = new google.maps.Marker({
-		  position : r.currLoc,
+		  position : r.mapsCurrLoc,
 		  map : r.map,
 		  'icon' : iconURL ,
 		  draggable : true
 	  });
 	  
+	  google.maps.event.addListener(marker, 'dragend', r.mapsChangePosition);
+	  
+	  r.mapsCurrLocMarker = marker;
+	  
+  };
+  
+  r.mapsChangePosition = function(){
+	  r.mapsClear();
+	  r.mapsCurrLoc = this.getPosition();
+	  r.placesLocationSearch(r.mapsCurrLoc,r.mapsGetNewMerchants)
+	    
+  };
+  
+  r.mapsGetNewMerchants = function(results,status){
+	  r.mapsList = results;
+	  r.mapsMarkerList = [];
+	  r.mapsAddMarkers(r.mapsList,r.mapsMarkerList);
+	  var form = $('input[name=mapsFilter]:checked', '#mapsFilterButtons').val()
+	  if(form === 'Radius' && $('#mapsFilterDiscoveryCheck').is(':checked')){//fetch radar data
+		  r.mapsAddCircle(r.mapsCurrLoc, r.mapsCurrRadius);
+		  r.mapsFilterOutAllMarkers(r.mapsMarkerList);
+		  r.placesRadarSearch(r.mapsCurrLoc,r.addPlacesRadarMarkers)
+	  }
+	  else{
+		  r.mapsFilterMarkers(form);  
+	  }
   };
   
   r.markerClick = function(e){//Called when a marker is clicked
@@ -2162,6 +2200,21 @@ var ARC = (function (r, $) {
 	  };
   };
   
+  r.mapsClear = function(){
+	  for(var i = 0; i < r.mapsMarkerList.length; i++){
+		  r.mapsMarkerList[i].setMap(null);
+	  }
+	  
+	  if(r.mapsRadarMarkerList){
+		  for(var i = 0; i < r.mapsRadarMarkerList.length; i++){
+			  r.mapsRadarMarkerList[i].setMap(null);
+			  }
+		  }
+	  
+	  if(r.mapsCircle)
+		  r.mapsCircle.setMap(null);
+  };
+  
   /*changes the image on the active marker 
    * and returns the old active marker to an unselected state
    */ 
@@ -2183,6 +2236,7 @@ var ARC = (function (r, $) {
 	  var radiusLI = $('#mapsFilterRadiusBarLI');
 	  radiusLI.hide();
 	  r.mapsRemoveCircle();
+	  r.mapsFilterOutAllMarkers(r.mapsRadarMarkerList);
 	  
 	  switch(filterType){
 		  case 'All':
@@ -2203,8 +2257,16 @@ var ARC = (function (r, $) {
 			  
 			  var rad = parseInt($('#mapsFilterRadiusBar').val());
 			  r.mapsCurrRadius = rad;
-			  r.mapsFilterMarkersRadius(rad,r.mapsMarkerList,r.currLoc,true);
-			  r.mapsAddCircle(r.currLoc,rad);
+			  r.mapsAddCircle(r.mapsCurrLoc,rad);
+			  
+			  if($('#mapsFilterDiscoveryCheck').is(':checked')){
+				  r.mapsFilterOutAllMarkers(r.mapsMarkerList);
+				  r.mapsFilterInAllMarkers(r.mapsRadarMarkerList);
+				  r.mapsFilterMarkersRadius(rad,r.mapsRadarMarkerList,r.mapsCurrLoc,true)
+			  }
+			  else{
+				  r.mapsFilterMarkersRadius(rad,r.mapsMarkerList,r.mapsCurrLoc,true);  
+			  }
 			  break;
 	  }
   };
@@ -2285,6 +2347,8 @@ var ARC = (function (r, $) {
 	  }
 	  else{
 		  var circ = r.mapsCircle;
+		  if(loc)
+			  circ.setCenter(loc);
 		  circ.setRadius(radius);
 		  circ.setMap(r.map);
 	  }
@@ -2297,7 +2361,7 @@ var ARC = (function (r, $) {
   };
   
   r.mapsFilterMarkersRadius = function(radius,list,loc,filterAll){
-	  if(list.leftOff && !filterAll){
+	  if(list.leftOff !== undefined && !filterAll){
 		  var i = list.leftOff;
 	  }
 	  else{
@@ -2337,33 +2401,43 @@ var ARC = (function (r, $) {
   
   r.mapsFilterRadius = function(radius, discoveryMode){
 	  if(discoveryMode){
-		  r.mapsFilterMarkersRadius(radius,r.mapsRadarMarkerList,r.currLoc)
+		  r.mapsFilterMarkersRadius(radius,r.mapsRadarMarkerList,r.mapsCurrLoc)
 	  }
 	  
 	  else{
-		  r.mapsFilterMarkersRadius(radius,r.mapsMarkerList,r.currLoc);
+		  r.mapsFilterMarkersRadius(radius,r.mapsMarkerList,r.mapsCurrLoc);
 	  }
   };
   
   r.addPlacesRadarMarkers = function(results,status,pagination){
-	  r.mapsRadarList = r.radiusSort(results);
+	  r.mapsRadarList = r.radiusSort(results,r.mapsCurrLoc);
 	  r.mapsRadarList.pagination = pagination;
 	  r.mapsRadarMarkerList = [];
 	  r.mapsAddMarkers(r.mapsRadarList,r.mapsRadarMarkerList);
 	  
-	  r.mapsFilterMarkersRadius(r.mapsCurrRadius,r.mapsRadarMarkerList,r.currLoc,true);
+	  r.mapsFilterMarkersRadius(r.mapsCurrRadius,r.mapsRadarMarkerList,r.mapsCurrLoc,true);
   };
   
   r.mapsFilterOutAllMarkers = function(markerList){
+	  if(!markerList)
+		  return;
 	  for(var i = 0; i < markerList.length; i++){
 		  markerList[i].setMap(null)
 	  }
   };
   
-  r.radiusSort = function(places){
+  r.mapsFilterInAllMarkers = function(markerList){
+	  if(!markerList)
+		  return
+	  for(var i = 0; i < markerList.length; i++){
+		  markerList[i].setMap(r.map);
+	  }
+  }
+  
+  r.radiusSort = function(places,loc){
 	  var sortfn = function(a,b){
-		  var d1 = r.getRadius(a)
-		  var d2 = r.getRadius(b)
+		  var d1 = r.getRadiusFrom(a,loc)
+		  var d2 = r.getRadiusFrom(b,loc)
 		  return d1-d2
 	  };
 	  
@@ -2371,12 +2445,9 @@ var ARC = (function (r, $) {
   };
   
   /*-----------------Google Places integration -----------------------!*/
-  r.placesLocationSearch = function(location,callback,radius){
+  r.placesLocationSearch = function(location,callback){
 	  try{
 		  RSKYBOX.log.info('entering', 'placesLocationSearch');
-		  if(!radius){
-			  radius = 1000;
-		  }
 		  
 		  if(!r.placeHolderMap)
 			  r.placeHolderMap = new google.maps.Map(document.getElementById("mapCanvas"))
@@ -2431,7 +2502,7 @@ var ARC = (function (r, $) {
 		  
 		  var req = {
 				  'location' : location,
-				  radius : 50000,
+				  radius : 1500,
 				  types: ['restaurant']
 		  }
 		  
