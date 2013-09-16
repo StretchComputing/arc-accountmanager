@@ -668,7 +668,8 @@ var ARC = (function (r, $) {
     					return;
     				}
     				
-    				r.placesLocationSearch(results[0].geometry.location,
+    				r.mapsCurrLoc = results[0].geometry.location
+    				r.placesLocationSearch(r.mapsCurrLoc,
     						               r.mapsLocationSearchSuccess);
     			});
     		});
@@ -686,16 +687,16 @@ var ARC = (function (r, $) {
     			var index = $(this).attr('index');
     			var place = r.mapsLocationSearchResults[index];
     			
-    			r.mapsSelectMerchant(place, r.getMerchantIndex(r.mapsList,place));
+    			var i = r.getMerchantIndex(r.mapsList,place);
+    			
+    			r.changeSelectedMarker(r.mapsMarkerList[i]);
+    			r.mapsSelectMerchant(place, i);
     			
     			r.map.setCenter(place.geometry.location);
     			
     		});
     		
-    		$('#mapsLocationSearchClear').bind('click', function(){
-    			$('#mapsLocationSearchResults').empty();
-    			$('#mapsLocationSearchField').val('')
-    		});
+    		$('#mapsLocationSearchClear').bind('click', r.mapsLocationSearchClear);
     		
     		
     		
@@ -727,10 +728,12 @@ var ARC = (function (r, $) {
     			var place = r.mapsPlacesSearchResults[index];
     			
     			if(r.isNewPlace(r.mapsList,place)){
-    				r.mapsAddMarker(place,r.mapsList.length,r.mapsMarkerList);
+    				var i = r.placeInsert(r.mapsList,place);
+    				r.mapsAddMarker(place,i,r.mapsMarkerList);
+    				r.changeSelectedMarker(r.mapsMarkerList[i])
     				r.mapsSelectMerchant(place, r.mapsList.length);
     			
-    				r.mapsList.push(place);
+    				
     			}
     			
     			r.map.setCenter(place.geometry.location);
@@ -790,6 +793,12 @@ var ARC = (function (r, $) {
     				r.mapsFilterAll();
     				r.mapsFilterMarkersRadius(r.mapsCurrRadius,r.mapsMarkerList,r.mapsCurrLoc,true)
     			}
+    		});
+    		
+    		$('#mapsResetButton').bind('click',function(){
+    			r.map.setCenter(r.currLoc)
+    			r.mapsCurrLocMarker.setPosition(r.currLoc)
+    			r.mapsChangePosition(r.currLoc)
     		});
     	}
     	catch(e){
@@ -2079,8 +2088,19 @@ var ARC = (function (r, $) {
   r.mapsLocationSearchSuccess = function(results,status){
 	  r.mapsLocationSearchResults = results;
 	  r.displayPlacesSearchResults($('#mapsLocationSearchResults'),results,'Location');
-	  r.addLocationsToMap(results);
+	  
+	  r.mapsList = results
+	  r.mapsClear();
+	  r.mapsCurrLocMarker.setPosition(r.mapsCurrLoc)
+	  r.mapsMarkerList = [];
+	  r.mapsAddMarkers(r.mapsList,r.mapsMarkerList);
+	  
 	  r.map.setCenter(results[0].geometry.location);
+  };
+  
+  r.mapsLocationSearchClear = function(){
+	  $('#mapsLocationSearchResults').empty();
+	  $('#mapsLocationSearchField').val('')
   };
   
   r.mapsAddMarker = function(merchant,index,markerList){
@@ -2102,13 +2122,20 @@ var ARC = (function (r, $) {
 		  'icon' : r.mapsBuildMarkerIconURL(color,false)
 	  });
 	  
-	  marker.color = color; //used later for recreating a given marker
+	  marker.color = color; //used later for recreating a given marker  
+	  marker.markerActive = true;
 	  marker.index = index;
 	  
-	  markerList.push(marker);
-	  marker.markerActive = true;
-	  
 	  google.maps.event.addListener(marker, 'click', r.markerClick);
+	  
+	  r.mapsInsertMarkerAt(markerList,marker,index);
+  };
+  
+  r.mapsInsertMarkerAt = function(list,marker,index){
+	  list.splice(index,0,marker);
+	  for(var i = index+1; i < list.length; i++){
+		  list[i].index = i;
+	  }
   };
   
   r.mapsBuildMarkerIconURL = function(color, selected){
@@ -2144,15 +2171,20 @@ var ARC = (function (r, $) {
 		  draggable : true
 	  });
 	  
-	  google.maps.event.addListener(marker, 'dragend', r.mapsChangePosition);
+	  google.maps.event.addListener(marker, 'dragend', r.mapsPosDragged);
 	  
 	  r.mapsCurrLocMarker = marker;
 	  
   };
   
-  r.mapsChangePosition = function(){
+  r.mapsPosDragged = function(){
+	  r.mapsChangePosition(this.position)
+  }
+  
+  r.mapsChangePosition = function(pos){
 	  r.mapsClear();
-	  r.mapsCurrLoc = this.getPosition();
+	  r.mapsLocationSearchClear();
+	  r.mapsCurrLoc = pos;
 	  r.placesLocationSearch(r.mapsCurrLoc,r.mapsGetNewMerchants)
 	    
   };
@@ -2409,6 +2441,7 @@ var ARC = (function (r, $) {
 	  }
   };
   
+  
   r.addPlacesRadarMarkers = function(results,status,pagination){
 	  r.mapsRadarList = r.radiusSort(results,r.mapsCurrLoc);
 	  r.mapsRadarList.pagination = pagination;
@@ -2601,6 +2634,14 @@ var ARC = (function (r, $) {
 	  return new google.maps.LatLng(merchant.Latitude,merchant.Longitude)
   }
   
+  /*returns the latLng object for either a merchant or a place*/
+  r.getLocation = function(merchant){
+	  if(r.isMerchant(merchant))
+		  return r.latLng(merchant);
+	  else
+		  return merchant.geometry.location;
+  }
+  
   r.getPlaceAddress = function(place){
 	  if(place.formatted_address)
 		  return place.formatted_address;
@@ -2620,6 +2661,20 @@ var ARC = (function (r, $) {
 			  return false
 	  }
 	  return true;
+  };
+  
+  /*inserts a place into a list of places/merchants sorted by distance*/
+  r.placeInsert = function(list,place){
+	  var d1 = r.getRadiusFrom(place,r.mapsCurrLoc);
+	  for(var i = 0; i < list.length; i++){
+		  var d2 = r.getRadiusFrom(list[i],r.mapsCurrLoc)
+		  if(d1 < d2){
+			  list.splice(i,0,place)
+			  return i;
+		  }
+	  }
+	  list.push(place);
+	  return i;
   };
   
   /*merges the places and the merchants and then calls a method to display
